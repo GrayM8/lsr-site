@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// Minimal content models to get started.
+/// (Auth profiles can be added later; keep it simple.)
+
+model Driver {
+  id         String   @id @default(uuid()) @db.Uuid
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  fullName   String
+  handle     String   @unique
+  bio        String?  @db.Text
+  headshotUrl String? // Cloudinary URL later
+  instagram  String?  @unique
+  twitch     String?  @unique
+  iRating    Int?
+  totalWins  Int      @default(0)
+
+  @@index([handle])
+}
+
+enum SponsorTier {
+  title
+  gold
+  silver
+  bronze
+}
+
+model Sponsor {
+  id         String      @id @default(uuid()) @db.Uuid
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  name       String      @unique
+  url        String?
+  logoUrl    String?     // Cloudinary URL later
+  tier       SponsorTier @default(bronze)
+}
+
+model Event {
+  id          String   @id @default(uuid()) @db.Uuid
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  title       String
+  startAt     DateTime
+  endAt       DateTime?
+  location    String?
+  description String?  @db.Text
+  externalUrl String?
+}
