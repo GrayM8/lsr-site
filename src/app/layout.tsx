@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Inter } from "next/font/google"
 import { SiteHeader } from "@/components/site-header"
 import { Analytics } from "@vercel/analytics/react"
+import React from "react";
 
 
 
