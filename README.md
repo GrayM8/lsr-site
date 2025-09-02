@@ -154,8 +154,6 @@ Ensure file path: src/app/auth/callback/route.ts.
 
 Add redirect URL in Supabase dashboard.
 
-“You’re importing next/headers in client code”:
-
 Client components must import createSupabaseBrowser (not server helper).
 
 Server code uses createSupabaseServer with Next 15 cookie API (getAll/setAll).

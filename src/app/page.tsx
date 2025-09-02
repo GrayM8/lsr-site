@@ -9,6 +9,7 @@ export default function Home() {
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
                 <h1 className="text-3xl font-bold text-center mb-4">Longhorn Sim Racing</h1>
                 <Button>Test Button</Button>
+                <h1 className="text-1xl font-bold text-center mb-4">⚠️This website is in active development⚠️</h1>
             </motion.div>
         </main>
     )
