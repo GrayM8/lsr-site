@@ -9,6 +9,7 @@ export function SiteHeader() {
                     <Link href="/drivers">Drivers</Link>
                     <Link href="/sponsors">Sponsors</Link>
                     <Link href="/events">Events</Link>
+                    <Link href="/news">News</Link>
                 </div>
             </nav>
         </header>
