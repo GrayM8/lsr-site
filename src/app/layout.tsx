@@ -17,6 +17,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000"),
   openGraph: { type: "website", siteName: "Longhorn Sim Racing" },
   twitter: { card: "summary_large_image" },
+  alternates: {
+    types: {
+      "application/rss+xml": "/news/rss.xml",
+    }
+  }
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
