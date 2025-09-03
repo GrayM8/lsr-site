@@ -5,11 +5,9 @@ import { Inter } from "next/font/google"
 import { SiteHeader } from "@/components/site-header"
 import { Analytics } from "@vercel/analytics/react"
 import React from "react";
-
-
+import { SiteFooter } from "@/components/site-footer"
 
 const inter = Inter({ subsets: ["latin"] })
-
 
 export const metadata: Metadata = {
   title: { default: "Longhorn Sim Racing", template: "%s · LSR" },
@@ -25,15 +23,16 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-    return (
-        <html lang="en" suppressHydrationWarning>
-        <body className={inter.className}>
-        <ThemeProvider>
-            <SiteHeader />
-            {children}
-          <Analytics />
-        </ThemeProvider>
-        </body>
-        </html>
-    )
+  return (
+    <html lang="en" className="h-full" suppressHydrationWarning>
+    <body className={`${inter.className} min-h-dvh flex flex-col`}>
+    <ThemeProvider>
+      <SiteHeader />
+      {/* This main grows to fill leftover height so the footer drops to the bottom */}
+      <main className="flex-1">{children}</main>
+      <SiteFooter />
+    </ThemeProvider>
+    </body>
+    </html>
+  )
 }
