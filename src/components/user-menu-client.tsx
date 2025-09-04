@@ -1,11 +1,18 @@
 "use client"
 
+import { useRouter } from "next/navigation"
+import { createSupabaseBrowser } from "@/lib/supabase-browser"
 import { useState } from "react"
-import Link from "next/link"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { createSupabaseBrowser } from "@/lib/supabase-browser"
 
 export function UserMenuClient({
                                  displayName,
@@ -19,14 +26,20 @@ export function UserMenuClient({
   handle?: string | null
 }) {
   const supabase = createSupabaseBrowser()
+  const router = useRouter()
   const [open, setOpen] = useState(false)
 
   async function logout() {
     await supabase.auth.signOut()
-    window.location.href = "/"
+    router.push("/")
   }
 
-  const initials = displayName.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase()
+  const initials = displayName
+    .split(" ")
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase()
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -45,14 +58,25 @@ export function UserMenuClient({
           {email && <div className="text-xs text-muted-foreground truncate">{email}</div>}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href={handle ? `/drivers/${handle}` : "/drivers/me"}>My driver page</Link>
+
+        {/* Use onSelect for navigation; no asChild/Link needed */}
+        <DropdownMenuItem onSelect={() => router.push(handle ? `/drivers/${handle}` : "/drivers/me")}>
+          My driver page
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/account">Account details</Link> {/* stub; we can make this a Dialog later */}
+        <DropdownMenuItem onSelect={() => router.push("/account")}>
+          Account details
         </DropdownMenuItem>
+
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
+        {/* Use onSelect here, prevent default to avoid item selection warning */}
+        <DropdownMenuItem
+          onSelect={(e) => {
+            e.preventDefault()
+            logout()
+          }}
+        >
+          Logout
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

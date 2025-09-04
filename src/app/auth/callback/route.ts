@@ -80,5 +80,12 @@ export async function GET(req: NextRequest) {
     },
   })
 
+  const profile = await prisma.profile.findUnique({ where: { userId: user.id } })
+  if (profile?.status === "retired") {
+    // clear session and send to retired page
+    await supabase.auth.signOut()
+    return NextResponse.redirect(new URL("/account/retired", url.origin))
+  }
+
   return res
 }
