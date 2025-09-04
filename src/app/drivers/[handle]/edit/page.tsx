@@ -1,88 +1,77 @@
-import { notFound, redirect } from "next/navigation"
+import Image from "next/image"
+import Link from "next/link"
 import { prisma } from "@/lib/prisma"
-import { createSupabaseRSC } from "@/lib/supabase-rsc"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Separator } from "@/components/ui/separator"
-import { updateProfile } from "./actions"
-import { AvatarUploader } from "@/components/avatar-uploader"
 
-
+// export const revalidate = 30
+// If you want *always* fresh (great while building), use this instead:
 export const dynamic = "force-dynamic"
 
-async function getOwnerUserIdRSC() {
-  const supabase = await createSupabaseRSC()
-  const { data } = await supabase.auth.getUser()
-  return data.user?.id ?? null
-}
-
-export default async function EditDriverPage({
-                                               params,
-                                             }: { params: Promise<{ handle: string }> }) {
-  const { handle } = await params
-  const profile = await prisma.profile.findUnique({ where: { handle } })
-  if (!profile || profile.status === "deleted") return notFound()
-
-  const userId = await getOwnerUserIdRSC()
-  if (!userId || userId !== profile.userId) {
-    redirect(`/drivers/${handle}`)
-  }
-
-  const socials = (profile.socials as Record<string, string> | null) ?? {}
+export default async function DriversIndexPage() {
+  const drivers = await prisma.profile.findMany({
+    where: { status: { not: "deleted" } },        // hide hard-deleted
+    orderBy: [{ iRating: "desc" }, { displayName: "asc" }],
+    select: {
+      id: true,
+      handle: true,
+      displayName: true,
+      avatarUrl: true,
+      iRating: true,
+      status: true,
+    },
+  })
 
   return (
-    <main className="mx-auto max-w-2xl p-8 space-y-6">
-      <h1 className="text-2xl font-bold">Edit your profile</h1>
-      <section className="rounded-xl border p-4">
-        <h2 className="mb-3 text-lg font-semibold">Profile photo</h2>
-        <AvatarUploader initialUrl={profile.avatarUrl} />
-      </section>
-      <form action={updateProfile} className="grid gap-4">
-        <div className="grid gap-1.5">
-          <Label htmlFor="displayName">Display name</Label>
-          <Input id="displayName" name="displayName" defaultValue={profile.displayName} required />
-        </div>
-        <div className="grid gap-1.5">
-          <Label htmlFor="iRating">iRating</Label>
-          <Input id="iRating" name="iRating" type="number" defaultValue={profile.iRating ?? ""} />
-        </div>
-        <div className="grid gap-1.5">
-          <Label htmlFor="gradYear">Graduating year</Label>
-          <Input id="gradYear" name="gradYear" type="number" defaultValue={profile.gradYear ?? ""} />
-        </div>
-        <div className="grid gap-1.5">
-          <Label htmlFor="bio">Bio</Label>
-          <Textarea id="bio" name="bio" rows={5} defaultValue={profile.bio ?? ""} />
-        </div>
+    <main className="mx-auto max-w-6xl p-8">
+      <h1 className="mb-6 text-3xl font-bold">Drivers</h1>
 
-        <Separator />
+      <ul className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-6">
+        {drivers.map((d) => {
+          const initials = d.displayName
+            .split(" ")
+            .map((n) => n[0])
+            .slice(0, 2)
+            .join("")
+            .toUpperCase()
 
-        <div className="grid gap-1.5">
-          <Label htmlFor="website">Website</Label>
-          <Input id="website" name="website" type="url" defaultValue={socials.website ?? ""} />
-        </div>
-        <div className="grid gap-1.5">
-          <Label htmlFor="instagram">Instagram</Label>
-          <Input id="instagram" name="instagram" type="url" defaultValue={socials.instagram ?? ""} />
-        </div>
-        <div className="grid gap-1.5">
-          <Label htmlFor="twitch">Twitch</Label>
-          <Input id="twitch" name="twitch" type="url" defaultValue={socials.twitch ?? ""} />
-        </div>
-        <div className="grid gap-1.5">
-          <Label htmlFor="youtube">YouTube</Label>
-          <Input id="youtube" name="youtube" type="url" defaultValue={socials.youtube ?? ""} />
-        </div>
+          return (
+            <li key={d.id} className="rounded-xl border p-4 transition hover:shadow-sm">
+              <Link href={`/drivers/${d.handle}`} className="flex items-center gap-3">
+                <div className="h-12 w-12 overflow-hidden rounded-full border bg-muted">
+                  {d.avatarUrl ? (
+                    <Image
+                      src={d.avatarUrl}
+                      alt={d.displayName}
+                      width={48}
+                      height={48}
+                      className="h-12 w-12 object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-sm">
+                      {initials || "U"}
+                    </div>
+                  )}
+                </div>
 
-        <div className="flex gap-3 pt-2">
-          <Button type="submit">Save changes</Button>
-          <Button type="button" variant="outline" asChild>
-            <a href={`/drivers/${handle}`}>Cancel</a>
-          </Button>
-        </div>
-      </form>
+                <div className="min-w-0">
+                  <div className="truncate font-medium">{d.displayName}</div>
+                  <div className="text-xs text-muted-foreground">@{d.handle}</div>
+                </div>
+              </Link>
+
+              <div className="mt-3 flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">iRating</span>
+                <span className="font-semibold">{d.iRating ?? "—"}</span>
+              </div>
+
+              {d.status === "retired" && (
+                <span className="mt-2 inline-block rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                  Retired
+                </span>
+              )}
+            </li>
+          )
+        })}
+      </ul>
     </main>
   )
 }
