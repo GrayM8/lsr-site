@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { createSupabaseServer } from "@/lib/supabase-server"
 import { slugify } from "@/lib/slug"
+import type { RoleCode } from "@/lib/roles"
 
 export async function GET(req: NextRequest) {
   const supabase = await createSupabaseServer(); // <-- await here
@@ -31,6 +32,7 @@ export async function GET(req: NextRequest) {
       handle = `${base}-${i}`
     }
 
+    const member = await prisma.role.findUnique({ where: { code: "member" } })
     profile = await prisma.profile.create({
       data: {
         userId: user.id,
@@ -46,6 +48,7 @@ export async function GET(req: NextRequest) {
             ? (user.user_metadata.gradYear as number)
             : undefined,
         signedUpAt: new Date(),
+        roles: member ? { create: [{ roleId: member.id }] } : undefined,
       },
     })
   }

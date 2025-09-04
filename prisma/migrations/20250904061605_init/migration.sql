@@ -1,6 +1,9 @@
 -- CreateEnum
 CREATE TYPE "public"."ProfileStatus" AS ENUM ('active', 'retired', 'deleted');
 
+-- CreateEnum
+CREATE TYPE "public"."Role" AS ENUM ('member', 'competition', 'officer', 'president', 'alumni');
+
 -- CreateTable
 CREATE TABLE "public"."Profile" (
     "id" TEXT NOT NULL,
@@ -13,6 +16,7 @@ CREATE TABLE "public"."Profile" (
     "socials" JSONB,
     "marketingOptIn" BOOLEAN NOT NULL DEFAULT true,
     "status" "public"."ProfileStatus" NOT NULL DEFAULT 'active',
+    "roles" "public"."Role"[] DEFAULT ARRAY[]::"public"."Role"[],
     "eid" TEXT,
     "gradYear" INTEGER,
     "signedUpAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

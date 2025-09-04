@@ -1,45 +1,119 @@
-import { prisma } from "@/lib/prisma"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import Image from "next/image"
 import Link from "next/link"
+import { prisma } from "@/lib/prisma"
+import { ROLE_LABEL, type RoleCode } from "@/lib/roles"
+import { Separator } from "@/components/ui/separator"
+import { DriversFilters } from "@/components/drivers-filters"
+import { DriversSearch } from "@/components/drivers-search"
 
 export const dynamic = "force-dynamic"
 
-export default async function DriversPage() {
-  const drivers = await prisma.driver.findMany({ orderBy: { fullName: "asc" } })
+function Badge({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center rounded-md border px-2 py-0.5 text-xs">
+      {children}
+    </span>
+  )
+}
+
+const ALL_ROLES = Object.keys(ROLE_LABEL) as RoleCode[]
+
+export default async function DriversIndexPage({
+                                                 searchParams,
+                                               }: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const sp = await searchParams
+  const q = typeof sp.q === "string" ? sp.q.trim() : ""
+  const roleParam = sp.role
+  const selectedRoles = (Array.isArray(roleParam) ? roleParam : roleParam ? [roleParam] : [])
+    .map((r) => r.toString().toLowerCase())
+    .filter((r): r is RoleCode => ALL_ROLES.includes(r as RoleCode))
+
+  const drivers = await prisma.profile.findMany({
+    where: {
+      status: { not: "deleted" },
+      ...(q
+        ? {
+          OR: [
+            { displayName: { contains: q, mode: "insensitive" } },
+            { handle: { contains: q, mode: "insensitive" } },
+          ],
+        }
+        : {}),
+      ...(selectedRoles.length
+        ? { roles: { some: { role: { code: { in: selectedRoles } } } } }
+        : {}),
+    },
+    orderBy: [{ iRating: "desc" }, { displayName: "asc" }],
+    include: { roles: { include: { role: true } } },
+  })
+
   return (
     <main className="mx-auto max-w-6xl p-8 space-y-6">
-      <h1 className="text-3xl font-bold">Drivers</h1>
-      {drivers.length === 0 ? (
-        <p className="text-muted-foreground">No drivers yet.</p>
-      ) : (
-        <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {drivers.map((d) => (
-            <li key={d.id}>
-              <Link href={`/drivers/${d.handle}`} className="block hover:opacity-95 focus:outline-none">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={d.headshotUrl ?? undefined} />
-                        <AvatarFallback>
-                          {d.fullName.split(" ").map(n => n[0]).slice(0,2).join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span>{d.fullName}</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-sm text-muted-foreground">
-                    <div>@{d.handle}</div>
-                    {typeof d.iRating === "number" && <div>iRating: {d.iRating}</div>}
-                    <div>Total wins: {d.totalWins}</div>
-                  </CardContent>
-                </Card>
+      <div className="flex flex-wrap items-center gap-3">
+        <h1 className="text-3xl font-bold">Drivers</h1>
+
+        <div className="ms-auto flex items-center gap-2">
+          {/* Slim search panel */}
+          <DriversSearch q={q} />
+          {/* Filter icon + dropdown */}
+          <DriversFilters selectedRoles={selectedRoles} />
+        </div>
+      </div>
+
+      <Separator />
+
+      <ul className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-6">
+        {drivers.map((d) => {
+          const initials = d.displayName
+            .split(" ")
+            .map((n) => n[0])
+            .slice(0, 2)
+            .join("")
+            .toUpperCase()
+          const codes: RoleCode[] = d.roles.length
+            ? d.roles.map((pr) => pr.role.code as RoleCode)
+            : ["member"]
+
+          return (
+            <li key={d.id} className="rounded-xl border p-4 transition hover:shadow-sm">
+              <Link href={`/drivers/${d.handle}`} className="flex items-center gap-3">
+                <div className="h-12 w-12 overflow-hidden rounded-full border bg-muted">
+                  {d.avatarUrl ? (
+                    <Image
+                      src={d.avatarUrl}
+                      alt={d.displayName}
+                      width={48}
+                      height={48}
+                      className="h-12 w-12 object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-sm">
+                      {initials || "U"}
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <div className="truncate font-medium">{d.displayName}</div>
+                  <div className="text-xs text-muted-foreground">@{d.handle}</div>
+                </div>
               </Link>
+
+              <div className="mt-3 flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">iRating</span>
+                <span className="font-semibold">{d.iRating ?? "—"}</span>
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-1">
+                {codes.map((c) => (
+                  <Badge key={c}>{ROLE_LABEL[c]}</Badge>
+                ))}
+              </div>
             </li>
-          ))}
-        </ul>
-      )}
+          )
+        })}
+      </ul>
     </main>
   )
 }

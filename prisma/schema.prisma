@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
@@ -26,58 +26,31 @@ model Profile {
   marketingOptIn  Boolean        @default(true)
   status          ProfileStatus  @default(active)
 
-  eid             String?        @unique        // UT EID (or student ID); optional but unique when present
-  gradYear        Int?                           // graduating year like 2026
-  signedUpAt      DateTime       @default(now()) // timestamp when we first provision the profile
+  roles           ProfileRole[]
 
+  eid             String?        @unique
+  gradYear        Int?
+  signedUpAt      DateTime       @default(now())
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 }
 
-model Driver {
-  id         String   @id @default(uuid()) @db.Uuid
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  fullName   String
-  handle     String   @unique
-  bio        String?  @db.Text
-  headshotUrl String? // Cloudinary URL later
-  instagram  String?  @unique
-  twitch     String?  @unique
-  iRating    Int?
-  totalWins  Int      @default(0)
-
-  @@index([handle])
+model Role {
+  id       String        @id @default(cuid())
+  // machine code (what we filter on): "member" | "competition" | "officer" | "president" | "alumni"
+  code     String        @unique
+  // human label (what we show)
+  name     String
+  profiles ProfileRole[]
 }
 
-enum SponsorTier {
-  title
-  gold
-  silver
-  bronze
-}
+model ProfileRole {
+  profileId String
+  roleId    String
 
-model Sponsor {
-  id         String      @id @default(uuid()) @db.Uuid
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  role      Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
-  name       String      @unique
-  url        String?
-  logoUrl    String?     // Cloudinary URL later
-  tier       SponsorTier @default(bronze)
-}
-
-model Event {
-  id          String   @id @default(uuid()) @db.Uuid
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  title       String
-  startAt     DateTime
-  endAt       DateTime?
-  location    String?
-  description String?  @db.Text
-  externalUrl String?
+  @@id([profileId, roleId])
+  @@index([roleId])
 }

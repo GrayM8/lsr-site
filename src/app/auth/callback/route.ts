@@ -3,6 +3,14 @@ import { createServerClient } from "@supabase/ssr"
 import { prisma } from "@/lib/prisma"
 import { slugify } from "@/lib/slug"
 import type { CookieOptions } from "@supabase/ssr"
+import type { RoleCode } from "@/lib/roles"
+
+// ensure member role exists (seeded already, but safe)
+const member = await prisma.role.upsert({
+  where: { code: "member" as RoleCode },
+  update: { name: "Member" },
+  create: { code: "member", name: "Member" },
+})
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url)
@@ -77,6 +85,7 @@ export async function GET(req: NextRequest) {
       eid: eid || undefined,
       gradYear: gradYearParsed || undefined,
       signedUpAt: new Date(),
+      roles: { create: [{ roleId: member.id }]},
     },
   })
 
