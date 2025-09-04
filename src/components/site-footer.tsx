@@ -109,10 +109,7 @@ export function SiteFooter() {
         <div className="mt-10 flex flex-col items-start justify-between gap-2 border-t pt-6 text-xs text-muted-foreground sm:flex-row">
           <p>© {year} Longhorn Sim Racing</p>
           <div className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-3">
-            <p>Built with Next.js • Deployed on Vercel</p>
-            <span className="hidden sm:inline">•</span>
-            <p>
-              Made by{" "}
+            <p>Built with Next.js • Deployed on Vercel • Made with ☕ & ❤️ by {" "}
               <a
                 href="https://graymarshall.dev" /* TODO: replace with your personal dev URL */
                 target="_blank"
@@ -120,8 +117,7 @@ export function SiteFooter() {
                 className="underline"
               >
                 Gray Marshall
-              </a>{" "}
-              with ☕ and ❤️
+              </a>
             </p>
           </div>
         </div>

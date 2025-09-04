@@ -8,8 +8,31 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-/// Minimal content models to get started.
-/// (Auth profiles can be added later; keep it simple.)
+enum ProfileStatus {
+  active
+  retired
+  deleted
+}
+
+model Profile {
+  id              String         @id @default(uuid())
+  userId          String         @unique @db.Uuid
+  handle          String         @unique
+  displayName     String
+  avatarUrl       String?
+  bio             String?
+  iRating         Int?
+  socials         Json?
+  marketingOptIn  Boolean        @default(true)
+  status          ProfileStatus  @default(active)
+
+  eid             String?        @unique        // UT EID (or student ID); optional but unique when present
+  gradYear        Int?                           // graduating year like 2026
+  signedUpAt      DateTime       @default(now()) // timestamp when we first provision the profile
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
 
 model Driver {
   id         String   @id @default(uuid()) @db.Uuid
