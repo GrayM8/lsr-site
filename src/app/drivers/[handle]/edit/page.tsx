@@ -6,9 +6,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
-import { updateProfile } from "./actions"      // <-- import only
+import { updateProfile } from "./actions"
+import { AvatarUploader } from "@/components/avatar-uploader"
 
-export const dynamic = "force-dynamic"         // allowed named export
+
+export const dynamic = "force-dynamic"
 
 async function getOwnerUserIdRSC() {
   const supabase = await createSupabaseRSC()
@@ -33,7 +35,10 @@ export default async function EditDriverPage({
   return (
     <main className="mx-auto max-w-2xl p-8 space-y-6">
       <h1 className="text-2xl font-bold">Edit your profile</h1>
-
+      <section className="rounded-xl border p-4">
+        <h2 className="mb-3 text-lg font-semibold">Profile photo</h2>
+        <AvatarUploader initialUrl={profile.avatarUrl} />
+      </section>
       <form action={updateProfile} className="grid gap-4">
         <div className="grid gap-1.5">
           <Label htmlFor="displayName">Display name</Label>

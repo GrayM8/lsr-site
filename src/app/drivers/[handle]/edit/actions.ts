@@ -73,3 +73,33 @@ export async function updateProfile(formData: FormData) {
   revalidatePath(`/drivers/${me.handle}`)
   redirect(`/drivers/${me.handle}`)
 }
+
+export async function saveAvatar(url: string) {
+  const userId = await getOwnerUserIdAction()
+  if (!userId) redirect("/login")
+
+  const me = await prisma.profile.findUnique({ where: { userId } })
+  if (!me) redirect("/")
+
+  await prisma.profile.update({
+    where: { id: me.id },
+    data: { avatarUrl: url },
+  })
+
+  revalidatePath(`/drivers/${me.handle}`)
+}
+
+export async function clearAvatar() {
+  const userId = await getOwnerUserIdAction()
+  if (!userId) redirect("/login")
+
+  const me = await prisma.profile.findUnique({ where: { userId } })
+  if (!me) redirect("/")
+
+  await prisma.profile.update({
+    where: { id: me.id },
+    data: { avatarUrl: null },
+  })
+
+  revalidatePath(`/drivers/${me.handle}`)
+}
