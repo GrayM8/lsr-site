@@ -1,4 +1,5 @@
 import Link from "next/link"
+import UserMenu from "@/components/user-menu";
 export function SiteHeader() {
     return (
         <header className="sticky top-0 z-50 bg-background/80 backdrop-blur border-b">
@@ -10,6 +11,7 @@ export function SiteHeader() {
                     <Link href="/sponsors">Sponsors</Link>
                     <Link href="/events">Events</Link>
                     <Link href="/news">News</Link>
+                  <UserMenu />
                 </div>
             </nav>
         </header>
