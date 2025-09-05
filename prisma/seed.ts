@@ -6,6 +6,7 @@ const ROLES = [
   { code: "officer",     name: "Officer" },
   { code: "president",   name: "President" },
   { code: "alumni",      name: "Alumni" },
+  { code: "admin",       name: "Admin" },
 ] as const
 
 async function main() {

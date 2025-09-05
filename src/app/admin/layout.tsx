@@ -1,31 +1,14 @@
 import { redirect } from "next/navigation"
-import { createSupabaseServer } from "@/lib/supabase-server"
-import { LogoutButton } from "@/components/logout-button"
+import { requireAdmin } from "@/lib/authz"
 
-export default async function AdminLayout({
-                                            children,
-                                          }: {
-  children: React.ReactNode
-}) {
-  const supabase = await createSupabaseServer()
-  const { data: { user } } = await supabase.auth.getUser()
+export const dynamic = "force-dynamic"
 
-  if (!user) redirect("/login")
-
-  const allowed = (process.env.ALLOWED_ADMIN_EMAILS ?? "")
-    .split(",")
-    .map(s => s.trim().toLowerCase())
-    .includes((user.email ?? "").toLowerCase())
-
-  if (!allowed) redirect("/")
-
-  return (
-    <section className="mx-auto max-w-6xl p-8 space-y-6">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">Signed in as {user.email}</p>
-        <LogoutButton />
-      </div>
-      {children}
-    </section>
-  )
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const res = await requireAdmin()
+  if (!res.ok) {
+    // optionally redirect unauthenticated → /login, forbidden → / (or a 403 page)
+    if (res.reason === "unauthenticated") redirect("/login")
+    redirect("/") // or redirect("/403")
+  }
+  return <>{children}</>
 }
