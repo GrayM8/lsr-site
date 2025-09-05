@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
+import { GoogleButton } from "@/components/google-button" // ← adjust to "@/components/auth/google-button" if needed
 
 type TabKey = "signin" | "signup"
 
@@ -67,11 +68,18 @@ export function AuthDialog() {
     })
   }
 
-  async function onGoogle() {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${origin}/auth/callback?next=/drivers/me` },
-    })
+  // Simple centered "OR" divider
+  function OrDivider() {
+    return (
+      <div className="relative my-3">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
+        </div>
+        <div className="relative flex justify-center">
+          <span className="bg-background px-2 text-xs text-muted-foreground">OR</span>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -96,75 +104,128 @@ export function AuthDialog() {
             <TabsTrigger value="signin">Sign in</TabsTrigger>
           </TabsList>
 
+          {/* ---------- SIGN UP ---------- */}
           <TabsContent value="signup" className="mt-4">
-            <form onSubmit={onSignup} className="grid gap-3">
-              <div className="grid gap-1.5">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} required />
-              </div>
+            <div className="grid gap-3">
+              {/* Google first */}
+              <GoogleButton next="/drivers/me" />
 
-              <div className="grid gap-1.5">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              </div>
+              <OrDivider />
 
-              <div className="grid gap-1.5">
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-              </div>
-
-              <div className="grid gap-1.5">
-                <Label htmlFor="eid">UT EID / Student ID (optional)</Label>
-                <Input id="eid" value={eid} onChange={(e) => setEid(e.target.value)} placeholder="e.g., abc123 or 12345678" />
-              </div>
-
-              <div className="grid gap-1.5">
-                <Label htmlFor="gradYear">Graduating year (optional)</Label>
-                <Input
-                  id="gradYear"
-                  type="number"
-                  inputMode="numeric"
-                  pattern="\d*"
-                  placeholder="2026"
-                  value={gradYear}
-                  onChange={(e) => setGradYear(e.target.value)}
-                />
-              </div>
-
-              <div className="flex items-center justify-between rounded-md border p-3">
-                <div className="text-sm">
-                  <div className="font-medium">Marketing opt-in</div>
-                  <p className="text-muted-foreground">Get news & event updates. Change anytime.</p>
+              {/* Email/password form */}
+              <form onSubmit={onSignup} className="grid gap-3">
+                <div className="grid gap-1.5">
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    required
+                  />
                 </div>
-                <Switch checked={marketing} onCheckedChange={(checked: boolean) => setMarketing(checked)} />
-              </div>
 
-              <Button type="submit" disabled={pending} className="w-full">
-                Create account
-              </Button>
-              <Button type="button" variant="outline" onClick={onGoogle} className="w-full">
-                Continue with Google
-              </Button>
-            </form>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-1.5">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-1.5">
+                  <Label htmlFor="eid">UT EID / Student ID (optional)</Label>
+                  <Input
+                    id="eid"
+                    value={eid}
+                    onChange={(e) => setEid(e.target.value)}
+                    placeholder="e.g., abc123 or 12345678"
+                  />
+                </div>
+
+                <div className="grid gap-1.5">
+                  <Label htmlFor="gradYear">Graduating year (optional)</Label>
+                  <Input
+                    id="gradYear"
+                    type="number"
+                    inputMode="numeric"
+                    pattern="\d*"
+                    placeholder="2026"
+                    value={gradYear}
+                    onChange={(e) => setGradYear(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between rounded-md border p-3">
+                  <div className="text-sm">
+                    <div className="font-medium">Marketing opt-in</div>
+                    <p className="text-muted-foreground">
+                      Get news & event updates. Change anytime.
+                    </p>
+                  </div>
+                  <Switch
+                    checked={marketing}
+                    onCheckedChange={(checked: boolean) => setMarketing(checked)}
+                  />
+                </div>
+
+                <Button type="submit" disabled={pending} className="w-full">
+                  Create account
+                </Button>
+              </form>
+            </div>
           </TabsContent>
 
+          {/* ---------- SIGN IN ---------- */}
           <TabsContent value="signin" className="mt-4">
-            <form onSubmit={onSignin} className="grid gap-3">
-              <div className="grid gap-1.5">
-                <Label htmlFor="email2">Email</Label>
-                <Input id="email2" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              </div>
-              <div className="grid gap-1.5">
-                <Label htmlFor="password2">Password</Label>
-                <Input id="password2" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-              </div>
-              <Button type="submit" disabled={pending} className="w-full">
-                Sign in
-              </Button>
-              <Button type="button" variant="outline" onClick={onGoogle} className="w-full">
-                Continue with Google
-              </Button>
-            </form>
+            <div className="grid gap-3">
+              {/* Google first */}
+              <GoogleButton next="/drivers/me" />
+
+              <OrDivider />
+
+              {/* Email/password form */}
+              <form onSubmit={onSignin} className="grid gap-3">
+                <div className="grid gap-1.5">
+                  <Label htmlFor="email2">Email</Label>
+                  <Input
+                    id="email2"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-1.5">
+                  <Label htmlFor="password2">Password</Label>
+                  <Input
+                    id="password2"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <Button type="submit" disabled={pending} className="w-full">
+                  Sign in
+                </Button>
+              </form>
+            </div>
           </TabsContent>
         </Tabs>
       </DialogContent>
