@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { createSupabaseBrowser } from "@/lib/supabase-browser"
 import { useState } from "react"
 import {
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export function UserMenuClient({
                                  displayName,
@@ -27,11 +28,20 @@ export function UserMenuClient({
 }) {
   const supabase = createSupabaseBrowser()
   const router = useRouter()
+  const pathname = usePathname()
   const [open, setOpen] = useState(false)
 
   async function logout() {
-    await supabase.auth.signOut()
-    router.push("/")
+    try {
+      await supabase.auth.signOut()
+    } catch {
+      // ignore
+    }
+    // Re-run the current route on the server so the header updates
+    router.replace(pathname ?? "/")
+    router.refresh()
+    // Hard fallback in case caching interferes:
+    // setTimeout(() => window.location.reload(), 0)
   }
 
   const initials = displayName
@@ -59,7 +69,6 @@ export function UserMenuClient({
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
 
-        {/* Use onSelect for navigation; no asChild/Link needed */}
         <DropdownMenuItem onSelect={() => router.push(handle ? `/drivers/${handle}` : "/drivers/me")}>
           My driver page
         </DropdownMenuItem>
@@ -68,7 +77,7 @@ export function UserMenuClient({
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
-        {/* Use onSelect here, prevent default to avoid item selection warning */}
+
         <DropdownMenuItem
           onSelect={(e) => {
             e.preventDefault()
