@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { GoogleButton } from "@/components/google-button" // ← adjust to "@/components/auth/google-button" if needed
+import { GoogleButton } from "@/components/google-button"
 
 type TabKey = "signin" | "signup"
 
