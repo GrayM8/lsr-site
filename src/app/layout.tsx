@@ -46,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="flex-1">{children}</main>
       <SiteFooter />
     </ThemeProvider>
+    <Analytics />
     </body>
     </html>
   )
