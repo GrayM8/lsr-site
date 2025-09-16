@@ -13,10 +13,10 @@ export function SiteFooter() {
           {/* Brand */}
           <div className="space-y-2">
             <Link href="/" className="font-bold text-lg text-lsr-orange">
-              Longhorn Sim Racing
+              LONGHORN SIM RACING
             </Link>
             <p className="text-sm text-muted-foreground">
-              UT Austin’s sim racing community. Events, practice, and competition.
+              UT Austin’s sim racing community. Bringing motorsports closer to Longhorns and Longhorns closer to the podium.
             </p>
           </div>
 
@@ -33,11 +33,11 @@ export function SiteFooter() {
           <div className="space-y-2 text-sm">
             <div className="font-medium">Contact</div>
             <a
-              href="mailto:longhornsimracing@gmail.com" /* TODO: replace with custom domain address */
+              href="mailto:info@longhornsimracing.org"
               className="flex items-center gap-2 hover:underline"
             >
               <Mail className="h-4 w-4" />
-              longhornsimracing@gmail.com
+              info@longhornsimracing.org
             </a>
           </div>
 

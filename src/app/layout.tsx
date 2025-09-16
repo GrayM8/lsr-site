@@ -1,13 +1,24 @@
 import "./globals.css"
 import type { Metadata } from "next"
 import { ThemeProvider } from "@/components/theme-provider"
-import { Inter } from "next/font/google"
+import { Inter, Bebas_Neue } from "next/font/google"
 import { SiteHeader } from "@/components/site-header"
 import { Analytics } from "@vercel/analytics/react"
 import React from "react";
 import { SiteFooter } from "@/components/site-footer"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans", // for body text
+  display: "swap",
+})
+
+const bebas = Bebas_Neue({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-display", // for headings
+  display: "swap",
+})
 
 export const metadata: Metadata = {
   title: { default: "Longhorn Sim Racing", template: "%s · LSR" },
@@ -24,12 +35,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="h-full" suppressHydrationWarning>
-    <body className={`${inter.className} min-h-dvh flex flex-col`}>
+    <html
+      lang="en"
+      className={`${inter.variable} ${bebas.variable} h-full`}
+      suppressHydrationWarning
+    >
+    <body className="min-h-dvh flex flex-col font-sans">
     <ThemeProvider>
       <SiteHeader />
-      {/* This main grows to fill leftover height so the footer drops to the bottom */}
-      <main className="flex-1">{children}</main>
+        <main className="flex-1">{children}</main>
       <SiteFooter />
     </ThemeProvider>
     </body>
