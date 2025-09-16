@@ -28,7 +28,7 @@ export default function Home() {
           fill
           priority
           sizes="100vw"
-          className="object-cover blur-[3px] md:blur-[7px] scale-110 opacity-60"
+          className="object-cover blur-[2.5px] md:blur-[3px] scale-110 opacity-60"
         />
         {/* soft radial vignette toward the center */}
         <div className="absolute inset-1 bg-[radial-gradient(900px_circle_at_50%_35%,transparent,rgba(0,0,0,0.65))]" />
@@ -181,6 +181,8 @@ export default function Home() {
             <li className="text-white/60">•</li>
             <li className="font-display uppercase tracking-wide text-lsr-orange drop-shadow-[0_4px_16px_rgba(191,87,0,0.45)]">Automotive Engineering</li>
             <li className="text-white/60">•</li>
+            <li className="font-display uppercase tracking-wide text-lsr-orange drop-shadow-[0_4px_16px_rgba(191,87,0,0.45)]">IRL Motorsports</li>
+            <li className="text-white/60">•</li>
           </ul>
 
           {/* 2nd copy (identical) */}
@@ -213,11 +215,13 @@ export default function Home() {
             <li className="text-white/60">•</li>
             <li className="font-display uppercase tracking-wide text-lsr-orange drop-shadow-[0_4px_16px_rgba(191,87,0,0.45)]">Automotive Engineering</li>
             <li className="text-white/60">•</li>
+            <li className="font-display uppercase tracking-wide text-lsr-orange drop-shadow-[0_4px_16px_rgba(191,87,0,0.45)]">IRL Motorsports</li>
+            <li className="text-white/60">•</li>
           </ul>
         </div>
 
         <span className="sr-only">
-          Discord two hundred fifty plus members; Weekly events; iRacing; Assetto Corsa; Driver development; Open practices.
+          One hundred plus discord members; Weekly events; iRacing; Watch Parties; F1 Fan Community; Open Practices; In-House League; Collegiate Racing; Competitive Events; Racing Rivalries; Telemetry Analysis; Automotive Engineering; IRL Motorsports;
         </span>
       </div>
     </main>
