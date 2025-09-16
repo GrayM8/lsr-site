@@ -96,9 +96,9 @@ export function SiteFooter() {
                 </a>
               </li>
               <li>
-                <Link href="/news/rss.xml" className="flex items-center gap-2 hover:underline">
+                <Link href="/news/subscribe" className="flex items-center gap-2 hover:underline">
                   <Rss className="h-4 w-4" />
-                  RSS Feed
+                  Subscribe
                 </Link>
               </li>
             </ul>
