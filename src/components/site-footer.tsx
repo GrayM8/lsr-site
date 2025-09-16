@@ -111,7 +111,7 @@ export function SiteFooter() {
           <div className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-3">
             <p>Built with Next.js • Deployed on Vercel • Made with ☕ & ❤️ by {" "}
               <a
-                href="https://graymarshall.dev" /* TODO: replace with your personal dev URL */
+                href="https://graymarshall.dev"
                 target="_blank"
                 rel="noreferrer"
                 className="underline"
