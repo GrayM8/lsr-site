@@ -67,7 +67,7 @@ export function SiteFooter() {
               </li>
               <li>
                 <a
-                  href="https://youtube.com/" /* TODO: replace */
+                  href="https://youtube.com/"
                   target="_blank" rel="noreferrer"
                   className="flex items-center gap-2 hover:underline"
                 >
@@ -77,7 +77,7 @@ export function SiteFooter() {
               </li>
               <li>
                 <a
-                  href="https://twitch.tv/" /* TODO: replace */
+                  href="https://www.twitch.tv/longhorn_sim_racing"
                   target="_blank" rel="noreferrer"
                   className="flex items-center gap-2 hover:underline"
                 >
