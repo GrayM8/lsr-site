@@ -11,12 +11,14 @@ import {
 } from "framer-motion"
 
 export default function SectionReveal({
+                                        id,
                                         index,
                                         className = "",
                                         children,
                                         coverClass = "bg-lsr-charcoal",
                                         clipClass = "rounded-2xl", // ← pass your tile radius here (e.g., "rounded-2xl")
                                       }: {
+  id?: string
   index: number
   className?: string
   children: React.ReactNode
@@ -68,7 +70,7 @@ export default function SectionReveal({
   }
 
   return (
-    <section ref={ref} className={`relative ${className}`}>
+    <section ref={ref} id={id} className={`relative ${className}`}>
       {/* CLIP WRAPPER: confines light & cover to the tile shape */}
       <div className={`relative overflow-hidden ${clipClass}`}>
         {/* content */}

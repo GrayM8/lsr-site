@@ -1,6 +1,7 @@
 import {useRef} from "react";
 import {motion, useReducedMotion, useScroll, useTransform} from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 import {Button} from "@/components/ui/button";
 
 export default function Home() {
@@ -124,16 +125,18 @@ export default function Home() {
         <div className="mt-8 md:mt-10 flex items-center justify-center gap-4">
           <Button
             size="lg"
+            asChild
             className="bg-lsr-orange text-white hover:bg-lsr-orange/90 font-semibold px-7 py-6 rounded-xl shadow-lg"
           >
-            Join the Grid
+            <Link href="#join-the-grid">Join the Grid</Link>
           </Button>
           <Button
             size="lg"
             variant="outline"
+            asChild
             className="border-white/20 text-white hover:bg-white/10 px-7 py-6 rounded-xl"
           >
-            Sponsor LSR
+            <Link href="/sponsors">Sponsor LSR</Link>
           </Button>
         </div>
 

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect } from "react"
 import { createSupabaseBrowser } from "@/lib/supabase-browser"
 import {
   Dialog,
@@ -36,6 +36,12 @@ export function AuthDialog() {
   const [marketing, setMarketing] = useState(true)
 
   const origin = typeof window !== "undefined" ? window.location.origin : ""
+
+  useEffect(() => {
+    const handleOpen = () => setOpen(true)
+    window.addEventListener("open-auth-dialog", handleOpen)
+    return () => window.removeEventListener("open-auth-dialog", handleOpen)
+  }, [])
 
   function onSignup(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
