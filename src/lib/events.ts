@@ -3,8 +3,8 @@
 export const placeholderEvents = [
   {
     title: "LSR Kickoff",
-    date: "2025-09-26T18:30:00-05:00",
-    location: "UT Campus - GDC",
+    date: "2025-09-19T18:30:00-05:00",
+    location: "UT Campus - ECJ 2.102",
     type: "General Meeting",
     description: "Kick off the new semester with us! Learn about our plans for the year, meet the team, and find out how to get involved.",
     isFeatured: true,
