@@ -5,7 +5,7 @@ import { getOwnerStatus } from "@/lib/owner"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { BrandIcon } from "@/components/brand-icon"
+import { BrandIcon, type SimpleIcon } from "@/components/brand-icon"
 import { siInstagram, siYoutube, siTwitch } from "simple-icons/icons"
 import { Globe, type LucideIcon } from "lucide-react"
 
@@ -51,15 +51,13 @@ export default async function DriverProfilePage({
 
   const tags = profile.roles.map(pr => pr.role)
   const socials = (profile.socials as Record<string, string> | null) ?? {}
-  const socialIcons: Record<string, LucideIcon | {
-    path: string;
-    title: string;
-    hex: string;
-  }> = {
-    website: Globe,
+  const simpleIconSocials: Record<string, SimpleIcon> = {
     instagram: siInstagram,
     twitch: siTwitch,
     youtube: siYoutube,
+  }
+  const componentIconSocials: Record<string, LucideIcon> = {
+    website: Globe,
   }
 
   return (
@@ -116,18 +114,28 @@ export default async function DriverProfilePage({
                 {Object.entries(socials).length > 0
                   ? Object.entries(socials).map(([key, value]) => {
                     if (!value) return null
-                    const Icon = socialIcons[key]
-                    const isSimpleIcon = key !== "website"
-                    return (
-                      <a key={key} href={value} target="_blank" rel="noreferrer"
-                         className="text-white/60 hover:text-white transition-colors">
-                        {isSimpleIcon ? (
-                          <BrandIcon icon={Icon} className="h-5 w-5" />
-                        ) : (
-                          <Icon className="h-5 w-5" />
-                        )}
-                      </a>
-                    )
+
+                    if (key in simpleIconSocials) {
+                      const IconData = simpleIconSocials[key]
+                      return (
+                        <a key={key} href={value} target="_blank" rel="noreferrer"
+                           className="text-white/60 hover:text-white transition-colors">
+                          <BrandIcon icon={IconData} className="h-5 w-5" />
+                        </a>
+                      )
+                    }
+
+                    if (key in componentIconSocials) {
+                      const IconComponent = componentIconSocials[key]
+                      return (
+                        <a key={key} href={value} target="_blank" rel="noreferrer"
+                           className="text-white/60 hover:text-white transition-colors">
+                          <IconComponent className="h-5 w-5" />
+                        </a>
+                      )
+                    }
+
+                    return null
                   })
                   : <p className="text-sm text-white/60">No links yet.</p>
                 }

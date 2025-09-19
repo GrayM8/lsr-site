@@ -1,5 +1,7 @@
 import type { SimpleIcon } from "simple-icons"
 
+export type { SimpleIcon }
+
 /**
  * Small wrapper so Simple Icons behave like your Lucide icons.
  * Inherits the current text color (set with Tailwind).
