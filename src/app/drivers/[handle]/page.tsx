@@ -97,7 +97,7 @@ export default async function DriverProfilePage({
               <h3 className="text-sm mb-2 text-white/60">Tags</h3>
               <div className="flex flex-wrap gap-2">
                 {tags.length > 0
-                  ? tags.map(t => <Badge key={t.code}>{t.label}</Badge>)
+                  ? tags.map(t => <Badge key={t.code}>{t.name}</Badge>)
                   : <p className="text-sm text-white/60">No tags yet.</p>
                 }
               </div>
