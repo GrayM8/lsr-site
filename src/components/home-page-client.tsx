@@ -10,17 +10,35 @@ import NewsHighlights from "@/components/home/NewsHighlights"
 import GalleryRibbon from "@/components/home/GalleryRibbon"
 import FinalCta from "@/components/home/FinalCta"
 import { type NewsFrontmatter } from "@/lib/news"
+import { type Profile } from "@prisma/client"
 
-export default function HomePageClient({ posts }: { posts: Array<NewsFrontmatter & { slug: string }> }) {
+// This type should be imported from a shared file in a real app
+type Event = {
+  title: string;
+  date: string;
+  location: string;
+  type: string;
+  description: string;
+  isFeatured?: boolean;
+}
+
+type Props = {
+  posts: Array<NewsFrontmatter & { slug: string }>
+  featuredEvent?: Event
+  upcomingEvents: Event[]
+  drivers: Profile[]
+}
+
+export default function HomePageClient({ posts, featuredEvent, upcomingEvents, drivers }: Props) {
   return (
     <main className="bg-lsr-charcoal text-white overflow-x-clip">
       <Hero />
 
       {/* Below-hero content */}
       <div className="space-y-10 md:space-y-14 px-6 md:px-8 pb-10 md:pb-14">
-        <NextEvent index={0} />
-        <WhatWeDo index={1} />
-        <Leaderboard index={2} />
+        <WhatWeDo index={0} />
+        <NextEvent index={1} featuredEvent={featuredEvent} upcomingEvents={upcomingEvents} />
+        <Leaderboard index={2} drivers={drivers} />
         <Hotlap index={3} />
         <NewsHighlights index={4} posts={posts} />
         <FinalCta index={5} />

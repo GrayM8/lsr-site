@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic"
 
 function Badge({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded-md border px-2 py-0.5 text-xs">
+    <span className="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-xs">
       {children}
     </span>
   )
@@ -50,70 +50,102 @@ export default async function DriversIndexPage({
   })
 
   return (
-    <main className="mx-auto max-w-6xl p-8 space-y-6">
-      <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-3xl font-bold">Drivers</h1>
+    <main className="bg-lsr-charcoal text-white min-h-screen">
+      <div className="mx-auto max-w-6xl px-6 md:px-8 py-10">
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="font-display text-4xl md:text-5xl text-lsr-orange tracking-wide">Drivers</h1>
+          <div className="ms-auto flex items-center gap-2">
+            <DriversSearch q={q} />
+            <DriversFilters selectedRoles={selectedRoles} />
+          </div>
+        </div>
 
-        <div className="ms-auto flex items-center gap-2">
-          {/* Slim search panel */}
-          <DriversSearch q={q} />
-          {/* Filter icon + dropdown */}
-          <DriversFilters selectedRoles={selectedRoles} />
+        <Separator className="my-6 bg-white/10" />
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="md:col-span-1">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+              <h2 className="font-display text-2xl text-lsr-orange tracking-wide">Last Race</h2>
+              <div className="mt-4 aspect-video bg-lsr-charcoal-darker rounded-lg flex items-center justify-center">
+                <p className="text-sm text-white/60">[Racetrack Image]</p>
+              </div>
+              <h3 className="mt-4 font-semibold">Podium Finishers:</h3>
+              <ul className="mt-2 space-y-2 text-sm text-white/80">
+                <li>1. [Driver Name]</li>
+                <li>2. [Driver Name]</li>
+                <li>3. [Driver Name]</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="md:col-span-2">
+            <div className="rounded-2xl border border-white/10 bg-white/5">
+              <table className="w-full text-sm">
+                <thead className="border-b border-white/10 text-white/60">
+                <tr>
+                  <th className="px-4 py-3 text-left font-normal w-16">Rank</th>
+                  <th className="px-4 py-3 text-left font-normal">Driver</th>
+                  <th className="px-4 py-3 text-center font-normal w-32">Season Points</th>
+                  <th className="px-4 py-3 text-center font-normal w-32">iRating</th>
+                </tr>
+                </thead>
+                <tbody>
+                {drivers.map((d, index) => {
+                  const initials = d.displayName
+                    .split(" ")
+                    .map((n) => n[0])
+                    .slice(0, 2)
+                    .join("")
+                    .toUpperCase()
+                  const codes: RoleCode[] = d.roles.length
+                    ? d.roles.map((pr) => pr.role.code as RoleCode)
+                    : ["member"]
+
+                  return (
+                    <tr key={d.id} className="border-b border-white/10 hover:bg-white/5">
+                      <td className="px-4 py-2 text-center text-lg font-bold text-white/60">{index + 1}</td>
+                      <td className="px-4 py-2">
+                        <Link href={`/drivers/${d.handle}`} className="flex items-center gap-3">
+                          <div
+                            className="h-10 w-10 overflow-hidden rounded-full border border-white/10 bg-lsr-charcoal-darker">
+                            {d.avatarUrl ? (
+                              <Image
+                                src={d.avatarUrl}
+                                alt={d.displayName}
+                                width={40}
+                                height={40}
+                                className="h-10 w-10 object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-xs">
+                                {initials || "U"}
+                              </div>
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <div className="truncate font-medium">{d.displayName}</div>
+                              <div className="flex flex-wrap gap-1">
+                                {codes.map((c) => (
+                                  <Badge key={c}>{ROLE_LABEL[c]}</Badge>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="text-xs text-white/60">@{d.handle}</div>
+                          </div>
+                        </Link>
+                      </td>
+                      <td className="px-4 py-2 text-center font-semibold">{"—"}</td>
+                      <td className="px-4 py-2 text-center font-semibold">{d.iRating ?? "—"}</td>
+                    </tr>
+                  )
+                })}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
-
-      <Separator />
-
-      <ul className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-6">
-        {drivers.map((d) => {
-          const initials = d.displayName
-            .split(" ")
-            .map((n) => n[0])
-            .slice(0, 2)
-            .join("")
-            .toUpperCase()
-          const codes: RoleCode[] = d.roles.length
-            ? d.roles.map((pr) => pr.role.code as RoleCode)
-            : ["member"]
-
-          return (
-            <li key={d.id} className="rounded-xl border p-4 transition hover:shadow-sm">
-              <Link href={`/drivers/${d.handle}`} className="flex items-center gap-3">
-                <div className="h-12 w-12 overflow-hidden rounded-full border bg-muted">
-                  {d.avatarUrl ? (
-                    <Image
-                      src={d.avatarUrl}
-                      alt={d.displayName}
-                      width={48}
-                      height={48}
-                      className="h-12 w-12 object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-sm">
-                      {initials || "U"}
-                    </div>
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <div className="truncate font-medium">{d.displayName}</div>
-                  <div className="text-xs text-muted-foreground">@{d.handle}</div>
-                </div>
-              </Link>
-
-              <div className="mt-3 flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">iRating</span>
-                <span className="font-semibold">{d.iRating ?? "—"}</span>
-              </div>
-
-              <div className="mt-3 flex flex-wrap gap-1">
-                {codes.map((c) => (
-                  <Badge key={c}>{ROLE_LABEL[c]}</Badge>
-                ))}
-              </div>
-            </li>
-          )
-        })}
-      </ul>
     </main>
   )
 }

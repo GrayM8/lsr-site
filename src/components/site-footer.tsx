@@ -1,7 +1,8 @@
 import Link from "next/link"
 import { Mail, Rss, ExternalLink } from "lucide-react"
 import { BrandIcon } from "@/components/brand-icon"
-import { siInstagram, siYoutube, siTwitch, siDiscord  } from "simple-icons/icons"
+import { siInstagram, siYoutube, siTwitch, siDiscord } from "simple-icons/icons"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 export function SiteFooter() {
   const year = new Date().getFullYear()
@@ -16,7 +17,8 @@ export function SiteFooter() {
               LONGHORN SIM RACING
             </Link>
             <p className="text-sm text-muted-foreground">
-              UT Austin’s sim racing community. Bringing motorsports closer to Longhorns and Longhorns closer to the podium.
+              UT Austin’s sim racing community. Bringing motorsports closer to Longhorns and Longhorns closer to the
+              podium.
             </p>
           </div>
 
@@ -66,14 +68,23 @@ export function SiteFooter() {
                 </a>
               </li>
               <li>
-                <a
-                  href="https://youtube.com/"
-                  target="_blank" rel="noreferrer"
-                  className="flex items-center gap-2 hover:underline"
-                >
-                  <BrandIcon icon={siYoutube} className="h-4 w-4" />
-                  YouTube
-                </a>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <a
+                        href="https://youtube.com/"
+                        target="_blank" rel="noreferrer"
+                        className="flex items-center gap-2 hover:underline"
+                      >
+                        <BrandIcon icon={siYoutube} className="h-4 w-4" />
+                        YouTube
+                      </a>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>YouTube channel coming soon!</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </li>
               <li>
                 <a
@@ -106,10 +117,11 @@ export function SiteFooter() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-10 flex flex-col items-start justify-between gap-2 border-t pt-6 text-xs text-muted-foreground sm:flex-row">
+        <div
+          className="mt-10 flex flex-col items-start justify-between gap-2 border-t pt-6 text-xs text-muted-foreground sm:flex-row">
           <p>© {year} Longhorn Sim Racing</p>
           <div className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-3">
-            <p>Built with Next.js • Deployed on Vercel • Made with ☕ & ❤️ by {" "}
+            <p>Built with Next.js • Deployed on Vercel • Made with ☕ & ❤️ by{" "}
               <a
                 href="https://graymarshall.dev"
                 target="_blank"

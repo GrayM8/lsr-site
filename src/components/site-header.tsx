@@ -19,9 +19,9 @@ export function SiteHeader() {
         </Link>
 
         <div className="font-sans flex items-center gap-4 text-sm">
-          <Link href="/about">About</Link>
+          {/*<Link href="/about">About</Link>*/}
           <Link href="/drivers">Drivers</Link>
-          <Link href="/sponsors">Sponsors</Link>
+          {/*<Link href="/sponsors">Sponsors</Link>*/}
           <Link href="/events">Events</Link>
           <Link href="/gallery">Gallery</Link>
           <Link href="/news">News</Link>

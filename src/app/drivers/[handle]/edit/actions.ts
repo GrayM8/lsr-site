@@ -18,6 +18,7 @@ const ProfileSchema = z.object({
     const n = typeof v === "string" ? parseInt(v, 10) : v
     return Number.isFinite(n as number) ? Number(n) : null
   }),
+  major: z.string().max(100).optional().nullable(),
   website: z.string().url().optional().or(z.literal("")).transform(v => v || null),
   instagram: z.string().url().optional().or(z.literal("")).transform(v => v || null),
   twitch: z.string().url().optional().or(z.literal("")).transform(v => v || null),
@@ -40,6 +41,7 @@ export async function updateProfile(formData: FormData) {
     iRating: formData.get("iRating"),
     bio: formData.get("bio"),
     gradYear: formData.get("gradYear"),
+    major: formData.get("major"),
     website: formData.get("website"),
     instagram: formData.get("instagram"),
     twitch: formData.get("twitch"),
@@ -60,6 +62,7 @@ export async function updateProfile(formData: FormData) {
       iRating: parsed.data.iRating ?? undefined,
       bio: parsed.data.bio ?? undefined,
       gradYear: parsed.data.gradYear ?? undefined,
+      major: parsed.data.major ?? undefined,
       socials: {
         ...prevSocials,
         website: parsed.data.website,

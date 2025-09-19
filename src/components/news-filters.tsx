@@ -62,8 +62,8 @@ export function NewsFilters({ allTags, selectedTags }: Props) {
           {allTags.map((tag) => (
             <DropdownMenuCheckboxItem
               key={tag}
-              checked={selectedTags.includes(tag)}
-              onCheckedChange={(v) => toggleTag(tag, Boolean(v))}
+              checked={selectedTags.includes(tag.toLowerCase())}
+              onCheckedChange={(v) => toggleTag(tag.toLowerCase(), Boolean(v))}
               className="capitalize"
             >
               {tag}
@@ -71,15 +71,13 @@ export function NewsFilters({ allTags, selectedTags }: Props) {
           ))}
         </div>
 
-        {active && <>
-          <DropdownMenuSeparator />
-          <div className="p-2">
-            <Button variant="ghost" size="sm" className="w-full" onClick={clearFilters}>
-              <X className="mr-2 h-4 w-4" />
-              Clear filters
-            </Button>
-          </div>
-        </>}
+        <DropdownMenuSeparator />
+        <div className="p-2">
+          <Button variant="ghost" size="sm" className="w-full" onClick={clearFilters} disabled={!active}>
+            <X className="mr-2 h-4 w-4" />
+            Clear filters
+          </Button>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   )
