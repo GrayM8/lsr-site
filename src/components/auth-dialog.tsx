@@ -92,13 +92,13 @@ export function AuthDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm" onClick={() => setTab("signup")}>
-          Sign in / Create account
+          Sign In / Create Account
         </Button>
       </DialogTrigger>
 
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{tab === "signup" ? "Create account" : "Sign in"}</DialogTitle>
+          <DialogTitle>{tab === "signup" ? "Create Account" : "Sign in"}</DialogTitle>
         </DialogHeader>
 
         <Tabs
@@ -153,7 +153,7 @@ export function AuthDialog() {
                 </div>
 
                 <div className="grid gap-1.5">
-                  <Label htmlFor="eid">UT EID / Student ID (optional)</Label>
+                  <Label htmlFor="eid">UT EID / Student ID</Label>
                   <Input
                     id="eid"
                     value={eid}
@@ -163,7 +163,7 @@ export function AuthDialog() {
                 </div>
 
                 <div className="grid gap-1.5">
-                  <Label htmlFor="gradYear">Graduating year (optional)</Label>
+                  <Label htmlFor="gradYear">Graduating Year</Label>
                   <Input
                     id="gradYear"
                     type="number"
