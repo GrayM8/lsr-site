@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { createSupabaseRSC } from "@/lib/supabase-rsc"
-import { updateAccountDetails, updateMarketingOptIn, retireAccount, deleteAccount } from "./actions"
+import { updateMarketingOptIn, retireAccount, deleteAccount } from "./actions"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
