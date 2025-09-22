@@ -12,7 +12,10 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:reset": "prisma mirate reset --force",
-    "ci:verify-prisma": "node -e \"const c=require('@prisma/client'); console.log('Prisma models:', Object.keys(new c.PrismaClient()));\""
+    "ci:verify-prisma": "node -e \"const c=require('@prisma/client'); console.log('Prisma models:', Object.keys(new c.PrismaClient()));\"",
+  "prisma": {
+    "seed": "node prisma/seed.cjs"
+  }
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
