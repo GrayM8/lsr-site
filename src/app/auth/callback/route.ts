@@ -3,6 +3,8 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { prisma } from '@/server/db';
 import { slugify } from '@/lib/slug';
 
+export const runtime = 'nodejs';
+
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const code = url.searchParams.get('code');

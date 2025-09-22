@@ -31,8 +31,8 @@ function StatCard({ label, value }: { label: string, value: React.ReactNode }) {
 
 export default async function DriverProfilePage({
   params,
-}: { params: { handle: string } }) {
-  const { handle } = params;
+}: { params: Promise<{ handle: string }> }) {
+  const { handle } = await params;
 
   const user = await prisma.user.findUnique({
     where: { handle },

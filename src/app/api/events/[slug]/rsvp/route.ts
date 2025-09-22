@@ -1,17 +1,15 @@
 // app/api/events/[slug]/rsvp/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { requireUser } from '@/server/auth/guards';
 import { getEventBySlug, rsvp } from '@/server/repos/event.repo';
 import { rsvpRequestSchema } from '@/schemas/event.schema';
 import { ZodError } from 'zod';
+import type { NodeHandler } from '@/server/next-types';
 
 export const runtime = 'nodejs';
 
-export async function POST(
-  request: NextRequest,
-  context: { params: { slug: string } },
-) {
-  const { slug } = context.params;
+export const POST: NodeHandler<{ slug: string }> = async (request, { params }) => {
+  const { slug } = await params;
   try {
     const user = await requireUser();
     const body = await request.json();
@@ -41,4 +39,5 @@ export async function POST(
     console.error(`Error RSVPing for event ${slug}:`, error);
     return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
-}
+};
+

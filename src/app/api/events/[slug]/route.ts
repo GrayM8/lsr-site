@@ -1,14 +1,12 @@
 // app/api/events/[slug]/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import type { NodeHandler } from '@/server/next-types';
 import { getEventBySlug } from '@/server/repos/event.repo';
 
 export const runtime = 'nodejs';
 
-export async function GET(
-  request: NextRequest,
-  context: { params: { slug: string } },
-) {
-  const { slug } = context.params;
+export const GET: NodeHandler<{ slug: string }> = async (req, { params }) => {
+  const { slug } = await params;
   try {
     const event = await getEventBySlug(slug);
     if (!event) {
@@ -20,4 +18,5 @@ export async function GET(
     console.error(`Error fetching event ${slug}:`, error);
     return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
-}
+};
+

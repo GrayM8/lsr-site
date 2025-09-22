@@ -1,18 +1,16 @@
 // app/api/sessions/[id]/results/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { listResultsForSession } from '@/server/repos/league.repo';
 import { requireRole } from '@/server/auth/guards';
 import { resultsUpdateRequestSchema } from '@/schemas/result.schema';
 import { upsertResult } from '@/server/repos/import.repo';
 import { ZodError } from 'zod';
+import type { NodeHandler } from '@/server/next-types';
 
 export const runtime = 'nodejs';
 
-export async function GET(
-  request: NextRequest,
-  context: { params: { id: string } },
-) {
-  const { id } = context.params;
+export const GET: NodeHandler<{ id: string }> = async (request, { params }) => {
+  const { id } = await params;
   try {
     const results = await listResultsForSession(id);
     return NextResponse.json(results);
@@ -20,13 +18,10 @@ export async function GET(
     console.error(`Error fetching results for session ${id}:`, error);
     return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
-}
+};
 
-export async function POST(
-  request: NextRequest,
-  context: { params: { id: string } },
-) {
-  const { id } = context.params;
+export const POST: NodeHandler<{ id: string }> = async (request, { params }) => {
+  const { id } = await params;
   try {
     const actor = await requireRole(['admin', 'officer']);
     const body = await request.json();
@@ -50,4 +45,5 @@ export async function POST(
     console.error(`Error upserting results for session ${id}:`, error);
     return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
-}
+};
+

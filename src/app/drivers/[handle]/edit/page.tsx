@@ -24,8 +24,8 @@ function FormField({ id, label, children }: { id: string, label: string, childre
 
 export default async function EditDriverPage({
   params,
-}: { params: { handle: string } }) {
-  const { handle } = params;
+}: { params: Promise<{ handle: string }> }) {
+  const { handle } = await params;
 
   const pageUser = await prisma.user.findUnique({ where: { handle } });
   if (!pageUser || pageUser.status === 'deleted') return notFound();
