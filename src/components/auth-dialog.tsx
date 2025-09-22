@@ -33,9 +33,7 @@ export function AuthDialog() {
   const [displayName, setDisplayName] = useState("")
   const [eid, setEid] = useState("")
   const [gradYear, setGradYear] = useState<string>("")
-  const [marketing, setMarketing] = useState(true)
-
-  const origin = typeof window !== "undefined" ? window.location.origin : ""
+  const [marketing, setMarketing] = useState(true);
 
   useEffect(() => {
     const handleOpen = () => setOpen(true)
@@ -44,13 +42,15 @@ export function AuthDialog() {
   }, [])
 
   function onSignup(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
+    e.preventDefault();
     startTransition(async () => {
+      const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
+      const redirectTo = `${origin.replace(/\/$/, '')}/auth/callback?next=/drivers/me`;
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${origin}/auth/callback?next=/drivers/me`,
+          emailRedirectTo: redirectTo,
           data: {
             displayName,
             eid,
@@ -58,11 +58,11 @@ export function AuthDialog() {
             marketingOptIn: marketing,
           },
         },
-      })
-      if (error) return alert(error.message)
-      alert("Check your email to confirm and sign in.")
-      setOpen(false)
-    })
+      });
+      if (error) return alert(error.message);
+      alert('Check your email to confirm and sign in.');
+      setOpen(false);
+    });
   }
 
   function onSignin(e: React.FormEvent<HTMLFormElement>) {

@@ -23,13 +23,14 @@ function GoogleIcon({ className }: { className?: string }) {
 
 export function GoogleButton({ next = "/" }: { next?: string }) {
   const handle = async () => {
-    const supabase = createSupabaseBrowser()
-    const origin = window.location.origin
+    const supabase = createSupabaseBrowser();
+    const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
+    const redirectTo = `${origin.replace(/\/$/, '')}/auth/callback?next=${encodeURIComponent(next)}`;
     await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}` },
-    })
-  }
+      provider: 'google',
+      options: { redirectTo },
+    });
+  };
 
   return (
     <Button onClick={handle} className="w-full" variant="outline">
