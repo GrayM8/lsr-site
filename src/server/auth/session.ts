@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { prisma } from '@/server/db';
 import { User } from '@prisma/client';
+import { slugify } from '@/lib/slug';
 
 export type SessionUser = {
   user: (User & { roles: { role: { key: string } }[] }) | null;
@@ -30,7 +31,7 @@ export async function getSessionUser(): Promise<SessionUser> {
     return { user: null, roles: [] };
   }
 
-  const dbUser = await prisma.user.findUnique({
+  let dbUser = await prisma.user.findUnique({
     where: { id: authUser.id },
     include: {
       roles: {
@@ -43,8 +44,42 @@ export async function getSessionUser(): Promise<SessionUser> {
     },
   });
 
+  // Just-in-time user provisioning
   if (!dbUser) {
-    return { user: null, roles: [] };
+    const meta = authUser.user_metadata ?? {};
+    const displayName =
+      meta.display_name || meta.full_name || authUser.email?.split('@')[0] || 'New Driver';
+
+    const baseHandle = slugify(displayName);
+    let handle = baseHandle;
+    // Simple uniqueness check
+    for (let i = 1; i < 10; i++) {
+      const exists = await prisma.user.findUnique({ where: { handle } });
+      if (!exists) break;
+      handle = `${baseHandle}-${i}`;
+    }
+
+    const memberRole = await prisma.role.findUnique({ where: { key: 'member' } });
+
+    dbUser = await prisma.user.create({
+      data: {
+        id: authUser.id,
+        email: authUser.email!,
+        displayName,
+        handle,
+        status: 'active',
+        roles: memberRole ? { create: [{ roleId: memberRole.id }] } : undefined,
+      },
+      include: {
+        roles: {
+          include: {
+            role: {
+              select: { key: true },
+            },
+          },
+        },
+      },
+    });
   }
 
   return {
