@@ -1,23 +1,15 @@
-import { notFound, redirect } from "next/navigation"
-import { prisma } from "@/lib/prisma"
-import { createSupabaseRSC } from "@/lib/supabase-rsc"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Separator } from "@/components/ui/separator"
-import { updateProfile } from "./actions"
-import { AvatarUploader } from "@/components/avatar-uploader"
+import { notFound, redirect } from 'next/navigation';
+import { prisma } from '@/server/db';
+import { getCachedSessionUser } from '@/server/auth/cached-session';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+import { updateProfile } from './actions';
+import { AvatarUploader } from '@/components/avatar-uploader';
 
-export const dynamic = "force-dynamic"
-
-async function getMe() {
-  const supabase = await createSupabaseRSC()
-  const { data } = await supabase.auth.getUser()
-  if (!data.user) return null
-  const me = await prisma.profile.findUnique({ where: { userId: data.user.id } })
-  return me
-}
+export const dynamic = 'force-dynamic';
 
 function FormField({ id, label, children }: { id: string, label: string, children: React.ReactNode }) {
   return (
@@ -27,27 +19,27 @@ function FormField({ id, label, children }: { id: string, label: string, childre
         {children}
       </div>
     </div>
-  )
+  );
 }
 
 export default async function EditDriverPage({
-                                               params,
-                                             }: { params: Promise<{ handle: string }> }) {
-  const { handle } = await params
+  params,
+}: { params: { handle: string } }) {
+  const { handle } = params;
 
-  const profile = await prisma.profile.findUnique({ where: { handle } })
-  if (!profile || profile.status === "deleted") return notFound()
+  const pageUser = await prisma.user.findUnique({ where: { handle } });
+  if (!pageUser || pageUser.status === 'deleted') return notFound();
 
-  const me = await getMe()
-  if (!me) {
-    redirect("/login")
+  const { user: sessionUser } = await getCachedSessionUser();
+  if (!sessionUser) {
+    redirect('/login');
   }
 
-  if (me!.id !== profile.id) {
-    redirect(`/drivers/${me!.handle}`)
+  if (sessionUser.id !== pageUser.id) {
+    redirect(`/drivers/${sessionUser.handle}`);
   }
 
-  const socials = (profile.socials as Record<string, string> | null) ?? {}
+  const socials = (pageUser.socials as Record<string, string> | null) ?? {};
 
   return (
     <main className="bg-lsr-charcoal text-white min-h-screen">
@@ -61,7 +53,7 @@ export default async function EditDriverPage({
           {/* Avatar */}
           <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
             <h2 className="text-lg font-semibold mb-4 text-lsr-orange tracking-wide">Profile Photo</h2>
-            <AvatarUploader initialUrl={profile.avatarUrl} />
+            <AvatarUploader initialUrl={pageUser.avatarUrl} />
           </div>
 
           {/* Form */}
@@ -69,23 +61,23 @@ export default async function EditDriverPage({
             <div className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-4">
               <h2 className="text-lg font-semibold text-lsr-orange tracking-wide">Driver Details</h2>
               <FormField id="displayName" label="Display Name">
-                <Input id="displayName" name="displayName" defaultValue={profile.displayName} required
+                <Input id="displayName" name="displayName" defaultValue={pageUser.displayName} required
                        className="bg-white/5 border-white/10" />
               </FormField>
               <FormField id="iRating" label="iRating">
-                <Input id="iRating" name="iRating" type="number" defaultValue={profile.iRating ?? ""}
+                <Input id="iRating" name="iRating" type="number" defaultValue={pageUser.iRating ?? ''}
                        className="bg-white/5 border-white/10" />
               </FormField>
               <FormField id="gradYear" label="Graduating Year">
-                <Input id="gradYear" name="gradYear" type="number" defaultValue={profile.gradYear ?? ""}
+                <Input id="gradYear" name="gradYear" type="number" defaultValue={pageUser.gradYear ?? ''}
                        className="bg-white/5 border-white/10" />
               </FormField>
               <FormField id="major" label="Major">
-                <Input id="major" name="major" defaultValue={profile.major ?? ""}
+                <Input id="major" name="major" defaultValue={pageUser.major ?? ''}
                        className="bg-white/5 border-white/10" />
               </FormField>
               <FormField id="bio" label="Bio">
-                <Textarea id="bio" name="bio" rows={5} defaultValue={profile.bio ?? ""}
+                <Textarea id="bio" name="bio" rows={5} defaultValue={pageUser.bio ?? ''}
                           className="bg-white/5 border-white/10" />
               </FormField>
             </div>
@@ -94,19 +86,19 @@ export default async function EditDriverPage({
               <h2 className="text-lg font-semibold text-lsr-orange tracking-wide">Social Links</h2>
               <FormField id="website" label="Website">
                 <Input id="website" name="website" type="url" placeholder="https://example.com"
-                       defaultValue={socials.website ?? ""} className="bg-white/5 border-white/10" />
+                       defaultValue={socials.website ?? ''} className="bg-white/5 border-white/10" />
               </FormField>
               <FormField id="instagram" label="Instagram">
                 <Input id="instagram" name="instagram" type="url" placeholder="https://instagram.com/handle"
-                       defaultValue={socials.instagram ?? ""} className="bg-white/5 border-white/10" />
+                       defaultValue={socials.instagram ?? ''} className="bg-white/5 border-white/10" />
               </FormField>
               <FormField id="twitch" label="Twitch">
                 <Input id="twitch" name="twitch" type="url" placeholder="https://twitch.tv/handle"
-                       defaultValue={socials.twitch ?? ""} className="bg-white/5 border-white/10" />
+                       defaultValue={socials.twitch ?? ''} className="bg-white/5 border-white/10" />
               </FormField>
               <FormField id="youtube" label="YouTube">
                 <Input id="youtube" name="youtube" type="url" placeholder="https://youtube.com/@channel"
-                       defaultValue={socials.youtube ?? ""} className="bg-white/5 border-white/10" />
+                       defaultValue={socials.youtube ?? ''} className="bg-white/5 border-white/10" />
               </FormField>
             </div>
 
@@ -122,5 +114,6 @@ export default async function EditDriverPage({
         </div>
       </div>
     </main>
-  )
+  );
 }
+

@@ -1,20 +1,17 @@
-import { prisma } from "@/lib/prisma"
-import { createSupabaseRSC } from "@/lib/supabase-rsc"
+import { getSessionUser } from '@/server/auth/session';
 
 // Returns { isOwner, userId } for current session
-export async function getOwnerStatus(profileUserId: string) {
-  const supabase = await createSupabaseRSC()
-  const { data } = await supabase.auth.getUser()
-  const userId = data.user?.id ?? null
-  return { isOwner: !!userId && userId === profileUserId, userId }
+export async function getOwnerStatus(targetUserId: string) {
+  const { user } = await getSessionUser();
+  const userId = user?.id ?? null;
+  return { isOwner: !!userId && userId === targetUserId, userId };
 }
 
 // Resolve current user's handle (for /drivers/me)
 export async function getMyHandle() {
-  const supabase = await createSupabaseRSC()
-  const { data } = await supabase.auth.getUser()
-  const userId = data.user?.id
-  if (!userId) return null
-  const me = await prisma.profile.findUnique({ where: { userId } })
-  return me?.handle ?? null
+  const { user } = await getSessionUser();
+  if (!user) return null;
+  // The handle is directly on the user object now
+  return user.handle;
 }
+

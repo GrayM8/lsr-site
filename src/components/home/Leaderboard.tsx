@@ -1,14 +1,14 @@
 import Link from "next/link"
 import SectionReveal from "./SectionReveal"
-import { type Profile } from "@prisma/client"
+import { type User } from '@prisma/client';
 import Image from "next/image"
 import { Trophy } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 type Props = {
-  index: number
-  drivers: Profile[]
-}
+  index: number;
+  drivers: User[];
+};
 
 export default function Leaderboard({ index, drivers }: Props) {
   const trophyColors = [

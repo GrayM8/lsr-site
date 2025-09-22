@@ -10,10 +10,10 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
-    "db:reset": "prisma mirate reset --force"
-  },
+    "db:reset": "prisma mirate reset --force",
   "prisma": {
     "seed": "node prisma/seed.cjs"
+  }
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
