@@ -1,50 +1,81 @@
 // app/auth/callback/route.ts
-import { NextResponse, type NextRequest } from 'next/server';
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { type CookieOptions, createServerClient } from '@supabase/ssr';
+import { type NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/server/db';
+import { slugify } from '@/lib/slug';
 
 export const runtime = 'nodejs';
 
-function siteOriginFromEnvOrReq(req: NextRequest) {
-  const envUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL;
-  if (envUrl) {
-    return (envUrl.startsWith('http') ? envUrl : `https://${envUrl}`).replace(/\/$/, '');
+export async function GET(request: NextRequest) {
+  const { searchParams, origin } = new URL(request.url);
+  const code = searchParams.get('code');
+  const next = searchParams.get('next') ?? '/';
+
+  if (!code) {
+    const errorUrl = new URL('/?auth-error=true', origin);
+    errorUrl.searchParams.set('message', 'Authentication code was missing.');
+    return NextResponse.redirect(errorUrl);
   }
-  const u = new URL(req.url);
-  return u.origin;
-}
 
-export async function GET(req: NextRequest) {
-  const url = new URL(req.url);
-  const code = url.searchParams.get('code');
-  const next = url.searchParams.get('next') || '/';
-
-  const origin = siteOriginFromEnvOrReq(req);
-  // Prepare a response we will return and mutate cookies on
-  const res = NextResponse.redirect(new URL(next, origin), { status: 302 });
-
-  if (code) {
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return req.cookies.get(name)?.value;
-          },
-          set(name: string, value: string, options: CookieOptions) {
-            // Persist auth cookies on the response
-            res.cookies.set({ name, value, ...options });
-          },
-          remove(name: string, options: CookieOptions) {
-            res.cookies.set({ name, value: '', ...options });
-          },
+  const response = NextResponse.redirect(`${origin}${next}`);
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get: (name: string) => request.cookies.get(name)?.value,
+        set: (name: string, value: string, options: CookieOptions) => {
+          response.cookies.set({ name, value, ...options });
+        },
+        remove: (name: string, options: CookieOptions) => {
+          response.cookies.set({ name, value: '', ...options });
         },
       },
-    );
+    },
+  );
 
-    // Exchange the code for a session; this will call cookies.set/remove above
-    await supabase.auth.exchangeCodeForSession(code);
+  const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code);
+
+  if (error || !user) {
+    console.error('Supabase auth exchange error:', error?.message);
+    const errorUrl = new URL('/?auth-error=true', origin);
+    errorUrl.searchParams.set('message', 'Authentication failed. Please try again.');
+    return NextResponse.redirect(errorUrl);
   }
 
-  return res; // Must return NextResponse so cookies are committed
+  // --- USER PROVISIONING LOGIC ---
+  const existingUser = await prisma.user.findUnique({ where: { id: user.id } });
+
+  if (!existingUser) {
+    const meta = user.user_metadata ?? {};
+    const displayName =
+      meta.display_name || meta.full_name || user.email?.split('@')[0] || 'New Driver';
+
+    const baseHandle = slugify(displayName);
+    let handle = baseHandle;
+    for (let i = 1; i <= 10; i++) {
+      const exists = await prisma.user.findUnique({ where: { handle } });
+      if (!exists) break;
+      handle = `${baseHandle}-${i}`;
+    }
+
+    const memberRole = await prisma.role.findUnique({ where: { key: 'member' } });
+
+    await prisma.user.create({
+      data: {
+        id: user.id,
+        email: user.email!,
+        displayName,
+        handle,
+        marketingOptIn: meta.marketingOptIn ?? true,
+        eid: meta.eid,
+        gradYear: meta.gradYear ? Number(meta.gradYear) : undefined,
+        signedUpAt: new Date(),
+        roles: memberRole ? { create: [{ roleId: memberRole.id }] } : undefined,
+      },
+    });
+  }
+  // --- END PROVISIONING ---
+
+  return response;
 }
