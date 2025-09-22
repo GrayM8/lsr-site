@@ -104,7 +104,7 @@ supabase-server.ts     # Supabase client for server components
 prisma/
 schema.prisma
 migrations/
-seed.ts                  # optional
+OLDseed.ts                  # optional
 Deployment (Vercel)
 Connect GitHub repo → New Project.
 
