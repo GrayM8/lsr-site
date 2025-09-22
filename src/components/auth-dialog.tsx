@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation';
 import * as React from "react"
 import { useState, useTransition, useEffect } from "react"
-import { createSupabaseBrowser } from "@/lib/supabase-browser"
 import {
   Dialog,
   DialogContent,
@@ -25,7 +24,6 @@ export function AuthDialog() {
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<TabKey>("signup")
   const [pending, startTransition] = useTransition()
-  const supabase = createSupabaseBrowser()
 
   // shared
   const [email, setEmail] = useState("")
@@ -45,37 +43,10 @@ export function AuthDialog() {
 
   function onSignup(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    startTransition(async () => {
-      const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
-      const redirectTo = `${origin.replace(/\/$/, '')}/auth/callback?next=/account`;
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: redirectTo,
-          data: {
-            displayName,
-            eid,
-            gradYear: gradYear ? Number(gradYear) : undefined,
-            marketingOptIn: marketing,
-          },
-        },
-      });
-      if (error) return alert(error.message);
-      alert("Check your email to confirm and sign in.");
-      setOpen(false);
-    });
   }
 
   function onSignin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    startTransition(async () => {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) return alert(error.message);
-      // Refresh the page to re-run Server Components with the new session
-      router.refresh();
-      setOpen(false);
-    });
   }
 
   // Simple centered "OR" divider

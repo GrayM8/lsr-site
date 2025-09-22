@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter, usePathname } from "next/navigation"
-import { createSupabaseBrowser } from "@/lib/supabase-browser"
+// import { createSupabaseBrowser } from "@/lib/supabase-browser"
 import { useState } from "react"
 import {
   DropdownMenu,
@@ -25,22 +25,22 @@ export function UserMenuClient({
   avatarUrl?: string | null
   handle?: string | null
 }) {
-  const supabase = createSupabaseBrowser()
+  // const supabase = createSupabaseBrowser()
   const router = useRouter()
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
 
   async function logout() {
-    try {
-      await supabase.auth.signOut()
-    } catch {
-      // ignore
-    }
-    // Re-run the current route on the server so the header updates
-    router.replace(pathname ?? "/")
-    router.refresh()
-    // Hard fallback in case caching interferes:
-    // setTimeout(() => window.location.reload(), 0)
+    // try {
+    //   await supabase.auth.signOut()
+    // } catch {
+    //   // ignore
+    // }
+    // // Re-run the current route on the server so the header updates
+    // router.replace(pathname ?? "/")
+    // router.refresh()
+    // // Hard fallback in case caching interferes:
+    // // setTimeout(() => window.location.reload(), 0)
   }
 
   const initials = displayName
