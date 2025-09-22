@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   const url = new URL(req.url);
 
   if (!user) {
-    return NextResponse.redirect(new URL('/login', url.origin));
+    return NextResponse.redirect(new URL('/', url.origin));
   }
 
   return NextResponse.redirect(new URL(`/drivers/${user.handle}`, url.origin));

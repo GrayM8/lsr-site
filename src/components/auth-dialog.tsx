@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from 'next/navigation';
 import * as React from "react"
 import { useState, useTransition, useEffect } from "react"
 import { createSupabaseBrowser } from "@/lib/supabase-browser"
@@ -20,6 +21,7 @@ import { GoogleButton } from "@/components/google-button"
 type TabKey = "signin" | "signup"
 
 export function AuthDialog() {
+  const router = useRouter();
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<TabKey>("signup")
   const [pending, startTransition] = useTransition()
@@ -66,12 +68,14 @@ export function AuthDialog() {
   }
 
   function onSignin(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
+    e.preventDefault();
     startTransition(async () => {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) return alert(error.message)
-      window.location.href = "/drivers/me"
-    })
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return alert(error.message);
+      // Refresh the page to re-run Server Components with the new session
+      router.refresh();
+      setOpen(false);
+    });
   }
 
   // Simple centered "OR" divider
