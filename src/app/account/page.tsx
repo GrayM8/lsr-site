@@ -1,24 +1,18 @@
-import { redirect } from "next/navigation"
-import { prisma } from "@/lib/prisma"
-import { createSupabaseRSC } from "@/lib/supabase-rsc"
-import { updateMarketingOptIn, retireAccount, deleteAccount } from "./actions"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { Input } from "@/components/ui/input"
-import { MarketingToggle } from "@/components/marketing-toggle"
-import { ConfirmSubmitButton } from "@/components/confirm-submit-button"
+import { redirect } from 'next/navigation';
+import { getCachedSessionUser } from '@/server/auth/cached-session';
+import { updateMarketingOptIn, retireAccount, deleteAccount } from './actions';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { MarketingToggle } from '@/components/marketing-toggle';
+import { ConfirmSubmitButton } from '@/components/confirm-submit-button';
 
-export const dynamic = "force-dynamic"
+export const dynamic = 'force-dynamic';
 
 export default async function AccountPage() {
-  const supabase = await createSupabaseRSC()
-  const { data } = await supabase.auth.getUser()
-  const user = data.user
-  if (!user) redirect("/login")
-
-  const profile = await prisma.profile.findUnique({ where: { userId: user.id } })
-  if (!profile) redirect("/drivers/me")
+  const { user } = await getCachedSessionUser();
+  if (!user) redirect('/login');
 
   return (
     <main className="bg-lsr-charcoal text-white min-h-screen">
@@ -36,19 +30,19 @@ export default async function AccountPage() {
           <div className="grid md:grid-cols-2 gap-4">
             <div className="grid gap-1.5">
               <Label>Email</Label>
-              <Input value={user.email ?? ""} readOnly className="bg-white/5 border-white/10" />
+              <Input value={user.email ?? ''} readOnly className="bg-white/5 border-white/10" />
             </div>
             <div className="grid gap-1.5">
               <Label>EID</Label>
-              <Input value={profile.eid ?? ""} readOnly className="bg-white/5 border-white/10" />
+              <Input value={user.eid ?? ''} readOnly className="bg-white/5 border-white/10" />
             </div>
             <div className="grid gap-1.5">
               <Label>Display Name</Label>
-              <Input value={profile.displayName} readOnly className="bg-white/5 border-white/10" />
+              <Input value={user.displayName} readOnly className="bg-white/5 border-white/10" />
             </div>
             <div className="grid gap-1.5">
               <Label>Handle</Label>
-              <Input value={`@${profile.handle}`} readOnly className="bg-white/5 border-white/10" />
+              <Input value={`@${user.handle}`} readOnly className="bg-white/5 border-white/10" />
             </div>
           </div>
         </section>
@@ -64,7 +58,7 @@ export default async function AccountPage() {
             </div>
             <MarketingToggle
               name="marketingOptIn"
-              defaultChecked={profile.marketingOptIn}
+              defaultChecked={user.marketingOptIn}
             />
           </div>
           <div className="pt-4">
@@ -107,5 +101,6 @@ export default async function AccountPage() {
         </div>
       </div>
     </main>
-  )
+  );
 }
+

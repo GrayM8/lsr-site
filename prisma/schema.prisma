@@ -1,3 +1,4 @@
+// ---------- Generators & Datasource ----------
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,57 +9,486 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Role {
-  id              String            @id @default(cuid())
-  code            String            @unique // machine code (what we filter on): "member" | "competition" | "officer" | "president" | "alumni"
-  name            String // human label (what we show)
-  profiles        ProfileRole[]
-  EventAccessRole EventAccessRole[]
+// ---------- Enums ----------
+enum EventStatus {
+  draft
+  scheduled
+  in_progress
+  canceled
+  postponed
+  completed
 }
 
-model ProfileRole {
-  profileId String
-  roleId    String
-
-  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  role    Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@id([profileId, roleId])
-  @@index([roleId])
+enum UserStatus {
+  active
+  retired
+  deleted
 }
 
-model Profile {
-  id             String        @id @default(uuid())
-  userId         String        @unique
-  handle         String        @unique
+enum Visibility {
+  public
+  members
+  officers
+}
+
+enum EventType {
+  meeting
+  practice
+  race
+  workshop
+  social
+}
+
+enum RSVPStatus {
+  going
+  waitlist
+  canceled
+}
+
+enum CheckinMethod {
+  qr
+  manual
+  import
+}
+
+enum SessionKind {
+  practice
+  qual
+  race
+}
+
+enum FinishStatus {
+  finished
+  dnf
+  dns
+  dsq
+}
+
+enum ResultSource {
+  manual
+  stracker
+  import
+}
+
+enum PaymentProvider {
+  stripe
+  manual
+  other
+}
+
+enum PaymentStatus {
+  succeeded
+  pending
+  failed
+  refunded
+}
+
+enum ProductType {
+  ANNUAL_DUES
+  LEAGUE_FEE
+}
+
+enum EntitlementKind {
+  lsr_member
+  league_access
+}
+
+enum EntitlementScope {
+  year
+  season
+  lifetime
+}
+
+enum AuditAction {
+  create
+  update
+  delete
+  import
+  login
+  logout
+  rsvp
+  checkin
+  payment_success
+  payment_failed
+  profile_update
+}
+
+// ---------- Identity & Access ----------
+model User {
+  id             String     @id @default(uuid())
+  email          String     @unique
+  handle         String     @unique
   displayName    String
   avatarUrl      String?
   bio            String?
   iRating        Int?
   socials        Json?
-  marketingOptIn Boolean       @default(true)
-  status         ProfileStatus @default(active)
+  marketingOptIn Boolean    @default(true)
+  status         UserStatus @default(active)
 
-  roles ProfileRole[]
-
-  duesPaid   Boolean   @default(false)
-  duesPaidAt DateTime?
   major      String?
-
-  eid        String?  @unique
   gradYear   Int?
+  eid        String?  @unique
   signedUpAt DateTime @default(now())
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
 
-  eventsCreated Event[]        @relation("EventCreatedBy")
-  eventsHosted  Event[]        @relation("EventHostProfile")
-  rsvps         EventRSVP[]
-  checkins      EventCheckin[]
-  invites       EventInvite[]
+  // Relations
+  authIdentities         AuthIdentity[]
+  roles                  UserRole[]
+  payments               Payment[]
+  entitlements           Entitlement[]
+  memberships            UserMembership[] // <-- added back-relation
+  posts                  Post[]           @relation("PostAuthor")
+  pages                  Page[]           @relation("PageAuthor")
+  RSVPs                  RSVP[]
+  checkins               Attendance[]
+  entries                Entry[]          @relation("EntryUser")
+  auditLogs              AuditLog[]       @relation("AuditActor")
+  provenanceCreated      Provenance[]     @relation("ProvenanceCreatedBy") // <-- added
+  importArtifactsCreated ImportArtifact[] @relation("ImportArtifactCreatedBy") // <-- added
+  mediaOwned             Media[]          @relation("MediaOwner") // <-- added
 
-  resultsCreated EventResult[]      @relation("EventResultCreatedBy")
-  resultEntries  EventResultEntry[] @relation("EventResultEntryProfile")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Role {
+  id          String @id @default(uuid())
+  key         String @unique // "admin" | "officer" | "member"
+  description String
+
+  users                 UserRole[]
+  eligibilityMinRoleFor EventEligibility[] @relation("EligibilityMinRole") // <-- back-relation for min role gate
+}
+
+model UserRole {
+  userId String
+  roleId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  assignedAt DateTime @default(now())
+
+  @@id([userId, roleId])
+  @@index([roleId])
+}
+
+model AuthIdentity {
+  id             String @id @default(uuid())
+  userId         String
+  provider       String
+  providerUserId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+}
+
+model AuditLog {
+  id          String  @id @default(uuid())
+  actorUserId String?
+  ip          String?
+  userAgent   String?
+
+  entityType String
+  entityId   String
+  action     AuditAction
+  diffJson   Json?
+  metaJson   Json?
+
+  actor User? @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([entityType, entityId, createdAt])
+  @@index([createdAt])
+}
+
+// ---------- Membership, Dues & Fees ----------
+model MembershipTier {
+  id    String @id @default(uuid())
+  key   String @unique // "GENERAL", "LSR_MEMBER"
+  label String
+
+  users UserMembership[]
+}
+
+model UserMembership {
+  id        String    @id @default(uuid())
+  userId    String
+  tierId    String
+  validFrom DateTime
+  validTo   DateTime?
+
+  user User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tier MembershipTier @relation(fields: [tierId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tierId, validFrom])
+  @@index([userId, validTo])
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  type        ProductType
+  name        String
+  leagueId    String?
+  amountCents Int
+  currency    String      @default("USD")
+  active      Boolean     @default(true)
+  metadata    Json?
+
+  league   League?   @relation("EntitlementLeague", fields: [leagueId], references: [id], onDelete: SetNull) // named to match Entitlement.league
+  payments Payment[]
+
+  @@unique([type, leagueId])
+  @@index([leagueId])
+}
+
+model Payment {
+  id          String          @id @default(uuid())
+  userId      String
+  productId   String
+  amountCents Int
+  currency    String          @default("USD")
+  provider    PaymentProvider
+  providerRef String?
+  status      PaymentStatus
+  paidAt      DateTime?
+  metadata    Json?
+  createdAt   DateTime        @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  entitlements Entitlement[]
+
+  @@index([userId, productId, status, paidAt])
+}
+
+model Entitlement {
+  id              String           @id @default(uuid())
+  userId          String
+  kind            EntitlementKind
+  leagueId        String?
+  scope           EntitlementScope
+  validFrom       DateTime
+  validTo         DateTime?
+  sourcePaymentId String?
+  meta            Json?
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  league  League?  @relation("EntitlementLeague", fields: [leagueId], references: [id], onDelete: SetNull) // <-- named & back-rel on League
+  payment Payment? @relation(fields: [sourcePaymentId], references: [id], onDelete: SetNull)
+
+  @@index([userId, kind, leagueId, validTo])
+  @@index([leagueId])
+}
+
+// ---------- Leagues & Competition ----------
+model League {
+  id            String     @id @default(uuid())
+  name          String
+  slug          String     @unique
+  descriptionMd String?
+  visibility    Visibility @default(public)
+
+  seasons              Season[]
+  classes              Class[]
+  products             Product[]          @relation("EntitlementLeague")
+  entitlements         Entitlement[]      @relation("EntitlementLeague") // <-- back-relation
+  // (removed: entries[] — Entry links via Season/Class, not directly to League)
+  eventEligibilityRefs EventEligibility[] @relation("EligibilityLeague") // <-- back-relation for event gate
+}
+
+model Season {
+  id         String     @id @default(uuid())
+  leagueId   String
+  name       String
+  slug       String     @unique
+  year       Int
+  startAt    DateTime?
+  endAt      DateTime?
+  pointsRule Json
+  visibility Visibility @default(public)
+
+  league  League  @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  rounds  Round[]
+  entries Entry[]
+
+  @@index([leagueId, year])
+}
+
+model Round {
+  id       String   @id @default(uuid())
+  seasonId String
+  name     String
+  slug     String   @unique
+  date     DateTime
+  eventId  String?  @unique // <-- enforce 1:1 when present
+
+  season   Season    @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  event    Event?    @relation("EventRound", fields: [eventId], references: [id], onDelete: SetNull) // <-- named relation
+  sessions Session[]
+
+  @@index([seasonId, date])
+}
+
+model Session {
+  id          String      @id @default(uuid())
+  roundId     String
+  kind        SessionKind
+  trackId     String?
+  carId       String?
+  classId     String?
+  laps        Int?
+  durationMin Int?
+  startedAt   DateTime?
+
+  round Round  @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  track Track? @relation(fields: [trackId], references: [id], onDelete: SetNull)
+  car   Car?   @relation(fields: [carId], references: [id], onDelete: SetNull)
+  class Class? @relation(fields: [classId], references: [id], onDelete: SetNull)
+
+  results Result[]
+
+  @@index([roundId, kind])
+}
+
+model Class {
+  id       String @id @default(uuid())
+  leagueId String
+  name     String
+  slug     String @unique
+
+  league   League    @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  entries  Entry[]
+  sessions Session[]
+
+  @@index([leagueId])
+}
+
+model Team {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  entries Entry[]
+}
+
+model Entry {
+  id               String  @id @default(uuid())
+  seasonId         String
+  userId           String?
+  teamId           String?
+  classId          String
+  carId            String?
+  number           Int?
+  nickname         String?
+  isEligiblePoints Boolean @default(true)
+
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  user   User?  @relation("EntryUser", fields: [userId], references: [id], onDelete: SetNull)
+  team   Team?  @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  class  Class  @relation(fields: [classId], references: [id], onDelete: Restrict)
+  car    Car?   @relation(fields: [carId], references: [id], onDelete: SetNull)
+
+  results Result[]
+
+  @@unique([seasonId, classId, userId], map: "unique_entry_user")
+  @@index([seasonId, classId])
+}
+
+model Result {
+  id            String       @id @default(uuid())
+  sessionId     String
+  entryId       String
+  position      Int?
+  points        Int?
+  bestLapMs     Int?
+  totalTimeMs   Int?
+  lapsCompleted Int?
+  status        FinishStatus @default(finished)
+  penaltiesJson Json?
+  source        ResultSource @default(manual)
+  provenanceId  String?
+
+  session    Session     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  entry      Entry       @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  provenance Provenance? @relation(fields: [provenanceId], references: [id], onDelete: SetNull) // <-- make relation optional
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([sessionId, entryId])
+  @@index([sessionId, position])
+}
+
+model Provenance {
+  id            String       @id @default(uuid())
+  source        ResultSource
+  payloadSha256 String
+  notes         String?
+  createdById   String?
+  createdAt     DateTime     @default(now())
+
+  createdBy User?            @relation("ProvenanceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  artifacts ImportArtifact[]
+  results   Result[]
+
+  @@index([source, createdAt])
+}
+
+model ImportArtifact {
+  id           String   @id @default(uuid())
+  storageUrl   String
+  contentType  String
+  bytes        Int
+  createdById  String?
+  provenanceId String? // <-- proper FK to Provenance
+  createdAt    DateTime @default(now())
+
+  createdBy  User?       @relation("ImportArtifactCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  provenance Provenance? @relation(fields: [provenanceId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+}
+
+// ---------- Tracks & Cars ----------
+model Track {
+  id      String  @id @default(uuid())
+  name    String
+  layout  String?
+  country String?
+  lengthM Int?
+  simKey  String? @unique
+
+  sessions Session[]
+}
+
+model Car {
+  id        String  @id @default(uuid())
+  name      String
+  simKey    String? @unique
+  classHint String?
+
+  sessions Session[]
+  entries  Entry[]
+}
+
+// ---------- Events & Eligibility ----------
+model EventSeries {
+  id         String     @id @default(uuid())
+  title      String
+  slug       String     @unique
+  visibility Visibility @default(public)
+
+  events    Event[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Venue {
@@ -80,17 +510,20 @@ model Venue {
 
 model Event {
   id           String  @id @default(uuid())
+  seriesId     String?
+  venueId      String?
   slug         String  @unique
   title        String
   summary      String?
   description  String?
   heroImageUrl String?
 
-  startsAtUtc DateTime // <- plain DateTime; store UTC values only
+  startsAtUtc DateTime
   endsAtUtc   DateTime
-  timezone    String // IANA tz to render local time correctly
+  timezone    String
 
-  status EventStatus @default(draft)
+  visibility Visibility  @default(public)
+  status     EventStatus @default(scheduled)
 
   rsvpRequired    Boolean   @default(false)
   rsvpOpenAt      DateTime?
@@ -98,171 +531,137 @@ model Event {
   capacity        Int?
   waitlistEnabled Boolean   @default(true)
 
-  venueId            String?
-  venue              Venue?  @relation(fields: [venueId], references: [id], onDelete: SetNull)
   meetingUrl         String?
   streamUrl          String?
   dialIn             String?
   accessInstructions String?
 
-  createdByProfileId String
-  createdByProfile   Profile @relation("EventCreatedBy", fields: [createdByProfileId], references: [id], onDelete: Restrict)
-  hostProfileId      String
-  hostProfile        Profile @relation("EventHostProfile", fields: [hostProfileId], references: [id], onDelete: Restrict)
+  series EventSeries? @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+  venue  Venue?       @relation(fields: [venueId], references: [id], onDelete: SetNull)
 
-  requiresDuesPaid Boolean           @default(false)
-  accessRoles      EventAccessRole[]
-  invites          EventInvite[]
+  eligibility EventEligibility?
+  rsvps       RSVP[]
+  checkins    Attendance[]
 
-  rsvps    EventRSVP[]
-  checkins EventCheckin[]
+  round Round? @relation("EventRound") // <-- match Round.event
 
-  publishedAt        DateTime?
-  embargoUntil       DateTime?
-  updatedByProfileId String?
-  updatedAt          DateTime  @updatedAt
-  createdAt          DateTime  @default(now())
+  publishedAt DateTime?
+  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime  @default(now())
 
-  results EventResult[]
-
-  @@index([status, startsAtUtc])
   @@index([startsAtUtc])
+  @@index([status, startsAtUtc])
 }
 
-model EventAccessRole {
-  eventId String
-  roleId  String
-
-  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  role  Role  @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@id([eventId, roleId])
-  @@index([roleId])
-}
-
-model EventInvite {
-  eventId   String
-  profileId String
-  note      String?
+model EventEligibility {
+  eventId           String  @id
+  allowsGeneral     Boolean @default(true)
+  requiresLsrMember Boolean @default(false)
+  requiresLeagueId  String?
+  minRoleId         String?
+  eligibilityJson   Json?
 
   event   Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  league  League? @relation("EligibilityLeague", fields: [requiresLeagueId], references: [id], onDelete: SetNull) // <-- named & back-rel
+  minRole Role?   @relation("EligibilityMinRole", fields: [minRoleId], references: [id], onDelete: SetNull) // <-- named & back-rel
 
-  @@id([eventId, profileId])
-  @@index([profileId])
+  @@index([requiresLeagueId])
+  @@index([minRoleId])
 }
 
-model EventRSVP {
+model RSVP {
   id          String     @id @default(uuid())
   eventId     String
-  profileId   String
+  userId      String
   status      RSVPStatus
   waitlistPos Int?
   respondedAt DateTime   @default(now())
+  source      String     @default("web")
 
-  event   Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([eventId, profileId])
+  @@unique([eventId, userId])
   @@index([eventId, status, respondedAt])
   @@index([eventId, waitlistPos])
 }
 
-model EventCheckin {
-  id          String   @id @default(uuid())
+model Attendance {
+  id          String         @id @default(uuid())
   eventId     String
-  profileId   String
-  checkedInAt DateTime @default(now())
-  method      String?
+  userId      String
+  checkedInAt DateTime       @default(now())
+  method      CheckinMethod?
 
-  event   Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([eventId, profileId])
+  @@unique([eventId, userId])
   @@index([eventId])
 }
 
-enum ProfileStatus {
-  active
-  retired
-  deleted
+// ---------- Content (light CMS) ----------
+model Post {
+  id          String     @id @default(uuid())
+  title       String
+  slug        String     @unique
+  excerpt     String?
+  bodyMd      String
+  authorId    String? // <-- optional because onDelete: SetNull
+  publishedAt DateTime?
+  visibility  Visibility @default(public)
+
+  author    User?    @relation("PostAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-enum EventStatus {
-  draft
-  scheduled
-  in_progress
-  canceled
-  postponed
-  completed
+model Page {
+  id         String     @id @default(uuid())
+  title      String
+  slug       String     @unique
+  bodyMd     String
+  visibility Visibility @default(public)
+  authorId   String?
+
+  author    User?    @relation("PageAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-enum RSVPStatus {
-  yes
-  waitlist
-  no
-  canceled
-}
+model Media {
+  id         String  @id @default(uuid())
+  title      String?
+  storageUrl String
+  width      Int?
+  height     Int?
+  alt        String?
+  ownerId    String?
 
-enum SessionType {
-  qualifying
-  race
-}
-
-enum FinishStatus {
-  finished
-  dnf
-  dns
-  dsq
-}
-
-enum ResultStatus {
-  draft
-  provisional
-  official
-}
-
-model EventResult {
-  id                 String       @id @default(uuid())
-  eventId            String
-  type               SessionType
-  status             ResultStatus @default(draft) // draft → provisional → official
-  notes              String?
-  source             String? // e.g. "manual", or future: "iracing"
-  createdByProfileId String
-  officialAt         DateTime? // when marked official
-
-  event            Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  createdByProfile Profile @relation("EventResultCreatedBy", fields: [createdByProfileId], references: [id], onDelete: Restrict)
-
-  entries EventResultEntry[]
+  owner User? @relation("MediaOwner", fields: [ownerId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@unique([eventId, type]) // one quali + one race per event
-  @@index([eventId, status])
 }
 
-model EventResultEntry {
-  id            String       @id @default(uuid())
-  resultId      String
-  profileId     String? // null = guest
-  displayName   String // show this on the table (pre-fill from Profile if set)
-  position      Int? // 1-based; null if not classified
-  status        FinishStatus @default(finished)
-  lapsCompleted Int?
-  totalTimeMs   Int? // accept "hh:mm:ss.mmm" in UI; store ms here
-  bestLapMs     Int?
-  gapToP1Ms     Int?
-  notes         String?
+model Tag {
+  id   String @id @default(uuid())
+  name String
+  slug String @unique
 
-  result  EventResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
-  profile Profile?    @relation("EventResultEntryProfile", fields: [profileId], references: [id], onDelete: SetNull)
+  entities EntityTag[]
+}
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// NOTE: Prisma can’t enforce a polymorphic relation back to Post/Page/etc.
+// Keep `entityType` + `entityId` as loose FKs and query manually.
+model EntityTag {
+  id         String @id @default(uuid())
+  tagId      String
+  entityType String // e.g. "post","page","event","league","season",...
+  entityId   String
 
-  @@unique([resultId, profileId]) // allows multiple NULLs for guests; prevents dup members
-  @@index([resultId, position])
+  tag Tag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@index([entityType, entityId])
+  @@index([tagId])
 }

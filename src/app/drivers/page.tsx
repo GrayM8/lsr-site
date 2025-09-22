@@ -1,53 +1,53 @@
-import Image from "next/image"
-import Link from "next/link"
-import { prisma } from "@/lib/prisma"
-import { ROLE_LABEL, type RoleCode } from "@/lib/roles"
-import { Separator } from "@/components/ui/separator"
-import { DriversFilters } from "@/components/drivers-filters"
-import { DriversSearch } from "@/components/drivers-search"
+import Image from 'next/image';
+import Link from 'next/link';
+import { prisma } from '@/server/db';
+import { ROLE_LABEL, type RoleCode } from '@/lib/roles';
+import { Separator } from '@/components/ui/separator';
+import { DriversFilters } from '@/components/drivers-filters';
+import { DriversSearch } from '@/components/drivers-search';
 
-export const dynamic = "force-dynamic"
+export const dynamic = 'force-dynamic';
 
 function Badge({ children }: { children: React.ReactNode }) {
   return (
     <span className="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-xs">
       {children}
     </span>
-  )
+  );
 }
 
-const ALL_ROLES = Object.keys(ROLE_LABEL) as RoleCode[]
+const ALL_ROLES = Object.keys(ROLE_LABEL) as RoleCode[];
 
 export default async function DriversIndexPage({
-                                                 searchParams,
-                                               }: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const sp = await searchParams
-  const q = typeof sp.q === "string" ? sp.q.trim() : ""
-  const roleParam = sp.role
+  const sp = await searchParams;
+  const q = typeof sp.q === 'string' ? sp.q.trim() : '';
+  const roleParam = sp.role;
   const selectedRoles = (Array.isArray(roleParam) ? roleParam : roleParam ? [roleParam] : [])
-    .map((r) => r.toString().toLowerCase())
-    .filter((r): r is RoleCode => ALL_ROLES.includes(r as RoleCode))
+    .map(r => r.toString().toLowerCase())
+    .filter((r): r is RoleCode => ALL_ROLES.includes(r as RoleCode));
 
-  const drivers = await prisma.profile.findMany({
+  const drivers = await prisma.user.findMany({
     where: {
-      status: { not: "deleted" },
+      status: { not: 'deleted' },
       ...(q
         ? {
-          OR: [
-            { displayName: { contains: q, mode: "insensitive" } },
-            { handle: { contains: q, mode: "insensitive" } },
-          ],
-        }
+            OR: [
+              { displayName: { contains: q, mode: 'insensitive' } },
+              { handle: { contains: q, mode: 'insensitive' } },
+            ],
+          }
         : {}),
       ...(selectedRoles.length
-        ? { roles: { some: { role: { code: { in: selectedRoles } } } } }
+        ? { roles: { some: { role: { key: { in: selectedRoles } } } } }
         : {}),
     },
-    orderBy: [{ iRating: "desc" }, { displayName: "asc" }],
+    orderBy: [{ iRating: 'desc' }, { displayName: 'asc' }],
     include: { roles: { include: { role: true } } },
-  })
+  });
 
   return (
     <main className="bg-lsr-charcoal text-white min-h-screen">
@@ -92,14 +92,14 @@ export default async function DriversIndexPage({
                 <tbody>
                 {drivers.map((d, index) => {
                   const initials = d.displayName
-                    .split(" ")
-                    .map((n) => n[0])
+                    .split(' ')
+                    .map(n => n[0])
                     .slice(0, 2)
-                    .join("")
-                    .toUpperCase()
+                    .join('')
+                    .toUpperCase();
                   const codes: RoleCode[] = d.roles.length
-                    ? d.roles.map((pr) => pr.role.code as RoleCode)
-                    : ["member"]
+                    ? d.roles.map(ur => ur.role.key as RoleCode)
+                    : ['member'];
 
                   return (
                     <tr key={d.id} className="border-b border-white/10 hover:bg-white/5">
@@ -118,7 +118,7 @@ export default async function DriversIndexPage({
                               />
                             ) : (
                               <div className="flex h-full w-full items-center justify-center text-xs">
-                                {initials || "U"}
+                                {initials || 'U'}
                               </div>
                             )}
                           </div>
@@ -126,7 +126,7 @@ export default async function DriversIndexPage({
                             <div className="flex items-center gap-2">
                               <div className="truncate font-medium">{d.displayName}</div>
                               <div className="flex flex-wrap gap-1">
-                                {codes.map((c) => (
+                                {codes.map(c => (
                                   <Badge key={c}>{ROLE_LABEL[c]}</Badge>
                                 ))}
                               </div>
@@ -135,10 +135,10 @@ export default async function DriversIndexPage({
                           </div>
                         </Link>
                       </td>
-                      <td className="px-4 py-2 text-center font-semibold">{"—"}</td>
-                      <td className="px-4 py-2 text-center font-semibold">{d.iRating ?? "—"}</td>
+                      <td className="px-4 py-2 text-center font-semibold">{'—'}</td>
+                      <td className="px-4 py-2 text-center font-semibold">{d.iRating ?? '—'}</td>
                     </tr>
-                  )
+                  );
                 })}
                 </tbody>
               </table>
@@ -147,5 +147,6 @@ export default async function DriversIndexPage({
         </div>
       </div>
     </main>
-  )
+  );
 }
+

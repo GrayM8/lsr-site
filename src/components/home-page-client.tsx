@@ -9,8 +9,8 @@ import SponsorStrip from "@/components/home/SponsorStrip"
 import NewsHighlights from "@/components/home/NewsHighlights"
 import GalleryRibbon from "@/components/home/GalleryRibbon"
 import FinalCta from "@/components/home/FinalCta"
-import { type NewsFrontmatter } from "@/lib/news"
-import { type Profile } from "@prisma/client"
+import { type NewsFrontmatter } from '@/lib/news';
+import { type User } from '@prisma/client';
 
 // This type should be imported from a shared file in a real app
 type Event = {
@@ -23,10 +23,10 @@ type Event = {
 }
 
 type Props = {
-  posts: Array<NewsFrontmatter & { slug: string }>
-  featuredEvent?: Event
-  upcomingEvents: Event[]
-  drivers: Profile[]
+  posts: Array<NewsFrontmatter & { slug: string }>;
+  featuredEvent?: Event;
+  upcomingEvents: Event[];
+  drivers: User[];
 }
 
 export default function HomePageClient({ posts, featuredEvent, upcomingEvents, drivers }: Props) {
