@@ -9,12 +9,8 @@ export type SessionUser = {
   roles: string[];
 };
 
-/**
- * Reads the session from cookies and retrieves the corresponding application user.
- * This is a read-only operation. User creation is handled in the auth callback.
- */
 export async function getSessionUser(): Promise<SessionUser> {
-  const cookieStore = await cookies();
+  const cookieStore = await cookies(); // await is necessary here for read-only contexts
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -47,8 +43,6 @@ export async function getSessionUser(): Promise<SessionUser> {
   });
 
   if (!dbUser) {
-    // This can happen if the user was deleted from our DB but not from Supabase.
-    // The callback route is responsible for creating the user.
     return { user: null, roles: [] };
   }
 

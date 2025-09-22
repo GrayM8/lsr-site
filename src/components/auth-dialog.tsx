@@ -47,7 +47,7 @@ export function AuthDialog() {
     e.preventDefault();
     startTransition(async () => {
       const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
-      const redirectTo = `${origin.replace(/\/$/, '')}/auth/callback?next=/drivers/me`;
+      const redirectTo = `${origin.replace(/\/$/, '')}/auth/callback?next=/account`;
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -62,7 +62,7 @@ export function AuthDialog() {
         },
       });
       if (error) return alert(error.message);
-      alert('Check your email to confirm and sign in.');
+      alert("Check your email to confirm and sign in.");
       setOpen(false);
     });
   }
@@ -118,7 +118,7 @@ export function AuthDialog() {
           <TabsContent value="signup" className="mt-4">
             <div className="grid gap-3">
               {/* Google first */}
-              <GoogleButton next="/drivers/me" />
+              <GoogleButton />
 
               <OrDivider />
 
@@ -203,7 +203,7 @@ export function AuthDialog() {
           <TabsContent value="signin" className="mt-4">
             <div className="grid gap-3">
               {/* Google first */}
-              <GoogleButton next="/drivers/me" />
+              <GoogleButton />
 
               <OrDivider />
 

@@ -1,81 +1,115 @@
 // app/auth/callback/route.ts
-import { type CookieOptions, createServerClient } from '@supabase/ssr';
-import { type NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/server/db';
-import { slugify } from '@/lib/slug';
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
+import { prisma } from "@/server/db";
+import { slugify } from "@/lib/slug";
 
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
+
+function siteOriginFromEnvOrReq(req: NextRequest) {
+  const envUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL;
+  if (envUrl) {
+    return (envUrl.startsWith("http") ? envUrl : `https://${envUrl}`).replace(/\/$/, "");
+  }
+  return req.nextUrl.origin;
+}
+
+// Minimal cookie reader off the incoming Request headers
+function getReqCookie(req: NextRequest, name: string): string | undefined {
+  const raw = req.headers.get("cookie") ?? "";
+  for (const part of raw.split(";")) {
+    const [k, ...v] = part.trim().split("=");
+    if (k === name) return decodeURIComponent(v.join("="));
+  }
+  return undefined;
+}
 
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/';
+  const url = new URL(request.url);
+  const code = url.searchParams.get("code");
+  const next = url.searchParams.get("next") ?? "/";
+  const origin = siteOriginFromEnvOrReq(request);
 
-  if (!code) {
-    const errorUrl = new URL('/?auth-error=true', origin);
-    errorUrl.searchParams.set('message', 'Authentication code was missing.');
-    return NextResponse.redirect(errorUrl);
-  }
+  // Prepare the redirect response up front; we'll mutate cookies on this object.
+  const res = NextResponse.redirect(new URL(next, origin), { status: 302 });
 
-  const response = NextResponse.redirect(`${origin}${next}`);
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get: (name: string) => request.cookies.get(name)?.value,
-        set: (name: string, value: string, options: CookieOptions) => {
-          response.cookies.set({ name, value, ...options });
+  if (code) {
+    // Supabase client that reads cookies from the request and WRITES to the response
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return getReqCookie(request, name);
+          },
+          set(name: string, value: string, options: CookieOptions) {
+            // Persist auth cookies on the redirect response
+            res.cookies.set({ name, value, ...options });
+          },
+          remove(name: string, options: CookieOptions) {
+            res.cookies.delete({ name, ...options });
+          },
         },
-        remove: (name: string, options: CookieOptions) => {
-          response.cookies.set({ name, value: '', ...options });
-        },
-      },
-    },
-  );
+      }
+    );
 
-  const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-  if (error || !user) {
-    console.error('Supabase auth exchange error:', error?.message);
-    const errorUrl = new URL('/?auth-error=true', origin);
-    errorUrl.searchParams.set('message', 'Authentication failed. Please try again.');
-    return NextResponse.redirect(errorUrl);
-  }
+    if (!error && data.user) {
+      const sb = data.user;
 
-  // --- USER PROVISIONING LOGIC ---
-  const existingUser = await prisma.user.findUnique({ where: { id: user.id } });
+      // --- First-login provisioning (idempotent) ---
+      // Try by Supabase ID first (we use sb.id as our User.id), then by email
+      let dbUser =
+        (await prisma.user.findUnique({ where: { id: sb.id } })) ??
+        (sb.email ? await prisma.user.findUnique({ where: { email: sb.email } }) : null);
 
-  if (!existingUser) {
-    const meta = user.user_metadata ?? {};
-    const displayName =
-      meta.display_name || meta.full_name || user.email?.split('@')[0] || 'New Driver';
+      if (!dbUser) {
+        type UserMetadata = {
+          display_name?: string;
+          full_name?: string;
+        };
+        const meta = sb.user_metadata as UserMetadata ?? {};
+        const displayName =
+          meta.display_name || meta.full_name || sb.email?.split('@')[0] || 'New Driver';
+        const base = slugify(displayName) || "user";
+        let handle = base;
+        for (let i = 1; i <= 50; i++) {
+          const exists = await prisma.user.findUnique({ where: { handle } });
+          if (!exists) break;
+          handle = `${base}-${i}`;
+        }
 
-    const baseHandle = slugify(displayName);
-    let handle = baseHandle;
-    for (let i = 1; i <= 10; i++) {
-      const exists = await prisma.user.findUnique({ where: { handle } });
-      if (!exists) break;
-      handle = `${baseHandle}-${i}`;
+        const memberRole = await prisma.role.findUnique({ where: { key: "member" } });
+
+        dbUser = await prisma.user.create({
+          data: {
+            id: sb.id, // align our User.id with Supabase user id (UUID)
+            email: sb.email!,
+            displayName,
+            handle,
+            status: "active",
+            authIdentities: {
+              create: { provider: "supabase", providerUserId: sb.id },
+            },
+            roles: memberRole ? { create: [{ roleId: memberRole.id }] } : undefined,
+          },
+        });
+      } else {
+        // Ensure AuthIdentity link exists
+        await prisma.authIdentity.upsert({
+          where: {
+            provider_providerUserId: { provider: "supabase", providerUserId: sb.id },
+          },
+          update: {},
+          create: { userId: dbUser.id, provider: "supabase", providerUserId: sb.id },
+        });
+      }
+      // --- End provisioning ---
     }
-
-    const memberRole = await prisma.role.findUnique({ where: { key: 'member' } });
-
-    await prisma.user.create({
-      data: {
-        id: user.id,
-        email: user.email!,
-        displayName,
-        handle,
-        marketingOptIn: meta.marketingOptIn ?? true,
-        eid: meta.eid,
-        gradYear: meta.gradYear ? Number(meta.gradYear) : undefined,
-        signedUpAt: new Date(),
-        roles: memberRole ? { create: [{ roleId: memberRole.id }] } : undefined,
-      },
-    });
   }
-  // --- END PROVISIONING ---
 
-  return response;
+  // Returning NextResponse is REQUIRED for Set-Cookie headers to commit.
+  return res;
 }
