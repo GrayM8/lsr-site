@@ -5,16 +5,9 @@ import { ROLE_LABEL, type RoleCode } from '@/lib/roles';
 import { Separator } from '@/components/ui/separator';
 import { DriversFilters } from '@/components/drivers-filters';
 import { DriversSearch } from '@/components/drivers-search';
+import { Badge } from '@/components/ui/badge';
 
 export const dynamic = 'force-dynamic';
-
-function Badge({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-xs">
-      {children}
-    </span>
-  );
-}
 
 const ALL_ROLES = Object.keys(ROLE_LABEL) as RoleCode[];
 
@@ -99,7 +92,7 @@ export default async function DriversIndexPage({
                     .toUpperCase();
                   const codes: RoleCode[] = d.roles.length
                     ? d.roles.map(ur => ur.role.key as RoleCode)
-                    : ['member'];
+                    : [];
 
                   return (
                     <tr key={d.id} className="border-b border-white/10 hover:bg-white/5">
@@ -126,6 +119,7 @@ export default async function DriversIndexPage({
                             <div className="flex items-center gap-2">
                               <div className="truncate font-medium">{d.displayName}</div>
                               <div className="flex flex-wrap gap-1">
+                                {d.status === 'pending_verification' && <Badge variant="destructive">Unverified</Badge>}
                                 {codes.map(c => (
                                   <Badge key={c}>{ROLE_LABEL[c]}</Badge>
                                 ))}

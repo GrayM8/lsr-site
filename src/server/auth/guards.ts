@@ -1,30 +1,43 @@
+// src/server/auth/guards.ts
+import { getSessionUser } from './session';
 import { User } from '@prisma/client';
 
+class NotAuthenticatedError extends Error {
+  constructor(message = 'You must be logged in to perform this action.') {
+    super(message);
+    this.name = 'NotAuthenticatedError';
+  }
+}
+
+class NotAuthorizedError extends Error {
+  constructor(message = 'You do not have permission to perform this action.') {
+    super(message);
+    this.name = 'NotAuthorizedError';
+  }
+}
+
 export async function requireUser(): Promise<User> {
-  // MOCK USER
-  const mockUser: User = {
-    id: 'mock-user-id',
-    email: 'mock@example.com',
-    handle: 'mockuser',
-    displayName: 'Mock User',
-    avatarUrl: null,
-    bio: null,
-    iRating: null,
-    socials: null,
-    marketingOptIn: true,
-    status: 'active',
-    major: null,
-    gradYear: null,
-    eid: null,
-    signedUpAt: new Date(),
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-  return mockUser;
+  const { user } = await getSessionUser();
+  if (!user) {
+    throw new NotAuthenticatedError();
+  }
+  return user;
 }
 
 type RoleKey = 'admin' | 'officer' | 'member';
 
 export async function requireRole(role: RoleKey | RoleKey[]): Promise<User> {
-  return requireUser();
+  const { user, roles } = await getSessionUser();
+  if (!user) {
+    throw new NotAuthenticatedError();
+  }
+
+  const requiredRoles = Array.isArray(role) ? role : [role];
+  const hasRole = requiredRoles.some((r) => roles.includes(r));
+
+  if (!hasRole) {
+    throw new NotAuthorizedError(`Requires one of the following roles: ${requiredRoles.join(', ')}`);
+  }
+
+  return user;
 }

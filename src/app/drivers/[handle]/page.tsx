@@ -8,17 +8,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { BrandIcon, type SimpleIcon } from '@/components/brand-icon';
 import { siInstagram, siYoutube, siTwitch } from 'simple-icons/icons';
 import { Globe, type LucideIcon } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 export const revalidate = 60;
-
-function Badge({ children }: { children: React.ReactNode }) {
-  return (
-    <span
-      className="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-xs">
-      {children}
-    </span>
-  );
-}
 
 function StatCard({ label, value }: { label: string, value: React.ReactNode }) {
   return (
@@ -71,15 +63,18 @@ export default async function DriverProfilePage({
               <AvatarFallback className="text-2xl">{initials || 'U'}</AvatarFallback>
             </Avatar>
             <div>
-              <h1
-                className="font-display text-4xl md:text-5xl text-lsr-orange tracking-wide">{user.displayName}</h1>
+              <h1 className="font-display text-4xl md:text-5xl text-lsr-orange tracking-wide">
+                {user.displayName}
+              </h1>
               <p className="text-white/60">@{user.handle}</p>
             </div>
           </div>
 
           {isOwner && (
-            <Button asChild
-                    className="bg-lsr-orange text-lsr-charcoal hover:bg-lsr-orange/90">
+            <Button
+              asChild
+              className="bg-lsr-orange text-lsr-charcoal hover:bg-lsr-orange/90"
+            >
               <Link href={`/drivers/${handle}/edit`}>Edit details</Link>
             </Button>
           )}
@@ -94,17 +89,20 @@ export default async function DriverProfilePage({
             <div className="rounded-xl border border-white/10 bg-white/5 p-4">
               <h3 className="text-sm mb-2 text-white/60">Tags</h3>
               <div className="flex flex-wrap gap-2">
-                {tags.length > 0
-                  ? tags.map(t => <Badge key={t.key}>{t.description}</Badge>)
-                  : <p className="text-sm text-white/60">No tags yet.</p>
-                }
+                {user.status === 'pending_verification' && (
+                  <Badge variant="destructive">Unverified</Badge>
+                )}
+                {tags.length > 0 ? (
+                  tags.map(t => <Badge key={t.key}>{t.description}</Badge>)
+                ) : (
+                  <p className="text-sm text-white/60">No tags yet.</p>
+                )}
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <StatCard label="iRating" value={user.iRating ?? '—'} />
-              <StatCard label="Grad Year" value={user.gradYear ?? '—'} />
-            </div>
+              <StatCard label="Grad Year" value={user.gradYear ?? '—'} />            </div>
             <StatCard label="Major" value={user.major ?? '—'} />
 
 
