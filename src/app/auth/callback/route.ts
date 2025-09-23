@@ -60,14 +60,24 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${origin}${next}`);
       } else {
         // User does not exist, create a new user
-        const handle = data.user.email!.split('@')[0];
+        const { user } = data;
+        if (!user.email) {
+          // Cannot create a user without an email
+          return NextResponse.redirect(
+            `${origin}/auth/auth-code-error?error=Email not available`,
+          );
+        }
+
+        const handle = user.email.split('@')[0];
+        const displayName = user.user_metadata.full_name || user.email;
+
         const newUser = await prisma.user.create({
           data: {
-            id: data.user.id,
-            email: data.user.email!,
+            id: user.id,
+            email: user.email,
             handle: handle,
-            displayName: data.user.user_metadata.full_name,
-            avatarUrl: data.user.user_metadata.avatar_url,
+            displayName: displayName,
+            avatarUrl: user.user_metadata.avatar_url,
             status: 'pending_verification',
           },
         });
