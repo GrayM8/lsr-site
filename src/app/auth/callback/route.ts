@@ -58,6 +58,21 @@ export async function GET(request: Request) {
       } else if (dbUser) {
         // User already exists and is active, send to original destination
         return NextResponse.redirect(`${origin}${next}`);
+      } else {
+        // User does not exist, create a new user
+        const handle = data.user.email!.split('@')[0];
+        const newUser = await prisma.user.create({
+          data: {
+            id: data.user.id,
+            email: data.user.email!,
+            handle: handle,
+            displayName: data.user.user_metadata.full_name,
+            avatarUrl: data.user.user_metadata.avatar_url,
+            status: 'pending_verification',
+          },
+        });
+        // Redirect to their driver page
+        return NextResponse.redirect(`${origin}/drivers/${newUser.handle}`);
       }
     }
   }

@@ -2,7 +2,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-// import { createSupabaseBrowser } from "@/lib/supabase-browser"
+import { createSupabaseBrowser } from "@/lib/supabase-browser"
 import { siGoogle } from "simple-icons/icons" // tree-shaken import
 
 function GoogleIcon({ className }: { className?: string }) {
@@ -23,13 +23,13 @@ function GoogleIcon({ className }: { className?: string }) {
 
 export function GoogleButton() {
   const handle = async () => {
-    // const supabase = createSupabaseBrowser();
-    // const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
-    // const redirectTo = `${origin.replace(/\/$/, '')}/auth/callback?next=/account`;
-    // await supabase.auth.signInWithOAuth({
-    //   provider: 'google',
-    //   options: { redirectTo },
-    // });
+    const supabase = createSupabaseBrowser();
+    const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
+    const redirectTo = `${origin.replace(/\/$/, '')}/auth/callback?next=/account`;
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo },
+    });
   };
 
   return (
