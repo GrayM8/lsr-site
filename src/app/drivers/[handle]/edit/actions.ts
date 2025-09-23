@@ -70,10 +70,15 @@ export async function updateProfile(formData: FormData) {
 export async function saveAvatar(url: string) {
   const user = await requireUser();
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { avatarUrl: url },
-  });
+  try {
+    await prisma.$connect();
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { avatarUrl: url },
+    });
+  } finally {
+    await prisma.$disconnect();
+  }
 
   revalidatePath(`/drivers/${user.handle}`);
 }
@@ -81,10 +86,16 @@ export async function saveAvatar(url: string) {
 export async function clearAvatar() {
   const user = await requireUser();
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { avatarUrl: null },
-  });
+  try {
+    await prisma.$connect();
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { avatarUrl: null },
+    });
+  } finally {
+    await prisma.$disconnect();
+  }
+
 
   revalidatePath(`/drivers/${user.handle}`);
 }

@@ -1,115 +1,82 @@
-// app/auth/callback/route.ts
+// src/app/auth/callback/route.ts
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/server/db";
-import { slugify } from "@/lib/slug";
 
-export const runtime = "nodejs";
-
-function siteOriginFromEnvOrReq(req: NextRequest) {
-  const envUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL;
-  if (envUrl) {
-    return (envUrl.startsWith("http") ? envUrl : `https://${envUrl}`).replace(/\/$/, "");
-  }
-  return req.nextUrl.origin;
-}
-
-// Minimal cookie reader off the incoming Request headers
-function getReqCookie(req: NextRequest, name: string): string | undefined {
-  const raw = req.headers.get("cookie") ?? "";
-  for (const part of raw.split(";")) {
-    const [k, ...v] = part.trim().split("=");
-    if (k === name) return decodeURIComponent(v.join("="));
-  }
-  return undefined;
-}
-
-export async function GET(request: NextRequest) {
-  const url = new URL(request.url);
-  const code = url.searchParams.get("code");
-  const next = url.searchParams.get("next") ?? "/";
-  const origin = siteOriginFromEnvOrReq(request);
-
-  // Prepare the redirect response up front; we'll mutate cookies on this object.
-  const res = NextResponse.redirect(new URL(next, origin), { status: 302 });
+export async function GET(request: Request) {
+  const { searchParams, origin } = new URL(request.url);
+  const code = searchParams.get("code");
+  // if "next" is in param, use it as the redirect URL
+  const next = searchParams.get("next") ?? "/";
 
   if (code) {
-    // Supabase client that reads cookies from the request and WRITES to the response
+    const cookieStore = await cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
           get(name: string) {
-            return getReqCookie(request, name);
+            return cookieStore.get(name)?.value;
           },
           set(name: string, value: string, options: CookieOptions) {
-            // Persist auth cookies on the redirect response
-            res.cookies.set({ name, value, ...options });
+            cookieStore.set({ name, value, ...options });
           },
           remove(name: string, options: CookieOptions) {
-            res.cookies.delete({ name, ...options });
+            cookieStore.delete({ name, ...options });
           },
         },
       }
     );
-
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (!error && data.user) {
-      const sb = data.user;
+    if (!error) {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: data.user.id },
+      });
 
-      // --- First-login provisioning (idempotent) ---
-      // Try by Supabase ID first (we use sb.id as our User.id), then by email
-      let dbUser =
-        (await prisma.user.findUnique({ where: { id: sb.id } })) ??
-        (sb.email ? await prisma.user.findUnique({ where: { email: sb.email } }) : null);
-
-      if (!dbUser) {
-        type UserMetadata = {
-          display_name?: string;
-          full_name?: string;
-        };
-        const meta = sb.user_metadata as UserMetadata ?? {};
-        const displayName =
-          meta.display_name || meta.full_name || sb.email?.split('@')[0] || 'New Driver';
-        const base = slugify(displayName) || "user";
-        let handle = base;
-        for (let i = 1; i <= 50; i++) {
-          const exists = await prisma.user.findUnique({ where: { handle } });
-          if (!exists) break;
-          handle = `${base}-${i}`;
-        }
-
-        const memberRole = await prisma.role.findUnique({ where: { key: "member" } });
-
-        dbUser = await prisma.user.create({
+      if (dbUser && dbUser.status === 'pending_verification') {
+        // User exists and is pending, update their status to active
+        await prisma.user.update({
+          where: { id: dbUser.id },
           data: {
-            id: sb.id, // align our User.id with Supabase user id (UUID)
-            email: sb.email!,
-            displayName,
-            handle,
-            status: "active",
-            authIdentities: {
-              create: { provider: "supabase", providerUserId: sb.id },
+            status: 'active',
+            roles: {
+              create: {
+                role: {
+                  connect: { key: 'member' },
+                },
+              },
             },
-            roles: memberRole ? { create: [{ roleId: memberRole.id }] } : undefined,
           },
         });
+        // Redirect to their driver page after verification
+        return NextResponse.redirect(
+          `${origin}/drivers/${dbUser.handle}?verified=true`,
+        );
+      } else if (dbUser) {
+        // User already exists and is active, send to original destination
+        return NextResponse.redirect(`${origin}${next}`);
       } else {
-        // Ensure AuthIdentity link exists
-        await prisma.authIdentity.upsert({
-          where: {
-            provider_providerUserId: { provider: "supabase", providerUserId: sb.id },
+        // User does not exist, create a new user
+        const handle = data.user.email!.split('@')[0];
+        const newUser = await prisma.user.create({
+          data: {
+            id: data.user.id,
+            email: data.user.email!,
+            handle: handle,
+            displayName: data.user.user_metadata.full_name,
+            avatarUrl: data.user.user_metadata.avatar_url,
+            status: 'pending_verification',
           },
-          update: {},
-          create: { userId: dbUser.id, provider: "supabase", providerUserId: sb.id },
         });
+        // Redirect to their driver page
+        return NextResponse.redirect(`${origin}/drivers/${newUser.handle}`);
       }
-      // --- End provisioning ---
     }
   }
 
-  // Returning NextResponse is REQUIRED for Set-Cookie headers to commit.
-  return res;
+  // return the user to an error page with instructions
+  return NextResponse.redirect(`${origin}/auth/auth-code-error`);
 }

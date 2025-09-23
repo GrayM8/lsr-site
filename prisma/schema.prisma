@@ -21,6 +21,7 @@ enum EventStatus {
 
 enum UserStatus {
   active
+  pending_verification
   retired
   deleted
 }
@@ -150,6 +151,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
 
 model Role {
   id          String @id @default(uuid())

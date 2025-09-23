@@ -1,9 +1,9 @@
 "use client"
 
+import { createSupabaseBrowser } from "@/lib/supabase-browser";
 import { useRouter } from 'next/navigation';
 import * as React from "react"
 import { useState, useTransition, useEffect } from "react"
-import { createSupabaseBrowser } from "@/lib/supabase-browser"
 import {
   Dialog,
   DialogContent,
@@ -48,7 +48,7 @@ export function AuthDialog() {
     startTransition(async () => {
       const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
       const redirectTo = `${origin.replace(/\/$/, '')}/auth/callback?next=/account`;
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -62,6 +62,24 @@ export function AuthDialog() {
         },
       });
       if (error) return alert(error.message);
+
+      if (data.user) {
+        // Create a corresponding user profile in our database
+        await fetch('/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: data.user.id,
+            email: data.user.email,
+            displayName,
+            handle: displayName.toLowerCase().replace(/\s/g, '-'),
+            eid,
+            gradYear: gradYear ? Number(gradYear) : null,
+            marketingOptIn: marketing,
+          }),
+        });
+      }
+
       alert("Check your email to confirm and sign in.");
       setOpen(false);
     });
@@ -70,8 +88,13 @@ export function AuthDialog() {
   function onSignin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     startTransition(async () => {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) return alert(error.message);
+
+      if (data.user && !data.user.email_confirmed_at) {
+        return alert("Please verify your email before signing in.");
+      }
+
       // Refresh the page to re-run Server Components with the new session
       router.refresh();
       setOpen(false);
