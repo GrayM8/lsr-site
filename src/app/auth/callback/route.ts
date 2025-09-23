@@ -60,29 +60,40 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${origin}${next}`);
       } else {
         // User does not exist, create a new user
-        const { user } = data;
-        if (!user.email) {
-          // Cannot create a user without an email
+        try {
+          const { user } = data;
+          if (!user.email) {
+            // Cannot create a user without an email
+            return NextResponse.redirect(
+              `${origin}/auth/auth-code-error?error=Email not available`,
+            );
+          }
+
+          // Generate a more unique handle
+          const emailPrefix = user.email.split('@')[0];
+          const randomSuffix = Math.random().toString(36).substring(2, 8);
+          const handle = `${emailPrefix}-${randomSuffix}`;
+
+          const displayName = user.user_metadata.full_name || user.email;
+
+          const newUser = await prisma.user.create({
+            data: {
+              id: user.id,
+              email: user.email,
+              handle: handle,
+              displayName: displayName,
+              avatarUrl: user.user_metadata.avatar_url,
+              status: 'pending_verification',
+            },
+          });
+          // Redirect to their driver page
+          return NextResponse.redirect(`${origin}/drivers/${newUser.handle}`);
+        } catch (error) {
+          console.error('Failed to create user from OAuth callback:', error);
           return NextResponse.redirect(
-            `${origin}/auth/auth-code-error?error=Email not available`,
+            `${origin}/auth/auth-code-error?error=Creation failed`,
           );
         }
-
-        const handle = user.email.split('@')[0];
-        const displayName = user.user_metadata.full_name || user.email;
-
-        const newUser = await prisma.user.create({
-          data: {
-            id: user.id,
-            email: user.email,
-            handle: handle,
-            displayName: displayName,
-            avatarUrl: user.user_metadata.avatar_url,
-            status: 'pending_verification',
-          },
-        });
-        // Redirect to their driver page
-        return NextResponse.redirect(`${origin}/drivers/${newUser.handle}`);
       }
     }
   }
