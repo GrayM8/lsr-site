@@ -11,7 +11,7 @@ export function PublishEventFormClient({ event }: { event: Event }) {
   const [publishDate, setPublishDate] = useState<string>("");
 
   const handlePublish = async () => {
-    await updateEventStatus(event.id, EventStatus.scheduled);
+    await updateEventStatus(event.id, EventStatus.completed);
   };
 
   const handleSchedule = async () => {

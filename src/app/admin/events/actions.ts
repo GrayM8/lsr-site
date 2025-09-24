@@ -48,12 +48,16 @@ export async function updateEventStatus(eventId: string, status: EventStatus, pu
     throw new Error("You must be logged in to update an event.");
   }
 
+  let data: { status: EventStatus; publishedAt?: Date } = { status };
+  if (status === EventStatus.completed) {
+    data.publishedAt = new Date();
+  } else if (publishedAt) {
+    data.publishedAt = publishedAt;
+  }
+
   await prisma.event.update({
     where: { id: eventId },
-    data: {
-      status,
-      publishedAt,
-    },
+    data,
   });
 
   await logAudit({
@@ -98,6 +102,7 @@ export async function updateEvent(id: string, formData: FormData) {
     entityId: id,
   });
 
+  revalidatePath("/events");
   revalidatePath("/admin/events");
   redirect("/admin/events");
 }
