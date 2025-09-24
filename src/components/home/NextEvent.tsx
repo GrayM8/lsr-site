@@ -4,26 +4,16 @@ import Image from "next/image"
 import SectionReveal from "./SectionReveal"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-
-// This type should be imported from a shared file in a real app
-type Event = {
-  title: string;
-  date: string;
-  location: string;
-  type: string;
-  description: string;
-  isFeatured?: boolean;
-  image?: string;
-}
+import { Event, Venue, EventSeries } from "@prisma/client"
 
 type Props = {
   index: number
-  featuredEvent?: Event
-  upcomingEvents: Event[]
+  featuredEvent?: Event & { venue: Venue | null, series: EventSeries | null }
+  upcomingEvents: (Event & { venue: Venue | null, series: EventSeries | null })[]
 }
 
 export default function NextEvent({ index, featuredEvent, upcomingEvents }: Props) {
-  const nextEventDate = featuredEvent ? new Date(featuredEvent.date) : null
+  const nextEventDate = featuredEvent ? new Date(featuredEvent.startsAtUtc) : null
 
   return (
     <SectionReveal index={index} className="mx-auto max-w-6xl" clipClass="rounded-2xl">
@@ -47,8 +37,8 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
         {featuredEvent && nextEventDate && (
           <div className="mt-6 pt-6 border-t border-white/10 grid md:grid-cols-2 gap-6">
             <div>
-              <Badge variant="outline" className="border-lsr-orange text-lsr-orange mb-2">{featuredEvent.type}</Badge>
-              <p className="text-white/80">{featuredEvent.description}</p>
+              <Badge variant="outline" className="border-lsr-orange text-lsr-orange mb-2">{featuredEvent.series?.title}</Badge>
+              <p className="text-white/80">{featuredEvent.summary}</p>
               <div className="text-sm text-white/60 mt-4 space-y-2">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
@@ -62,17 +52,19 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
                   <Clock className="h-4 w-4" />
                   <span>{nextEventDate.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  <span>{featuredEvent.location}</span>
-                </div>
+                {featuredEvent.venue && (
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    <span>{featuredEvent.venue.name}</span>
+                  </div>
+                )}
               </div>
             </div>
             <div
               className="rounded-xl border border-white/10 bg-white/[0.04] flex items-center justify-center overflow-hidden">
-              {featuredEvent.image ? (
+              {featuredEvent.heroImageUrl ? (
                 <Image
-                  src={featuredEvent.image}
+                  src={featuredEvent.heroImageUrl}
                   alt={featuredEvent.title}
                   width={800}
                   height={600}
@@ -89,14 +81,14 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
           <h3 className="font-display text-2xl text-lsr-orange tracking-wide">Also Coming Up...</h3>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {upcomingEvents.length > 0 ? upcomingEvents.slice(0, 4).map((event) => {
-              const eventDate = new Date(event.date)
+              const eventDate = new Date(event.startsAtUtc)
               return (
-                <div key={event.title} className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
+                <div key={event.id} className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
                   <div className="text-xs text-white/60">
                     {eventDate.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                   </div>
                   <div className="font-medium">{event.title}</div>
-                  <div className="text-xs text-white/60">{event.type}</div>
+                  <div className="text-xs text-white/60">{event.series?.title}</div>
                 </div>
               )
             }) : Array.from({ length: 4 }).map((_, i) => (

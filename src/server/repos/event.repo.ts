@@ -2,7 +2,7 @@
 import { prisma } from '@/server/db';
 import { getActiveEntitlements } from './membership.repo';
 import { getSessionUser } from '@/server/auth/session';
-import { EventEligibility, Prisma, RSVPStatus, CheckinMethod } from '@prisma/client';
+import { EventEligibility, Prisma, RSVPStatus, CheckinMethod, EventType } from '@prisma/client';
 import { logAudit } from '@/server/audit/log';
 
 export async function listUpcomingEvents(limit = 10) {
@@ -12,7 +12,25 @@ export async function listUpcomingEvents(limit = 10) {
     },
     orderBy: { startsAtUtc: 'asc' },
     take: limit,
+    include: {
+      venue: true,
+      series: true,
+    },
   });
+}
+
+export async function listAllEvents() {
+  return prisma.event.findMany({
+    orderBy: { startsAtUtc: 'asc' },
+    include: {
+      venue: true,
+      series: true,
+    },
+  });
+}
+
+export async function getAllEventTypes() {
+  return Object.values(EventType);
 }
 
 export async function getEventBySlug(slug: string) {
