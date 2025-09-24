@@ -21,6 +21,19 @@ export async function listUpcomingEvents(limit = 10) {
 
 export async function listAllEvents() {
   return prisma.event.findMany({
+    where: {
+      status: { not: "draft" },
+    },
+    orderBy: { startsAtUtc: 'asc' },
+    include: {
+      venue: true,
+      series: true,
+    },
+  });
+}
+
+export async function listAllEventsForAdmin() {
+  return prisma.event.findMany({
     orderBy: { startsAtUtc: 'asc' },
     include: {
       venue: true,
@@ -46,6 +59,12 @@ export async function getEventBySlug(slug: string) {
         },
       },
     },
+  });
+}
+
+export async function getEventById(id: string) {
+  return prisma.event.findUnique({
+    where: { id },
   });
 }
 

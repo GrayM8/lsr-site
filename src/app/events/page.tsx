@@ -24,6 +24,11 @@ function EventCard({ event }: { event: Event & { series: EventSeries | null, ven
             year: "numeric",
             month: "long",
             day: "numeric",
+          })} - {new Date(event.endsAtUtc).toLocaleDateString(undefined, {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
           })}</span>
         </div>
         <div className="flex items-center gap-2">

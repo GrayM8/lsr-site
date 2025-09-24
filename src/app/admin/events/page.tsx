@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { getAllEvents } from "@/server/queries/events";
+import { getAllEventsForAdmin } from "@/server/queries/events";
 
 export default async function EventsAdminPage() {
-  const events = await getAllEvents();
+  const events = await getAllEventsForAdmin();
 
   return (
     <main className="mx-auto max-w-6xl p-8">
@@ -20,6 +20,7 @@ export default async function EventsAdminPage() {
               <th className="p-4">Title</th>
               <th className="p-4">Date</th>
               <th className="p-4">Status</th>
+              <th className="p-4">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -28,6 +29,17 @@ export default async function EventsAdminPage() {
                 <td className="p-4">{event.title}</td>
                 <td className="p-4">{event.startsAtUtc.toLocaleString()}</td>
                 <td className="p-4">{event.status}</td>
+                <td className="p-4">
+                  {event.status === "draft" ? (
+                    <Button size="sm" asChild>
+                      <Link href={`/admin/events/${event.id}/publish`}>Publish</Link>
+                    </Button>
+                  ) : (
+                    <Button size="sm" asChild>
+                      <Link href={`/admin/events/${event.id}/edit`}>Edit</Link>
+                    </Button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
