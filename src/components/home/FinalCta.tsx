@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import SectionReveal from "./SectionReveal"
-import { Calendar, Check, MessageSquare, UserPlus } from "lucide-react"
+import { Calendar, MessageSquare, UserPlus } from "lucide-react"
 
 export default function FinalCta({ index }: { index: number }) {
   const openAuthDialog = () => {
