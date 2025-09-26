@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { getAllEventsForAdmin } from "@/server/queries/events";
+import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
+import { deleteEvent } from "@/app/admin/events/actions";
 
 export default async function EventsAdminPage() {
   const events = await getAllEventsForAdmin();
@@ -29,7 +31,7 @@ export default async function EventsAdminPage() {
                 <td className="p-4">{event.title}</td>
                 <td className="p-4">{event.startsAtUtc.toLocaleString()}</td>
                 <td className="p-4">{event.status}</td>
-                <td className="p-4">
+                <td className="p-4 space-x-2">
                   {event.status === "draft" ? (
                     <Button size="sm" asChild>
                       <Link href={`/admin/events/${event.id}/publish`}>Publish</Link>
@@ -39,6 +41,15 @@ export default async function EventsAdminPage() {
                       <Link href={`/admin/events/${event.id}/edit`}>Edit</Link>
                     </Button>
                   )}
+                  <form action={deleteEvent.bind(null, event.id)} className="inline-block">
+                    <ConfirmSubmitButton
+                      size="sm"
+                      variant="destructive"
+                      message="Are you sure you want to delete this event?"
+                    >
+                      Delete
+                    </ConfirmSubmitButton>
+                  </form>
                 </td>
               </tr>
             ))}

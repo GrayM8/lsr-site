@@ -12,10 +12,15 @@ export async function createEvent(formData: FormData) {
     throw new Error("You must be logged in to create an event.");
   }
 
+  const seriesId = formData.get("seriesId") as string;
+  const venueId = formData.get("venueId") as string;
+
   const event = await prisma.event.create({
     data: {
       title: formData.get("title") as string,
       slug: formData.get("slug") as string,
+      seriesId: seriesId === "" ? null : seriesId,
+      venueId: venueId === "" ? null : venueId,
       startsAtUtc: new Date(formData.get("startsAtUtc") as string),
       endsAtUtc: new Date(formData.get("endsAtUtc") as string),
       timezone: formData.get("timezone") as string,
@@ -79,11 +84,16 @@ export async function updateEvent(id: string, formData: FormData) {
     throw new Error("You must be logged in to update an event.");
   }
 
+  const seriesId = formData.get("seriesId") as string;
+  const venueId = formData.get("venueId") as string;
+
   await prisma.event.update({
     where: { id },
     data: {
       title: formData.get("title") as string,
       slug: formData.get("slug") as string,
+      seriesId: seriesId === "" ? null : seriesId,
+      venueId: venueId === "" ? null : venueId,
       startsAtUtc: new Date(formData.get("startsAtUtc") as string),
       endsAtUtc: new Date(formData.get("endsAtUtc") as string),
       timezone: formData.get("timezone") as string,
@@ -103,4 +113,24 @@ export async function updateEvent(id: string, formData: FormData) {
   revalidatePath("/events");
   revalidatePath("/admin/events");
   redirect("/admin/events");
+}
+
+export async function deleteEvent(eventId: string) {
+  const { user } = await getSessionUser();
+  if (!user) {
+    throw new Error("You must be logged in to delete an event.");
+  }
+
+  await prisma.event.delete({
+    where: { id: eventId },
+  });
+
+  await logAudit({
+    actorUserId: user.id,
+    action: "delete",
+    entityType: "Event",
+    entityId: eventId,
+  });
+
+  revalidatePath("/admin/events");
 }

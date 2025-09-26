@@ -137,16 +137,16 @@ model User {
   roles                  UserRole[]
   payments               Payment[]
   entitlements           Entitlement[]
-  memberships            UserMembership[] // <-- added back-relation
+  memberships            UserMembership[]
   posts                  Post[]           @relation("PostAuthor")
   pages                  Page[]           @relation("PageAuthor")
   RSVPs                  RSVP[]
   checkins               Attendance[]
   entries                Entry[]          @relation("EntryUser")
   auditLogs              AuditLog[]       @relation("AuditActor")
-  provenanceCreated      Provenance[]     @relation("ProvenanceCreatedBy") // <-- added
-  importArtifactsCreated ImportArtifact[] @relation("ImportArtifactCreatedBy") // <-- added
-  mediaOwned             Media[]          @relation("MediaOwner") // <-- added
+  provenanceCreated      Provenance[]     @relation("ProvenanceCreatedBy")
+  importArtifactsCreated ImportArtifact[] @relation("ImportArtifactCreatedBy")
+  mediaOwned             Media[]          @relation("MediaOwner")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -301,7 +301,6 @@ model League {
   classes              Class[]
   products             Product[]          @relation("EntitlementLeague")
   entitlements         Entitlement[]      @relation("EntitlementLeague") // <-- back-relation
-  // (removed: entries[] — Entry links via Season/Class, not directly to League)
   eventEligibilityRefs EventEligibility[] @relation("EligibilityLeague") // <-- back-relation for event gate
 }
 

@@ -3,7 +3,7 @@ import { AuthDialog } from './auth-dialog';
 import { getCachedSessionUser } from '@/server/auth/cached-session';
 
 export default async function UserMenu() {
-  const { user } = await getCachedSessionUser();
+  const { user, roles } = await getCachedSessionUser();
 
   if (!user) return <AuthDialog />;
 
@@ -13,6 +13,7 @@ export default async function UserMenu() {
       email={user.email}
       avatarUrl={user.avatarUrl ?? null}
       handle={user.handle ?? null}
+      roles={roles}
     />
   );
 }

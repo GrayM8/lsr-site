@@ -19,11 +19,13 @@ export function UserMenuClient({
                                  email,
                                  avatarUrl,
                                  handle,
+                                 roles,
                                }: {
   displayName: string
   email?: string | null
   avatarUrl?: string | null
   handle?: string | null
+  roles: string[]
 }) {
   const supabase = createSupabaseBrowser()
   const router = useRouter()
@@ -50,6 +52,8 @@ export function UserMenuClient({
     .join("")
     .toUpperCase()
 
+  const isAdmin = roles.includes("admin");
+
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
@@ -74,6 +78,22 @@ export function UserMenuClient({
         <DropdownMenuItem onSelect={() => router.push("/account")}>
           Account details
         </DropdownMenuItem>
+
+        {isAdmin && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Admin</DropdownMenuLabel>
+            <DropdownMenuItem onSelect={() => router.push("/admin/events")}>
+              Events
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => router.push("/admin/series")}>
+              Series
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => router.push("/admin/venues")}>
+              Venues
+            </DropdownMenuItem>
+          </>
+        )}
 
         <DropdownMenuSeparator />
 

@@ -46,6 +46,12 @@ export async function getAllEventTypes() {
   return Object.values(EventType);
 }
 
+export async function getAllEventSeries() {
+  return prisma.eventSeries.findMany({
+    orderBy: { title: 'asc' },
+  });
+}
+
 export async function getEventBySlug(slug: string) {
   return prisma.event.findUnique({
     where: { slug },
