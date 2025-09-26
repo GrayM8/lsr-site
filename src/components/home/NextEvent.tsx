@@ -1,4 +1,4 @@
-import { Calendar, Clock, MapPin } from "lucide-react"
+import { Calendar, Clock, MapPin, Send } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import SectionReveal from "./SectionReveal"
@@ -14,6 +14,12 @@ type Props = {
 
 export default function NextEvent({ index, featuredEvent, upcomingEvents }: Props) {
   const nextEventDate = featuredEvent ? new Date(featuredEvent.startsAtUtc) : null
+  const nextEventEndDate = featuredEvent ? new Date(featuredEvent.endsAtUtc) : null
+
+  const venue = featuredEvent?.venue
+  const geo = venue?.geo as any
+  const hasCoords = geo?.type === "Point" && geo?.coordinates?.length === 2
+  const directionsUrl = hasCoords ? `https://www.google.com/maps/search/?api=1&query=${geo.coordinates[1]},${geo.coordinates[0]}` : null
 
   return (
     <SectionReveal index={index} className="mx-auto max-w-6xl" clipClass="rounded-2xl">
@@ -22,19 +28,21 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
           <div>
             <h2 className="font-display text-3xl md:text-4xl text-lsr-orange tracking-wide">Next Event & Upcoming</h2>
             {featuredEvent ? (
-              <p className="text-white/80 mt-2">{featuredEvent.title}</p>
+              <p className="text-white/80 mt-2">
+                <Link href={`/events/${featuredEvent.slug}`} className="hover:underline">{featuredEvent.title}</Link>
+              </p>
             ) : (
               <p className="text-white/80 mt-2">Check back later — schedule is being finalized.</p>
             )}
           </div>
           <div className="flex items-center gap-3">
             <Button asChild className="bg-lsr-orange hover:bg-lsr-orange/90 text-lsr-charcoal-darker">
-              <Link href="/events">View Events</Link>
+              <Link href="/events">View All Events</Link>
             </Button>
           </div>
         </div>
 
-        {featuredEvent && nextEventDate && (
+        {featuredEvent && nextEventDate && nextEventEndDate && (
           <div className="mt-6 pt-6 border-t border-white/10 grid md:grid-cols-2 gap-6">
             <div>
               <Badge variant="outline" className="border-lsr-orange text-lsr-orange mb-2">{featuredEvent.series?.title}</Badge>
@@ -50,12 +58,26 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4" />
-                  <span>{nextEventDate.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}</span>
+                  <span>
+                    {nextEventDate.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })} - {nextEventEndDate.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
+                  </span>
                 </div>
-                {featuredEvent.venue && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    <span>{featuredEvent.venue.name}</span>
+                {venue && (
+                  <div className="flex items-start gap-2">
+                    <MapPin className="h-4 w-4 mt-0.5" />
+                    <div>
+                      {directionsUrl ? (
+                        <Link href={directionsUrl} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
+                          <span>{venue.name}</span>
+                          <Send className="h-3 w-3" />
+                        </Link>
+                      ) : (
+                        <span>{venue.name}</span>
+                      )}
+                      <div className="text-xs text-white/50">
+                        {[venue.addressLine1, venue.addressLine2, venue.city, venue.state, venue.postalCode].filter(Boolean).join(", ")}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -83,12 +105,26 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
             {upcomingEvents.length > 0 ? upcomingEvents.slice(0, 4).map((event) => {
               const eventDate = new Date(event.startsAtUtc)
               return (
-                <div key={event.id} className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
-                  <div className="text-xs text-white/60">
-                    {eventDate.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                <div key={event.id} className="rounded-xl border border-white/10 bg-white/[0.04] p-4 flex flex-col">
+                  <div className="flex justify-between items-center mb-1">
+                    {event.series && (
+                      <Badge variant="outline" className="border-lsr-orange text-lsr-orange text-xs">
+                        {event.series.title}
+                      </Badge>
+                    )}
+                    <div className="text-xs text-white/60">
+                      {eventDate.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                    </div>
                   </div>
-                  <div className="font-medium">{event.title}</div>
-                  <div className="text-xs text-white/60">{event.series?.title}</div>
+                  <div className="font-medium flex-grow">
+                    <Link href={`/events/${event.slug}`} className="hover:underline">{event.title}</Link>
+                  </div>
+                  {event.summary && (
+                    <p className="text-xs text-white/70 mt-1 flex-grow">{event.summary.substring(0, 60)}...</p>
+                  )}
+                  <Link href={`/events/${event.slug}`} className="text-xs text-lsr-orange hover:underline mt-2 self-end">
+                    See Details
+                  </Link>
                 </div>
               )
             }) : Array.from({ length: 4 }).map((_, i) => (

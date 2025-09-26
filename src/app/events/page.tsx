@@ -26,7 +26,9 @@ function EventCard({ event }: { event: Event & { series: EventSeries | null, ven
       <div className="p-6 flex-grow flex flex-col">
         <div className="flex-grow">
           <Badge variant="outline" className="border-lsr-orange text-lsr-orange mb-2">{event.series?.title}</Badge>
-          <h3 className={`font-semibold text-xl`}>{event.title}</h3>
+          <h3 className={`font-semibold text-xl`}>
+            <Link href={`/events/${event.slug}`} className="hover:underline">{event.title}</Link>
+          </h3>
           <p className={`text-sm text-white/70 mt-2 flex-grow`}>{event.summary || event.description}</p>
         </div>
         <div className="text-sm text-white/60 mt-4 space-y-2">
@@ -46,18 +48,28 @@ function EventCard({ event }: { event: Event & { series: EventSeries | null, ven
             </span>
           </div>
           {venue && (
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              {directionsUrl ? (
-                <Link href={directionsUrl} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
+            <div className="flex items-start gap-2">
+              <MapPin className="h-4 w-4 mt-0.5" />
+              <div>
+                {directionsUrl ? (
+                  <Link href={directionsUrl} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
+                    <span>{venue.name}</span>
+                    <Send className="h-3 w-3" />
+                  </Link>
+                ) : (
                   <span>{venue.name}</span>
-                  <Send className="h-3 w-3" />
-                </Link>
-              ) : (
-                <span>{venue.name}</span>
-              )}
+                )}
+                <div className="text-xs text-white/50">
+                  {[venue.addressLine1, venue.addressLine2, venue.city, venue.state, venue.postalCode].filter(Boolean).join(", ")}
+                </div>
+              </div>
             </div>
           )}
+        </div>
+        <div className="mt-4">
+          <Link href={`/events/${event.slug}`} className="text-sm text-lsr-orange hover:underline">
+            See Details
+          </Link>
         </div>
       </div>
     </div>

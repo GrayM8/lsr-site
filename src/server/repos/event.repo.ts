@@ -56,6 +56,8 @@ export async function getEventBySlug(slug: string) {
   return prisma.event.findUnique({
     where: { slug },
     include: {
+      venue: true,
+      series: true,
       eligibility: true,
       rsvps: {
         include: {

@@ -33,9 +33,14 @@ export default async function EventsAdminPage() {
                 <td className="p-4">{event.status}</td>
                 <td className="p-4 space-x-2">
                   {event.status === "draft" ? (
-                    <Button size="sm" asChild>
-                      <Link href={`/admin/events/${event.id}/publish`}>Publish</Link>
-                    </Button>
+                    <>
+                      <Button size="sm" asChild>
+                        <Link href={`/admin/events/${event.id}/edit`}>Edit</Link>
+                      </Button>
+                      <Button size="sm" asChild>
+                        <Link href={`/admin/events/${event.id}/publish`}>Publish</Link>
+                      </Button>
+                    </>
                   ) : (
                     <Button size="sm" asChild>
                       <Link href={`/admin/events/${event.id}/edit`}>Edit</Link>
