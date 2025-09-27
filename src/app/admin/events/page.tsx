@@ -35,16 +35,11 @@ export default async function EventsAdminPage() {
                   {event.status === "draft" ? (
                     <>
                       <Button size="sm" asChild>
-                        <Link href={`/admin/events/${event.id}/edit`}>Edit</Link>
-                      </Button>
-                      <Button size="sm" asChild>
                         <Link href={`/admin/events/${event.id}/publish`}>Publish</Link>
                       </Button>
                     </>
                   ) : (
-                    <Button size="sm" asChild>
-                      <Link href={`/admin/events/${event.id}/edit`}>Edit</Link>
-                    </Button>
+                    <></>
                   )}
                   <form action={deleteEvent.bind(null, event.id)} className="inline-block">
                     <ConfirmSubmitButton

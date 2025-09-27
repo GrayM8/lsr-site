@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { createVenue, updateVenue } from "@/app/admin/venues/actions";
 import { Venue } from "@prisma/client";
+import { GeoPoint } from "@/types";
 
 export function VenueForm({ venue }: { venue?: Venue }) {
   return (

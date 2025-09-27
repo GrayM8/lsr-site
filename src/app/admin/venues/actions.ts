@@ -1,5 +1,6 @@
 "use server"
 
+import { GeoPoint } from "@/types";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createVenue as createVenueInDb, updateVenue as updateVenueInDb, deleteVenue as deleteVenueInDb } from "@/server/repos/venue.repo";
@@ -23,7 +24,7 @@ export async function createVenue(formData: FormData) {
   const latitude = formData.get("latitude") as string;
   const longitude = formData.get("longitude") as string;
 
-  let geo = null;
+  let geo: GeoPoint | undefined = undefined;
   if (latitude && longitude) {
     geo = {
       type: "Point",
@@ -40,7 +41,7 @@ export async function createVenue(formData: FormData) {
     postalCode,
     country,
     room,
-    geo,
+    ...(geo && { geo }),
   });
 
   await logAudit({
@@ -71,7 +72,7 @@ export async function updateVenue(id: string, formData: FormData) {
   const latitude = formData.get("latitude") as string;
   const longitude = formData.get("longitude") as string;
 
-  let geo = null;
+  let geo: GeoPoint | undefined = undefined;
   if (latitude && longitude) {
     geo = {
       type: "Point",
@@ -88,7 +89,7 @@ export async function updateVenue(id: string, formData: FormData) {
     postalCode,
     country,
     room,
-    geo,
+    ...(geo && { geo }),
   });
 
   await logAudit({

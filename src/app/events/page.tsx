@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Calendar, Clock, MapPin, Send } from "lucide-react"
 import { getAllEvents, getAllEventTypes } from "@/server/queries/events"
 import { Event, Venue, EventSeries } from "@prisma/client"
+import { GeoPoint } from "@/types";
 import Image from "next/image"
 import Link from "next/link"
 
@@ -27,7 +28,7 @@ function EventCard({ event }: { event: Event & { series: EventSeries | null, ven
         <div className="flex-grow">
           <Badge variant="outline" className="border-lsr-orange text-lsr-orange mb-2">{event.series?.title}</Badge>
           <h3 className={`font-semibold text-xl`}>
-            <Link href={`/events/${event.slug}`} className="hover:underline">{event.title}</Link>
+            <span className="hover:underline">{event.title}</span>
           </h3>
           <p className={`text-sm text-white/70 mt-2 flex-grow`}>{event.summary || event.description}</p>
         </div>
@@ -66,11 +67,7 @@ function EventCard({ event }: { event: Event & { series: EventSeries | null, ven
             </div>
           )}
         </div>
-        <div className="mt-4">
-          <Link href={`/events/${event.slug}`} className="text-sm text-lsr-orange hover:underline">
-            See Details
-          </Link>
-        </div>
+
       </div>
     </div>
   )

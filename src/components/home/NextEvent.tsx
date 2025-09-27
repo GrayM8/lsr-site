@@ -5,6 +5,7 @@ import SectionReveal from "./SectionReveal"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Event, Venue, EventSeries } from "@prisma/client"
+import { GeoPoint } from "@/types";
 
 type Props = {
   index: number
@@ -29,7 +30,7 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
             <h2 className="font-display text-3xl md:text-4xl text-lsr-orange tracking-wide">Next Event & Upcoming</h2>
             {featuredEvent ? (
               <p className="text-white/80 mt-2">
-                <Link href={`/events/${featuredEvent.slug}`} className="hover:underline">{featuredEvent.title}</Link>
+                <span className="hover:underline">{featuredEvent.title}</span>
               </p>
             ) : (
               <p className="text-white/80 mt-2">Check back later — schedule is being finalized.</p>
@@ -117,14 +118,12 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
                     </div>
                   </div>
                   <div className="font-medium flex-grow">
-                    <Link href={`/events/${event.slug}`} className="hover:underline">{event.title}</Link>
+                    <span className="hover:underline">{event.title}</span>
                   </div>
                   {event.summary && (
                     <p className="text-xs text-white/70 mt-1 flex-grow">{event.summary.substring(0, 60)}...</p>
                   )}
-                  <Link href={`/events/${event.slug}`} className="text-xs text-lsr-orange hover:underline mt-2 self-end">
-                    See Details
-                  </Link>
+
                 </div>
               )
             }) : Array.from({ length: 4 }).map((_, i) => (
