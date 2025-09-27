@@ -28,7 +28,7 @@ function EventCard({ event }: { event: Event & { series: EventSeries | null, ven
         <div className="flex-grow">
           <Badge variant="outline" className="border-lsr-orange text-lsr-orange mb-2">{event.series?.title}</Badge>
           <h3 className={`font-semibold text-xl`}>
-            <span className="hover:underline">{event.title}</span>
+            <Link href={`/events/${event.slug}`} className="hover:underline">{event.title}</Link>
           </h3>
           <p className={`text-sm text-white/70 mt-2 flex-grow`}>{event.summary || event.description}</p>
         </div>
@@ -67,7 +67,11 @@ function EventCard({ event }: { event: Event & { series: EventSeries | null, ven
             </div>
           )}
         </div>
-
+        <div className="mt-4">
+          <Link href={`/events/${event.slug}`} className="text-lsr-orange hover:underline text-sm">
+            See Details
+          </Link>
+        </div>
       </div>
     </div>
   )

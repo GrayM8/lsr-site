@@ -30,6 +30,9 @@ export default async function SeriesAdminPage() {
                 <td className="p-4">{s.title}</td>
                 <td className="p-4">{s.slug}</td>
                 <td className="p-4 space-x-2">
+                  <Button size="sm" asChild>
+                    <Link href={`/admin/series/${s.id}/edit`}>Edit</Link>
+                  </Button>
                   <form action={deleteSeries.bind(null, s.id)} className="inline-block">
                     <ConfirmSubmitButton
                       size="sm"

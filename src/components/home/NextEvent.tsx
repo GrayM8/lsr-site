@@ -30,7 +30,7 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
             <h2 className="font-display text-3xl md:text-4xl text-lsr-orange tracking-wide">Next Event & Upcoming</h2>
             {featuredEvent ? (
               <p className="text-white/80 mt-2">
-                <span className="hover:underline">{featuredEvent.title}</span>
+                <Link href={`/events/${featuredEvent.slug}`} className="hover:underline">{featuredEvent.title}</Link>
               </p>
             ) : (
               <p className="text-white/80 mt-2">Check back later — schedule is being finalized.</p>
@@ -82,6 +82,9 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
                   </div>
                 )}
               </div>
+              <div className="mt-4">
+                <Link href={`/events/${featuredEvent.slug}`} className="text-lsr-orange hover:underline text-sm">See Details</Link>
+              </div>
             </div>
             <div
               className="rounded-xl border border-white/10 bg-white/[0.04] flex items-center justify-center overflow-hidden">
@@ -118,12 +121,14 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
                     </div>
                   </div>
                   <div className="font-medium flex-grow">
-                    <span className="hover:underline">{event.title}</span>
+                    <Link href={`/events/${event.slug}`} className="hover:underline">{event.title}</Link>
                   </div>
                   {event.summary && (
                     <p className="text-xs text-white/70 mt-1 flex-grow">{event.summary.substring(0, 60)}...</p>
                   )}
-
+                  <div className="mt-2">
+                    <Link href={`/events/${event.slug}`} className="text-lsr-orange hover:underline text-sm">See Details</Link>
+                  </div>
                 </div>
               )
             }) : Array.from({ length: 4 }).map((_, i) => (

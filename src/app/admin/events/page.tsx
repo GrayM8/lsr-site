@@ -32,6 +32,9 @@ export default async function EventsAdminPage() {
                 <td className="p-4">{event.startsAtUtc.toLocaleString()}</td>
                 <td className="p-4">{event.status}</td>
                 <td className="p-4 space-x-2">
+                  <Button size="sm" asChild>
+                    <Link href={`/admin/events/${event.id}/edit`}>Edit</Link>
+                  </Button>
                   {event.status === "draft" ? (
                     <>
                       <Button size="sm" asChild>

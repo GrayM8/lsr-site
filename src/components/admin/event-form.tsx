@@ -54,11 +54,11 @@ export function EventForm({ event, series, venues }: { event?: Event, series: Ev
         </div>
         <div>
           <label htmlFor="startsAtUtc">Starts At (UTC)</label>
-          <Input id="startsAtUtc" name="startsAtUtc" type="datetime-local" defaultValue={event?.startsAtUtc.toISOString().slice(0, 16)} required />
+          <Input id="startsAtUtc" name="startsAtUtc" type="datetime-local" defaultValue={event?.startsAtUtc ? event.startsAtUtc.toISOString().slice(0, 16) : ""} required />
         </div>
         <div>
           <label htmlFor="endsAtUtc">Ends At (UTC)</label>
-          <Input id="endsAtUtc" name="endsAtUtc" type="datetime-local" defaultValue={event?.endsAtUtc.toISOString().slice(0, 16)} required />
+          <Input id="endsAtUtc" name="endsAtUtc" type="datetime-local" defaultValue={event?.endsAtUtc ? event.endsAtUtc.toISOString().slice(0, 16) : ""} required />
         </div>
         <div>
           <label htmlFor="timezone">Timezone</label>

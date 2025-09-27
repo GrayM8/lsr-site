@@ -28,6 +28,9 @@ export default async function VenuesAdminPage() {
               <tr key={v.id} className="border-b">
                 <td className="p-4">{v.name}</td>
                 <td className="p-4 space-x-2">
+                  <Button size="sm" asChild>
+                    <Link href={`/admin/venues/${v.id}/edit`}>Edit</Link>
+                  </Button>
                   <form action={deleteVenue.bind(null, v.id)} className="inline-block">
                     <ConfirmSubmitButton
                       size="sm"

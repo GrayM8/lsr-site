@@ -1,12 +1,14 @@
-"use client"
+"use client";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { createVenue, updateVenue } from "@/app/admin/venues/actions";
 import { Venue } from "@prisma/client";
-import { GeoPoint } from "@/types";
 
 export function VenueForm({ venue }: { venue?: Venue }) {
+  // @ts-expect-error - geo is a JSON object
+  const [longitude, latitude] = venue?.geo?.coordinates ?? [];
+
   return (
     <form action={venue ? updateVenue.bind(null, venue.id) : createVenue}>
       <div className="space-y-4">
@@ -42,14 +44,14 @@ export function VenueForm({ venue }: { venue?: Venue }) {
           <label htmlFor="room">Room</label>
           <Input id="room" name="room" defaultValue={venue?.room ?? ""} />
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
+        <div className="flex space-x-4">
+          <div className="w-1/2">
             <label htmlFor="latitude">Latitude</label>
-            <Input id="latitude" name="latitude" type="number" step="any" defaultValue={(venue?.geo as GeoPoint | null)?.coordinates?.[1]} />
+            <Input id="latitude" name="latitude" type="number" step="any" defaultValue={latitude} />
           </div>
-          <div>
+          <div className="w-1/2">
             <label htmlFor="longitude">Longitude</label>
-            <Input id="longitude" name="longitude" type="number" step="any" defaultValue={(venue?.geo as GeoPoint | null)?.coordinates?.[0]} />
+            <Input id="longitude" name="longitude" type="number" step="any" defaultValue={longitude} />
           </div>
         </div>
         <Button type="submit">{venue ? "Update Venue" : "Create Venue"}</Button>

@@ -5,6 +5,7 @@ import {
   listAllEventsForAdmin,
   getAllEventSeries as getAllEventSeriesFromRepo,
   getEventBySlug as getEventBySlugFromRepo,
+  getEventById,
 } from '@/server/repos/event.repo';
 
 export const getAllEvents = cache(async () => {
@@ -13,6 +14,10 @@ export const getAllEvents = cache(async () => {
 
 export const getAllEventsForAdmin = cache(async () => {
   return await listAllEventsForAdmin();
+});
+
+export const getEventForAdmin = cache(async (id: string) => {
+  return await getEventById(id);
 });
 
 export const getAllEventTypes = cache(async () => {
