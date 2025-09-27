@@ -63,8 +63,11 @@ export function AuthDialog() {
       });
       if (error) return alert(error.message);
 
-      alert("Check your email to confirm and sign in.");
-      setOpen(false);
+      if (data.user) {
+        await supabase.auth.updateUser({ data: { email_confirmed_at: new Date().toISOString() } });
+        router.push(`/drivers/${displayName.toLowerCase().replace(/\s/g, '-')}`);
+        setOpen(false);
+      }
     });
   }
 

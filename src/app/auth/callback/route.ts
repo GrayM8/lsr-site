@@ -40,10 +40,6 @@ export async function GET(request: Request) {
 
   const { user } = data;
 
-  // Manually update the user's email confirmation status
-  await supabase.auth.updateUser({ data: { email_confirmed_at: new Date().toISOString() } });
-
-
   try {
     let dbUser = await prisma.user.findUnique({
       where: { id: user.id },
