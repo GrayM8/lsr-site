@@ -14,19 +14,19 @@ export const GET: NodeHandler<{ slug: string }> = async (request, { params }) =>
       return NextResponse.json({ message: 'Season not found' }, { status: 404 });
     }
 
-    const standings = await getStandingsForSeason(season.id);
+    const standings = (await getStandingsForSeason(season.id)) as { className: string }[];
 
     // Group standings by class
-    const standingsByClass = standings.reduce(
-      (acc, standing) => {
-        if (!acc[standing.className]) {
-          acc[standing.className] = [];
-        }
-        acc[standing.className].push(standing);
-        return acc;
-      },
-      {} as Record<string, typeof standings>,
-    );
+     const standingsByClass = standings.reduce(
+       (acc, standing) => {
+         if (!acc[standing.className]) {
+           acc[standing.className] = [];
+         }
+         acc[standing.className].push(standing);
+         return acc;
+       },
+       {} as Record<string, typeof standings>,
+     );
 
     return NextResponse.json(standingsByClass);
   } catch (error) {

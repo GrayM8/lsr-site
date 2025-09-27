@@ -1,11 +1,11 @@
 import { cache } from 'react';
 import {
   listAllEvents,
-  getAllEventTypes as getAllEventTypesFromRepo,
   listAllEventsForAdmin,
   getAllEventSeries as getAllEventSeriesFromRepo,
   getEventBySlug as getEventBySlugFromRepo,
   getEventById,
+  listLiveEvents,
 } from '@/server/repos/event.repo';
 
 export const getAllEvents = cache(async () => {
@@ -20,14 +20,14 @@ export const getEventForAdmin = cache(async (id: string) => {
   return await getEventById(id);
 });
 
-export const getAllEventTypes = cache(async () => {
-  return await getAllEventTypesFromRepo();
-});
-
 export const getAllEventSeries = cache(async () => {
   return await getAllEventSeriesFromRepo();
 });
 
 export const getEventBySlug = cache(async (slug: string) => {
   return await getEventBySlugFromRepo(slug);
+});
+
+export const getLiveEvents = cache(async () => {
+  return await listLiveEvents();
 });

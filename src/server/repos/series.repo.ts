@@ -14,6 +14,19 @@ export async function getSeriesById(id: string) {
   });
 }
 
+export async function getSeriesBySlug(slug: string) {
+  return prisma.eventSeries.findUnique({
+    where: { slug },
+    include: {
+      events: {
+        include: {
+          venue: true,
+        },
+      },
+    },
+  });
+}
+
 export async function createSeries(data: Prisma.EventSeriesCreateInput) {
   return prisma.eventSeries.create({ data });
 }

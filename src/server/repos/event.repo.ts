@@ -42,6 +42,17 @@ export async function listAllEventsForAdmin() {
   });
 }
 
+export async function listLiveEvents() {
+  const now = new Date();
+  return prisma.event.findMany({
+    where: {
+      startsAtUtc: { lte: now },
+      endsAtUtc: { gte: now },
+      status: 'in_progress',
+    },
+  });
+}
+
 export async function getAllEventTypes() {
   return Object.values(EventType);
 }

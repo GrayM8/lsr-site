@@ -44,8 +44,8 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
         </div>
 
         {featuredEvent && nextEventDate && nextEventEndDate && (
-          <div className="mt-6 pt-6 border-t border-white/10 grid md:grid-cols-2 gap-6">
-            <div>
+          <div className="mt-6 pt-6 border-t border-white/10 md:flex gap-6">
+            <div className="md:w-1/2">
               <Badge variant="outline" className="border-lsr-orange text-lsr-orange mb-2">{featuredEvent.series?.title}</Badge>
               <p className="text-white/80">{featuredEvent.summary}</p>
               <div className="text-sm text-white/60 mt-4 space-y-2">
@@ -87,7 +87,7 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
               </div>
             </div>
             <div
-              className="rounded-xl border border-white/10 bg-white/[0.04] flex items-center justify-center overflow-hidden">
+              className="rounded-xl border border-white/10 bg-white/[0.04] overflow-hidden md:w-1/2">
               {featuredEvent.heroImageUrl ? (
                 <Image
                   src={featuredEvent.heroImageUrl}
@@ -97,7 +97,9 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
                   className="object-cover w-full h-full"
                 />
               ) : (
-                <p className="text-white/60">[Map or Track Layout Placeholder]</p>
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-white/60">[Map or Track Layout Placeholder]</p>
+                </div>
               )}
             </div>
           </div>
