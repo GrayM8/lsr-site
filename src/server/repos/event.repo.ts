@@ -2,7 +2,7 @@
 import { prisma } from '@/server/db';
 import { getActiveEntitlements } from './membership.repo';
 import { getSessionUser } from '@/server/auth/session';
-import { EventEligibility, Prisma, RSVPStatus, CheckinMethod } from '@prisma/client';
+import { EventEligibility, Prisma, RSVPStatus, CheckinMethod, EventType } from '@prisma/client';
 import { logAudit } from '@/server/audit/log';
 
 export async function listUpcomingEvents(limit = 10) {
@@ -12,6 +12,54 @@ export async function listUpcomingEvents(limit = 10) {
     },
     orderBy: { startsAtUtc: 'asc' },
     take: limit,
+    include: {
+      venue: true,
+      series: true,
+    },
+  });
+}
+
+export async function listAllEvents() {
+  return prisma.event.findMany({
+    where: {
+      status: { not: "draft" },
+    },
+    orderBy: { startsAtUtc: 'asc' },
+    include: {
+      venue: true,
+      series: true,
+    },
+  });
+}
+
+export async function listAllEventsForAdmin() {
+  return prisma.event.findMany({
+    orderBy: { startsAtUtc: 'asc' },
+    include: {
+      venue: true,
+      series: true,
+    },
+  });
+}
+
+export async function listLiveEvents() {
+  const now = new Date();
+  return prisma.event.findMany({
+    where: {
+      startsAtUtc: { lte: now },
+      endsAtUtc: { gte: now },
+      status: 'in_progress',
+    },
+  });
+}
+
+export async function getAllEventTypes() {
+  return Object.values(EventType);
+}
+
+export async function getAllEventSeries() {
+  return prisma.eventSeries.findMany({
+    orderBy: { title: 'asc' },
   });
 }
 
@@ -19,6 +67,8 @@ export async function getEventBySlug(slug: string) {
   return prisma.event.findUnique({
     where: { slug },
     include: {
+      venue: true,
+      series: true,
       eligibility: true,
       rsvps: {
         include: {
@@ -28,6 +78,12 @@ export async function getEventBySlug(slug: string) {
         },
       },
     },
+  });
+}
+
+export async function getEventById(id: string) {
+  return prisma.event.findUnique({
+    where: { id },
   });
 }
 

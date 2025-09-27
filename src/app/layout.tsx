@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header"
 import { Analytics } from "@vercel/analytics/react"
 import React from "react";
 import { SiteFooter } from "@/components/site-footer"
+import { LiveBanner } from "@/components/live-banner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
     <body className="min-h-dvh flex flex-col font-sans">
     <ThemeProvider>
+      <LiveBanner />
       <SiteHeader />
         <main className="flex-1">{children}</main>
       <SiteFooter />

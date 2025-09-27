@@ -1,16 +1,33 @@
-// src/server/queries/events.ts
-import { listUpcomingEvents, getEventBySlug } from '@/server/repos/event.repo';
 import { cache } from 'react';
+import {
+  listAllEvents,
+  listAllEventsForAdmin,
+  getAllEventSeries as getAllEventSeriesFromRepo,
+  getEventBySlug as getEventBySlugFromRepo,
+  getEventById,
+  listLiveEvents,
+} from '@/server/repos/event.repo';
 
-export const getUpcomingEvents = cache(async (limit = 10) => {
-  return listUpcomingEvents(limit);
+export const getAllEvents = cache(async () => {
+  return await listAllEvents();
 });
 
-export const getEventPage = cache(async (slug: string) => {
-  const event = await getEventBySlug(slug);
-  if (!event) {
-    return null;
-  }
-  // In a real app, you might fetch additional data for the page here
-  return event;
+export const getAllEventsForAdmin = cache(async () => {
+  return await listAllEventsForAdmin();
+});
+
+export const getEventForAdmin = cache(async (id: string) => {
+  return await getEventById(id);
+});
+
+export const getAllEventSeries = cache(async () => {
+  return await getAllEventSeriesFromRepo();
+});
+
+export const getEventBySlug = cache(async (slug: string) => {
+  return await getEventBySlugFromRepo(slug);
+});
+
+export const getLiveEvents = cache(async () => {
+  return await listLiveEvents();
 });

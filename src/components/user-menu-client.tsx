@@ -13,17 +13,20 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Shield } from "lucide-react";
 
 export function UserMenuClient({
                                  displayName,
                                  email,
                                  avatarUrl,
                                  handle,
+                                 roles,
                                }: {
   displayName: string
   email?: string | null
   avatarUrl?: string | null
   handle?: string | null
+  roles: string[]
 }) {
   const supabase = createSupabaseBrowser()
   const router = useRouter()
@@ -50,6 +53,8 @@ export function UserMenuClient({
     .join("")
     .toUpperCase()
 
+  const isAdmin = roles.includes("admin");
+
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
@@ -74,6 +79,29 @@ export function UserMenuClient({
         <DropdownMenuItem onSelect={() => router.push("/account")}>
           Account details
         </DropdownMenuItem>
+
+        {isAdmin && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Admin</DropdownMenuLabel>
+            <DropdownMenuItem onSelect={() => router.push("/admin")}>
+              <Shield className="mr-2 h-4 w-4" />
+              <span>Dashboard</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => router.push("/admin/events")}>
+              <Shield className="mr-2 h-4 w-4" />
+              <span>Events</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => router.push("/admin/series")}>
+              <Shield className="mr-2 h-4 w-4" />
+              <span>Series</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => router.push("/admin/venues")}>
+              <Shield className="mr-2 h-4 w-4" />
+              <span>Venues</span>
+            </DropdownMenuItem>
+          </>
+        )}
 
         <DropdownMenuSeparator />
 

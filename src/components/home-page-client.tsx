@@ -1,5 +1,3 @@
-"use client"
-
 import Hero from "@/components/home/Hero"
 import NextEvent from "@/components/home/NextEvent"
 import WhatWeDo from "@/components/home/WhatWeDo"
@@ -10,22 +8,12 @@ import NewsHighlights from "@/components/home/NewsHighlights"
 import GalleryRibbon from "@/components/home/GalleryRibbon"
 import FinalCta from "@/components/home/FinalCta"
 import { type NewsFrontmatter } from '@/lib/news';
-import { type User } from '@prisma/client';
-
-// This type should be imported from a shared file in a real app
-type Event = {
-  title: string;
-  date: string;
-  location: string;
-  type: string;
-  description: string;
-  isFeatured?: boolean;
-}
+import { type User, type Event, type Venue, type EventSeries } from '@prisma/client';
 
 type Props = {
   posts: Array<NewsFrontmatter & { slug: string }>;
-  featuredEvent?: Event;
-  upcomingEvents: Event[];
+  featuredEvent?: Event & { venue: Venue | null, series: EventSeries | null };
+  upcomingEvents: (Event & { venue: Venue | null, series: EventSeries | null })[];
   drivers: User[];
 }
 
