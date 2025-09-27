@@ -50,7 +50,6 @@ export async function GET(request: Request) {
 
       if (existingUser) {
         console.log(`User ${existingUser.id} found in DB. Status: ${existingUser.status}.`);
-        // If user exists but isn't active, update them.
         if (existingUser.status !== 'active') {
           return tx.user.update({
             where: { id: user.id },
@@ -66,23 +65,40 @@ export async function GET(request: Request) {
         throw new Error('Cannot create user: email is missing from Supabase user data.');
       }
 
-      // For Google OAuth, name comes from 'full_name'. For email, it's 'displayName'
       const displayName = user.user_metadata.displayName || user.user_metadata.full_name || user.email.split('@')[0];
       const avatarUrl = user.user_metadata.avatar_url;
-      const handle = slugify(displayName);
+      
+      // Create a unique handle
+      const baseHandle = slugify(displayName);
+      const randomSuffix = Math.random().toString(36).substring(2, 8);
+      const handle = `${baseHandle}-${randomSuffix}`;
 
-      const newUserPayload = {
+      const newUserPayload: {
+        id: string;
+        email: string;
+        handle: string;
+        displayName: string;
+        avatarUrl?: string;
+        status: 'active';
+        eid?: string;
+        gradYear?: number;
+        marketingOptIn: boolean;
+      } = {
         id: user.id,
         email: user.email,
         handle: handle,
         displayName: displayName,
         avatarUrl: avatarUrl,
         status: 'active' as const,
-        // EID and gradYear are only available for email signups
-        eid: user.user_metadata.eid,
-        gradYear: user.user_metadata.gradYear,
         marketingOptIn: user.user_metadata.marketingOptIn ?? true,
       };
+
+      if (user.user_metadata.eid) {
+        newUserPayload.eid = user.user_metadata.eid;
+      }
+      if (user.user_metadata.gradYear) {
+        newUserPayload.gradYear = Number(user.user_metadata.gradYear);
+      }
 
       console.log('Creating user with payload:', JSON.stringify(newUserPayload, null, 2));
       return tx.user.create({ data: newUserPayload });
