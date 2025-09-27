@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Shield } from "lucide-react";
 
 export function UserMenuClient({
                                  displayName,
@@ -83,14 +84,21 @@ export function UserMenuClient({
           <>
             <DropdownMenuSeparator />
             <DropdownMenuLabel>Admin</DropdownMenuLabel>
+            <DropdownMenuItem onSelect={() => router.push("/admin")}>
+              <Shield className="mr-2 h-4 w-4" />
+              <span>Dashboard</span>
+            </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => router.push("/admin/events")}>
-              Events
+              <Shield className="mr-2 h-4 w-4" />
+              <span>Events</span>
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => router.push("/admin/series")}>
-              Series
+              <Shield className="mr-2 h-4 w-4" />
+              <span>Series</span>
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => router.push("/admin/venues")}>
-              Venues
+              <Shield className="mr-2 h-4 w-4" />
+              <span>Venues</span>
             </DropdownMenuItem>
           </>
         )}
