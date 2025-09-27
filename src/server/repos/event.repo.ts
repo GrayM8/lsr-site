@@ -19,6 +19,22 @@ export async function listUpcomingEvents(limit = 10) {
   });
 }
 
+export async function listActiveAndUpcomingEvents(limit = 10) {
+  const now = new Date();
+  return prisma.event.findMany({
+    where: {
+      endsAtUtc: { gte: now },
+      status: { in: ['scheduled', 'in_progress'] },
+    },
+    orderBy: { startsAtUtc: 'asc' },
+    take: limit,
+    include: {
+      venue: true,
+      series: true,
+    },
+  });
+}
+
 export async function listAllEvents() {
   return prisma.event.findMany({
     where: {
@@ -48,7 +64,7 @@ export async function listLiveEvents() {
     where: {
       startsAtUtc: { lte: now },
       endsAtUtc: { gte: now },
-      status: 'in_progress',
+      status: { in: ['in_progress', 'scheduled'] },
     },
   });
 }

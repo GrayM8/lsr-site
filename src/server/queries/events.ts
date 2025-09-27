@@ -31,3 +31,14 @@ export const getEventBySlug = cache(async (slug: string) => {
 export const getLiveEvents = cache(async () => {
   return await listLiveEvents();
 });
+
+export const getNextEventForHomepage = cache(async () => {
+  const allEvents = await listAllEvents();
+  const now = new Date();
+
+  const upcoming = allEvents.filter(e => new Date(e.endsAtUtc) >= now);
+
+  // The first event in the sorted list is the featured one.
+  // It's either live or the next upcoming.
+  return upcoming.slice(0, 5);
+});

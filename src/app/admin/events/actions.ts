@@ -44,7 +44,6 @@ export async function createEvent(formData: FormData) {
 }
 
 import { EventStatus } from "@prisma/client";
-
 import { getEventById } from "@/server/repos/event.repo";
 
 export async function updateEventStatus(eventId: string, status: EventStatus, publishedAt?: Date) {
@@ -73,6 +72,7 @@ export async function updateEventStatus(eventId: string, status: EventStatus, pu
   revalidatePath("/admin/events");
   redirect("/admin/events");
 }
+
 
 export async function getEvent(id: string) {
   return await getEventById(id);

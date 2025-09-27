@@ -13,6 +13,13 @@ type Props = {
   upcomingEvents: (Event & { venue: Venue | null, series: EventSeries | null })[]
 }
 
+const isLive = (event: Event) => {
+  const now = new Date();
+  const start = new Date(event.startsAtUtc);
+  const end = new Date(event.endsAtUtc);
+  return start <= now && now <= end;
+};
+
 export default function NextEvent({ index, featuredEvent, upcomingEvents }: Props) {
   const nextEventDate = featuredEvent ? new Date(featuredEvent.startsAtUtc) : null
   const nextEventEndDate = featuredEvent ? new Date(featuredEvent.endsAtUtc) : null
@@ -21,6 +28,7 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
   const geo = venue?.geo as GeoPoint | null
   const hasCoords = geo?.type === "Point" && geo?.coordinates?.length === 2
   const directionsUrl = hasCoords ? `https://www.google.com/maps/search/?api=1&query=${geo.coordinates[1]},${geo.coordinates[0]}` : null
+  const featuredIsLive = featuredEvent ? isLive(featuredEvent) : false;
 
   return (
     <SectionReveal index={index} className="mx-auto max-w-6xl" clipClass="rounded-2xl">
@@ -46,7 +54,10 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
         {featuredEvent && nextEventDate && nextEventEndDate && (
           <div className="mt-6 pt-6 border-t border-white/10 md:flex gap-6">
             <div className="md:w-1/2">
-              <Badge variant="outline" className="border-lsr-orange text-lsr-orange mb-2">{featuredEvent.series?.title}</Badge>
+              <div className="flex items-center gap-2 mb-2">
+                {featuredIsLive && <Badge className="bg-red-600 text-white">Live</Badge>}
+                <Badge variant="outline" className="border-lsr-orange text-lsr-orange">{featuredEvent.series?.title}</Badge>
+              </div>
               <p className="text-white/80">{featuredEvent.summary}</p>
               <div className="text-sm text-white/60 mt-4 space-y-2">
                 <div className="flex items-center gap-2">
@@ -110,15 +121,19 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {upcomingEvents.length > 0 ? upcomingEvents.slice(0, 4).map((event) => {
               const eventDate = new Date(event.startsAtUtc)
+              const live = isLive(event);
               return (
                 <div key={event.id} className="rounded-xl border border-white/10 bg-white/[0.04] p-4 flex flex-col">
-                  <div className="flex justify-between items-center mb-1">
-                    {event.series && (
-                      <Badge variant="outline" className="border-lsr-orange text-lsr-orange text-xs">
-                        {event.series.title}
-                      </Badge>
-                    )}
-                    <div className="text-xs text-white/60">
+                  <div className="flex justify-between items-start mb-1 gap-2">
+                    <div className="flex flex-wrap gap-1">
+                      {live && <Badge className="bg-red-600 text-white text-xs">Live</Badge>}
+                      {event.series && (
+                        <Badge variant="outline" className="border-lsr-orange text-lsr-orange text-xs">
+                          {event.series.title}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="text-xs text-white/60 text-right flex-shrink-0">
                       {eventDate.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                     </div>
                   </div>
