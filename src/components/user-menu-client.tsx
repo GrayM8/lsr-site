@@ -15,7 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Shield } from "lucide-react";
 import { AuthDialog } from "./auth-dialog";
-import { User } from "@/server/auth/session";
+import { User } from "@prisma/client";
 
 export function UserMenuClient({
                                  user,
