@@ -9,7 +9,7 @@ export async function GET(request: Request) {
   const code = searchParams.get('code');
 
   if (!code) {
-    console.error('Callback invoked without a code.');
+    console.error('[Auth Callback] Error: No code provided.');
     return NextResponse.redirect(`${origin}/auth/auth-code-error?error=No code provided`);
   }
 
@@ -33,83 +33,62 @@ export async function GET(request: Request) {
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error || !data.user) {
-    console.error('Error exchanging code for session:', error);
+    console.error('[Auth Callback] Error exchanging code for session:', error);
     const errorMessage = error ? error.message : 'No user data';
     return NextResponse.redirect(`${origin}/auth/auth-code-error?error=${errorMessage}`);
   }
 
   const { user } = data;
-  console.log(`Successfully exchanged code. Supabase user ID: ${user.id}.`);
+  console.log(`[Auth Callback] Supabase user retrieved:`, JSON.stringify(user, null, 2));
 
   try {
-    // Use a transaction to find or create the user
     const dbUser = await prisma.$transaction(async (tx) => {
-      const existingUser = await tx.user.findUnique({
-        where: { id: user.id },
-      });
+      const existingUser = await tx.user.findUnique({ where: { id: user.id } });
 
       if (existingUser) {
-        console.log(`User ${existingUser.id} found in DB. Status: ${existingUser.status}.`);
-        if (existingUser.status !== 'active') {
-          return tx.user.update({
-            where: { id: user.id },
-            data: { status: 'active' },
-          });
-        }
+        console.log(`[Auth Callback] User ${existingUser.id} found in DB.`);
         return existingUser;
       }
 
-      // --- User does not exist, so create them ---
-      console.log('User not found in DB. Creating new user.');
+      console.log('[Auth Callback] User not found in DB. Creating new user.');
       if (!user.email) {
-        throw new Error('Cannot create user: email is missing from Supabase user data.');
+        throw new Error('User email is missing from Supabase data.');
       }
 
-      const displayName = user.user_metadata.displayName || user.user_metadata.full_name || user.email.split('@')[0];
-      const avatarUrl = user.user_metadata.avatar_url;
-      
-      // Create a unique handle
+      const displayName = user.user_metadata.full_name || user.user_metadata.displayName || user.email.split('@')[0];
       const baseHandle = slugify(displayName);
       const randomSuffix = Math.random().toString(36).substring(2, 8);
       const handle = `${baseHandle}-${randomSuffix}`;
+      console.log(`[Auth Callback] Generated handle: ${handle}`);
 
-      const newUserPayload: {
-        id: string;
-        email: string;
-        handle: string;
-        displayName: string;
-        avatarUrl?: string;
-        status: 'active';
-        eid?: string;
-        gradYear?: number;
-        marketingOptIn: boolean;
-      } = {
+      const newUserPayload = {
         id: user.id,
         email: user.email,
         handle: handle,
         displayName: displayName,
-        avatarUrl: avatarUrl,
+        avatarUrl: user.user_metadata.avatar_url,
         status: 'active' as const,
         marketingOptIn: user.user_metadata.marketingOptIn ?? true,
       };
-
-      if (user.user_metadata.eid) {
-        newUserPayload.eid = user.user_metadata.eid;
+      
+      console.log('[Auth Callback] Creating user with payload:', JSON.stringify(newUserPayload, null, 2));
+      
+      try {
+        const createdUser = await tx.user.create({ data: newUserPayload });
+        console.log('[Auth Callback] Successfully created user in DB:', createdUser.id);
+        return createdUser;
+      } catch (creationError) {
+        console.error('[Auth Callback] Error creating user in transaction:', creationError);
+        throw creationError; // Re-throw to abort the transaction
       }
-      if (user.user_metadata.gradYear) {
-        newUserPayload.gradYear = Number(user.user_metadata.gradYear);
-      }
-
-      console.log('Creating user with payload:', JSON.stringify(newUserPayload, null, 2));
-      return tx.user.create({ data: newUserPayload });
     });
 
     const redirectUrl = `${origin}/drivers/${dbUser.handle}`;
-    console.log(`Redirecting to user's page: ${redirectUrl}`);
+    console.log(`[Auth Callback] Redirecting to: ${redirectUrl}`);
     return NextResponse.redirect(redirectUrl);
 
   } catch (dbError) {
-    console.error('A database error occurred:', dbError);
+    console.error('[Auth Callback] A database error occurred:', dbError);
     const errorMessage = (dbError instanceof Error) ? dbError.message : 'Unknown DB error';
     return NextResponse.redirect(`${origin}/auth/auth-code-error?error=DB operation failed&details=${errorMessage}`);
   }
