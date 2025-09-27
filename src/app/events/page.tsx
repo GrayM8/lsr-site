@@ -3,7 +3,7 @@ import { EventsSearch } from "@/components/events-search"
 import { EventsFilters } from "@/components/events-filters"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Clock, MapPin, Send } from "lucide-react"
-import { getAllEvents, getAllEventTypes } from "@/server/queries/events"
+import { getAllEvents } from "@/server/queries/events";
 import { Event, Venue, EventSeries } from "@prisma/client"
 import { GeoPoint } from "@/types";
 import Image from "next/image"
@@ -90,7 +90,7 @@ export default async function EventsIndexPage({
     .map((t) => t.toString().toLowerCase())
 
   const allEvents = await getAllEvents()
-  const allTypes = await getAllEventTypes();
+  const allSeries = [...new Set(allEvents.map(e => e.series?.title).filter((s): s is string => !!s))].sort();
 
   const events = allEvents.filter((e) => {
     const searchMatch = !q ||
@@ -112,7 +112,7 @@ export default async function EventsIndexPage({
           <h1 className="font-display text-4xl md:text-5xl text-lsr-orange tracking-wide">Events</h1>
           <div className="ms-auto flex items-center gap-2">
             <EventsSearch q={q} />
-            <EventsFilters allTypes={allTypes} selectedTypes={selectedTypes} />
+            <EventsFilters allTypes={allSeries} selectedTypes={selectedTypes} />
           </div>
         </div>
 
