@@ -47,7 +47,7 @@ export function AuthDialog() {
     e.preventDefault();
     startTransition(async () => {
       const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
-      const redirectTo = `${origin.replace(/\/$/, '')}/auth/callback?next=/account`;
+      const redirectTo = `${origin.replace(/\/$/, '')}/auth/callback`;
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -62,23 +62,6 @@ export function AuthDialog() {
         },
       });
       if (error) return alert(error.message);
-
-      if (data.user) {
-        // Create a corresponding user profile in our database
-        await fetch('/api/users', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: data.user.id,
-            email: data.user.email,
-            displayName,
-            handle: displayName.toLowerCase().replace(/\s/g, '-'),
-            eid,
-            gradYear: gradYear ? Number(gradYear) : null,
-            marketingOptIn: marketing,
-          }),
-        });
-      }
 
       alert("Check your email to confirm and sign in.");
       setOpen(false);

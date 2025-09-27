@@ -25,7 +25,7 @@ export function GoogleButton() {
   const handle = async () => {
     const supabase = createSupabaseBrowser();
     const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
-    const redirectTo = `${origin.replace(/\/$/, '')}/auth/callback?next=/account`;
+    const redirectTo = `${origin.replace(/\/$/, '')}/auth/callback`;
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo },
