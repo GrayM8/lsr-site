@@ -14,24 +14,24 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Shield } from "lucide-react";
+import { AuthDialog } from "./auth-dialog";
+import { User } from "@/server/auth/session";
 
 export function UserMenuClient({
-                                 displayName,
-                                 email,
-                                 avatarUrl,
-                                 handle,
+                                 user,
                                  roles,
                                }: {
-  displayName: string
-  email?: string | null
-  avatarUrl?: string | null
-  handle?: string | null
+  user: User | null
   roles: string[]
 }) {
   const supabase = createSupabaseBrowser()
   const router = useRouter()
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+
+  if (!user) {
+    return <AuthDialog />
+  }
 
   async function logout() {
     try {
@@ -46,7 +46,7 @@ export function UserMenuClient({
     // setTimeout(() => window.location.reload(), 0)
   }
 
-  const initials = displayName
+  const initials = user.displayName
     .split(" ")
     .map((n) => n[0])
     .slice(0, 2)
@@ -60,20 +60,20 @@ export function UserMenuClient({
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="h-9 gap-2">
           <Avatar className="h-5 w-5">
-            <AvatarImage src={avatarUrl ?? undefined} />
+            <AvatarImage src={user.avatarUrl ?? undefined} />
             <AvatarFallback className="text-[10px]">{initials || "U"}</AvatarFallback>
           </Avatar>
-          <span className="truncate max-w-[10rem]">{displayName}</span>
+          <span className="truncate max-w-[10rem]">{user.displayName}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
-          <div className="truncate">{displayName}</div>
-          {email && <div className="text-xs text-muted-foreground truncate">{email}</div>}
+          <div className="truncate">{user.displayName}</div>
+          {user.email && <div className="text-xs text-muted-foreground truncate">{user.email}</div>}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem onSelect={() => router.push(handle ? `/drivers/${handle}` : "/drivers/me")}>
+        <DropdownMenuItem onSelect={() => router.push(user.handle ? `/drivers/${user.handle}` : "/drivers/me")}>
           My driver page
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => router.push("/account")}>
