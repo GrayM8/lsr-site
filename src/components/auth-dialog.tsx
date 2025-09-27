@@ -48,7 +48,7 @@ export function AuthDialog() {
     startTransition(async () => {
       const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
       const redirectTo = `${origin.replace(/\/$/, '')}/auth/callback`;
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -61,13 +61,13 @@ export function AuthDialog() {
           },
         },
       });
-      if (error) return alert(error.message);
-
-      if (data.user) {
-        await supabase.auth.updateUser({ data: { email_confirmed_at: new Date().toISOString() } });
-        router.push(`/drivers/${displayName.toLowerCase().replace(/\s/g, '-')}`);
-        setOpen(false);
+      if (error) {
+        alert(error.message);
+        return;
       }
+
+      alert("Check your email to confirm and sign in.");
+      setOpen(false);
     });
   }
 

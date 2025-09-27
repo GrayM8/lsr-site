@@ -2,13 +2,14 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { type CookieOptions, createServerClient } from '@supabase/ssr';
 import { prisma } from '@/server/db';
+import { slugify } from '@/lib/slug';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/';
 
   if (!code) {
+    console.error('Callback invoked without a code.');
     return NextResponse.redirect(`${origin}/auth/auth-code-error?error=No code provided`);
   }
 
@@ -18,13 +19,11 @@ export async function GET(request: Request) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-        set(name: string, value: string, options: CookieOptions) {
+        get: (name: string) => cookieStore.get(name)?.value,
+        set: (name: string, value: string, options: CookieOptions) => {
           cookieStore.set({ name, value, ...options });
         },
-        remove(name: string, options: CookieOptions) {
+        remove: (name: string, options: CookieOptions) => {
           cookieStore.delete({ name, ...options });
         },
       },
@@ -34,47 +33,68 @@ export async function GET(request: Request) {
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error || !data.user) {
+    console.error('Error exchanging code for session:', error);
     const errorMessage = error ? error.message : 'No user data';
     return NextResponse.redirect(`${origin}/auth/auth-code-error?error=${errorMessage}`);
   }
 
   const { user } = data;
+  console.log(`Successfully exchanged code. Supabase user ID: ${user.id}.`);
 
   try {
-    let dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
+    // Use a transaction to find or create the user
+    const dbUser = await prisma.$transaction(async (tx) => {
+      const existingUser = await tx.user.findUnique({
+        where: { id: user.id },
+      });
+
+      if (existingUser) {
+        console.log(`User ${existingUser.id} found in DB. Status: ${existingUser.status}.`);
+        // If user exists but isn't active, update them.
+        if (existingUser.status !== 'active') {
+          return tx.user.update({
+            where: { id: user.id },
+            data: { status: 'active' },
+          });
+        }
+        return existingUser;
+      }
+
+      // --- User does not exist, so create them ---
+      console.log('User not found in DB. Creating new user.');
+      if (!user.email) {
+        throw new Error('Cannot create user: email is missing from Supabase user data.');
+      }
+
+      // For Google OAuth, name comes from 'full_name'. For email, it's 'displayName'
+      const displayName = user.user_metadata.displayName || user.user_metadata.full_name || user.email.split('@')[0];
+      const avatarUrl = user.user_metadata.avatar_url;
+      const handle = slugify(displayName);
+
+      const newUserPayload = {
+        id: user.id,
+        email: user.email,
+        handle: handle,
+        displayName: displayName,
+        avatarUrl: avatarUrl,
+        status: 'active' as const,
+        // EID and gradYear are only available for email signups
+        eid: user.user_metadata.eid,
+        gradYear: user.user_metadata.gradYear,
+        marketingOptIn: user.user_metadata.marketingOptIn ?? true,
+      };
+
+      console.log('Creating user with payload:', JSON.stringify(newUserPayload, null, 2));
+      return tx.user.create({ data: newUserPayload });
     });
 
-    if (dbUser) {
-      if (dbUser.status !== 'active') {
-        dbUser = await prisma.user.update({
-          where: { id: user.id },
-          data: { status: 'active' },
-        });
-      }
-    } else {
-      const emailPrefix = user.email!.split('@')[0];
-      const randomSuffix = Math.random().toString(36).substring(2, 8);
-      const handle = `${emailPrefix}-${randomSuffix}`;
-      const displayName = user.user_metadata.full_name || user.email;
-
-      dbUser = await prisma.user.create({
-        data: {
-          id: user.id,
-          email: user.email!,
-          handle: handle,
-          displayName: displayName,
-          avatarUrl: user.user_metadata.avatar_url,
-          status: 'active',
-        },
-      });
-    }
-
     const redirectUrl = `${origin}/drivers/${dbUser.handle}`;
+    console.log(`Redirecting to user's page: ${redirectUrl}`);
     return NextResponse.redirect(redirectUrl);
 
   } catch (dbError) {
-    const errorMessage = dbError instanceof Error ? dbError.message : 'Unknown DB error';
+    console.error('A database error occurred:', dbError);
+    const errorMessage = (dbError instanceof Error) ? dbError.message : 'Unknown DB error';
     return NextResponse.redirect(`${origin}/auth/auth-code-error?error=DB operation failed&details=${errorMessage}`);
   }
 }
