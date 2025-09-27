@@ -9,9 +9,17 @@ import { GeoPoint } from "@/types";
 import Image from "next/image"
 import Link from "next/link"
 
+const isLive = (event: Event) => {
+  const now = new Date();
+  const start = new Date(event.startsAtUtc);
+  const end = new Date(event.endsAtUtc);
+  return start <= now && now <= end;
+};
+
 function EventCard({ event }: { event: Event & { series: EventSeries | null, venue: Venue | null } }) {
   const startsAt = new Date(event.startsAtUtc)
   const endsAt = new Date(event.endsAtUtc)
+  const live = isLive(event);
 
   const venue = event.venue
   const geo = venue?.geo as GeoPoint | null
@@ -26,7 +34,10 @@ function EventCard({ event }: { event: Event & { series: EventSeries | null, ven
       )}
       <div className="p-6 flex-grow flex flex-col">
         <div className="flex-grow">
-          <Badge variant="outline" className="border-lsr-orange text-lsr-orange mb-2">{event.series?.title}</Badge>
+          <div className="flex items-center gap-2 mb-2">
+            {live && <Badge className="bg-red-600 text-white">Live</Badge>}
+            <Badge variant="outline" className="border-lsr-orange text-lsr-orange">{event.series?.title}</Badge>
+          </div>
           <h3 className={`font-semibold text-xl`}>
             <Link href={`/events/${event.slug}`} className="hover:underline">{event.title}</Link>
           </h3>
