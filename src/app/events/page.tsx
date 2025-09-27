@@ -13,7 +13,7 @@ function EventCard({ event }: { event: Event & { series: EventSeries | null, ven
   const endsAt = new Date(event.endsAtUtc)
 
   const venue = event.venue
-  const geo = venue?.geo as any
+  const geo = venue?.geo as GeoPoint | null
   const hasCoords = geo?.type === "Point" && geo?.coordinates?.length === 2
   const directionsUrl = hasCoords ? `https://www.google.com/maps/search/?api=1&query=${geo.coordinates[1]},${geo.coordinates[0]}` : null
 

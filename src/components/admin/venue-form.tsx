@@ -44,11 +44,11 @@ export function VenueForm({ venue }: { venue?: Venue }) {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label htmlFor="latitude">Latitude</label>
-            <Input id="latitude" name="latitude" type="number" step="any" defaultValue={(venue?.geo as any)?.coordinates?.[1]} />
+            <Input id="latitude" name="latitude" type="number" step="any" defaultValue={(venue?.geo as GeoPoint | null)?.coordinates?.[1]} />
           </div>
           <div>
             <label htmlFor="longitude">Longitude</label>
-            <Input id="longitude" name="longitude" type="number" step="any" defaultValue={(venue?.geo as any)?.coordinates?.[0]} />
+            <Input id="longitude" name="longitude" type="number" step="any" defaultValue={(venue?.geo as GeoPoint | null)?.coordinates?.[0]} />
           </div>
         </div>
         <Button type="submit">{venue ? "Update Venue" : "Create Venue"}</Button>

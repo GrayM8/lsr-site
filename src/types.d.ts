@@ -15,3 +15,8 @@
 // For now, we will leave this empty as the repositories are returning Prisma types.
 // As the app grows, we can define specific DTOs here to decouple the client
 // from the database schema.
+
+export type GeoPoint = {
+  type: "Point";
+  coordinates: [number, number];
+};
