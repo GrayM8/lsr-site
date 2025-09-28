@@ -17,13 +17,13 @@ async function main() {
   });
   await prisma.role.upsert({
     where: { key: "officer" },
-    update: {},
-    create: { key: "officer", description: "Club officer" },
+    update: { description: "Officer" },
+    create: { key: "officer", description: "Officer" },
   });
   await prisma.role.upsert({
     where: { key: "admin" },
-    update: {},
-    create: { key: "admin", description: "Site administrator" },
+    update: { description: "Site Admin" },
+    create: { key: "admin", description: "Site Admin" },
   });
 
   // ---- Membership tiers ----
