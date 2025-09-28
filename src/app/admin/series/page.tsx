@@ -15,8 +15,8 @@ export default async function SeriesAdminPage() {
           <Link href="/admin/series/new">New Series</Link>
         </Button>
       </div>
-      <div className="border rounded-lg">
-        <table className="w-full text-left">
+      <div className="border rounded-lg overflow-x-auto">
+        <table className="w-full text-left min-w-[600px]">
           <thead>
             <tr className="border-b">
               <th className="p-4">Title</th>

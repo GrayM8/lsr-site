@@ -3,9 +3,23 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import SectionReveal from "./SectionReveal"
-import { Calendar, MessageSquare, UserPlus } from "lucide-react"
+import { Calendar, MessageSquare, UserPlus, Check } from "lucide-react"
+import { createSupabaseBrowser } from "@/lib/supabase-browser"
+import { useEffect, useState } from "react"
+import { User } from "@supabase/supabase-js"
 
 export default function FinalCta({ index }: { index: number }) {
+  const [user, setUser] = useState<User | null>(null)
+  const supabase = createSupabaseBrowser()
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data } = await supabase.auth.getUser()
+      setUser(data.user)
+    }
+    getUser()
+  }, [supabase.auth])
+
   const openAuthDialog = () => {
     window.dispatchEvent(new CustomEvent("open-auth-dialog"))
   }
@@ -18,10 +32,17 @@ export default function FinalCta({ index }: { index: number }) {
           <li className="rounded-xl border border-white/10 bg-white/[0.04] p-4 flex flex-col">
             <div className="font-semibold">1) Create an Account</div>
             <p className="text-white/75 mt-1 flex-grow">Forge your digital identity and track your progress. Sign up to create your driver profile and get on the official roster.</p>
-            <Button onClick={openAuthDialog} className="mt-4 bg-lsr-orange hover:bg-lsr-orange/90 w-full">
-              <UserPlus className="w-4 h-4 mr-2" />
-              Sign Up
-            </Button>
+            {user ? (
+              <Button disabled className="mt-4 w-full">
+                <Check className="w-4 h-4 mr-2" />
+                You&apos;re Signed Up!
+              </Button>
+            ) : (
+              <Button onClick={openAuthDialog} className="mt-4 bg-lsr-orange hover:bg-lsr-orange/90 w-full">
+                <UserPlus className="w-4 h-4 mr-2" />
+                Sign Up
+              </Button>
+            )}
           </li>
           <li className="rounded-xl border border-white/10 bg-white/[0.04] p-4 flex flex-col">
             <div className="font-semibold">2) Join the Discord</div>
