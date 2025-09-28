@@ -28,8 +28,8 @@ export function SiteFooter() {
             <Link href="/events" className="hover:underline">Events</Link>
             <Link href="/drivers" className="hover:underline">All Drivers</Link>
             <Link href="/series/lone-star-cup" className="hover:underline">Lone Star Cup</Link>
+            <Link href="/gallery" className="hover:underline">Gallery</Link>
             <Link href="/sponsors" className="hover:underline">Sponsors</Link>
-            <Link href="/about" className="hover:underline">About</Link>
           </nav>
 
           {/* Contact */}
