@@ -1,176 +1,76 @@
-# Longhorn Sim Racing — Website
+# Longhorn Sim Racing
 
-Next.js 15 + TypeScript, Tailwind, shadcn/ui. Data via Prisma → Postgres (Supabase). Auth via Supabase Magic Link. Deployed on Vercel.
+This is the official website for the Longhorn Sim Racing club at UT Austin.
+
+Built with Next.js, TypeScript, Tailwind CSS, Prisma, and Supabase.
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v20.x or later)
+- npm
+- A Supabase project for database and authentication.
+
+### Setup
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/your-repo/lsr-site.git
+    cd lsr-site
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+3.  **Set up environment variables:**
+    Create `.env.local` and `.env` files by copying the examples and add your Supabase credentials. You can get these from your Supabase project dashboard. Also fill in keys for the other providers.
+
+    ```bash
+    cp .env.example .env.local
+    ```
+
+    Now, open `.env.local` and fill in the values:
+
+    ```env
+    # Get these from your Supabase project's "API" settings
+    NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-public-anon-key
+
+    # Get this from your Supabase project's "Database" settings
+    # Use the "Connection string" URI and make sure to use the Session Replay port (6543)
+    DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.your-project-id.supabase.co:6543/postgres"
+    ```
+
+4.  **Run database migrations:**
+    This will sync your database schema with the Prisma schema defined in the project.
+    ```bash
+    npm run db:migrate
+    ```
+
+5.  **Run the development server:**
+    ```bash
+    npm run dev
+    ```
+    The site will be available at [http://localhost:3000](http://localhost:3000).
+
+## Key Scripts
+
+-   `npm run dev`: Starts the development server.
+-   `npm run build`: Creates a production build of the site.
+-   `npm run lint`: Lints the codebase for errors.
+-   `npm run db:migrate`: Applies database migrations.
+-   `npm run db:reset`: Resets and re-seeds the database (for development only).
+-   `npm run set-role <userId> <role>`: Assigns a role (`admin`, `officer`) to a user.
 
 ## Tech Stack
-- **App**: Next.js (App Router), React 19, TypeScript
-- **UI**: Tailwind CSS, shadcn/ui, Framer Motion, next-themes
-- **Data**: Prisma ORM → Supabase Postgres
-- **Auth**: Supabase (magic link)
-- **Deploy**: Vercel (Preview + Prod)
 
----
-
-## Prerequisites
-- Node **≥ 20** (recommended 22.x)
-- npm **≥ 10**
-- A Supabase project (URL, anon key, Postgres credentials)
-
----
-
-## Local Setup
-
-1. **Install deps**
-   ```bash
-   npm install
-Environment variables
-
-Create .env (server-only; Prisma uses this):
-
-# Supabase Postgres (server-only)
-# Use pooler for Prisma Client at runtime
-DATABASE_URL=postgresql://postgres:ENCODED_PASSWORD@db.YOUR_PROJECT_ID.supabase.co:6543/postgres?pgbouncer=true&connection_limit=1&sslmode=require
-
-# Use direct port for migrations/introspection
-DIRECT_URL=postgresql://postgres:ENCODED_PASSWORD@db.YOUR_PROJECT_ID.supabase.co:5432/postgres?sslmode=require
-If your DB password contains @:/#&?= , URL-encode it:
-
-node -e "console.log(encodeURIComponent('raw_password'))"
-
-Create .env.local (browser + server):
-
-NEXT_PUBLIC_SUPABASE_URL=YOUR_SUPABASE_URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
-ALLOWED_ADMIN_EMAILS=you@utexas.edu
-Never commit .env / .env.local. Keep .env.example with placeholders.
-
-Database & Prisma
-
-# Apply migrations (schema is already in repo)
-npx prisma migrate dev --name init
-
-# Optional: open Prisma Studio
-npx prisma studio
-
-# Optional: seed data (if seed is configured)
-npm run db:seed
-Run dev server
-
-npm run dev
-http://localhost:3000
-
-http://localhost:3000/drivers (SSR list)
-
-http://localhost:3000/login → magic link flow → /admin
-
-Auth Configuration (Supabase)
-Supabase → Auth → URL Configuration → Redirect URLs:
-
-http://localhost:3000/auth/callback
-(Add your Vercel Preview/Prod URLs later.)
-
-Admin access is gated by ALLOWED_ADMIN_EMAILS (comma-separated).
-
-Scripts
-{
-"dev": "next dev",
-"build": "next build",
-"start": "next start",
-"lint": "eslint",
-"postinstall": "prisma generate",     // ensure Prisma client on Vercel
-"db:seed": "prisma db seed"           // optional convenience
-}
-Handy extras:
-
-npx prisma generate
-npx prisma studio
-
-Project Structure
-src/
-app/
-(routes)
-admin/
-layout.tsx     # protected layout (requires auth + allowed email)
-page.tsx       # admin home (add driver)
-sponsors/page.tsx
-events/page.tsx
-auth/callback/route.ts  # Supabase session exchange
-components/
-(ui components, header, logout-button, etc.)
-lib/
-prisma.ts              # Prisma client (singleton)
-supabase-browser.ts    # Supabase client for client components
-supabase-server.ts     # Supabase client for server components
-prisma/
-schema.prisma
-migrations/
-OLDseed.ts                  # optional
-Deployment (Vercel)
-Connect GitHub repo → New Project.
-
-Environment Variables (set for both Preview and Production):
-
-NEXT_PUBLIC_SUPABASE_URL
-
-NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-DATABASE_URL (pooler 6543, include pgbouncer=true&connection_limit=1&sslmode=require)
-
-DIRECT_URL (direct 5432, include sslmode=require)
-
-ALLOWED_ADMIN_EMAILS
-
-In Vercel, do not wrap values in quotes.
-
-Prisma on build: postinstall runs prisma generate automatically.
-
-Auth redirect: add your Preview/Prod domain to Supabase Auth Redirect URLs:
-
-https://<preview-domain>/auth/callback
-https://<prod-domain>/auth/callback
-If using a separate prod DB, run migrations:
-
-npx prisma migrate deploy
-Common Troubleshooting
-Node version error: Next.js requires ^18.18 || ^19.8 || >=20. Use Node 20/22.
-
-Prisma P1001 (can’t reach DB):
-
-Check DIRECT_URL/DATABASE_URL values.
-
-Some networks block 5432; use mobile hotspot for migration or set DIRECT_URL temporarily to 6543.
-
-“URL must start with postgresql://” on Vercel:
-
-Missing/empty DATABASE_URL or DIRECT_URL, or they contain quotes. Fix envs in Vercel UI (no quotes).
-
-Invalid connection string / “invalid port number”:
-
-Password not URL-encoded → encode and update both URLs.
-
-Login 404 at /auth/callback:
-
-Ensure file path: src/app/auth/callback/route.ts.
-
-Add redirect URL in Supabase dashboard.
-
-Client components must import createSupabaseBrowser (not server helper).
-
-Server code uses createSupabaseServer with Next 15 cookie API (getAll/setAll).
-
-Contributing
-Branches: feat/*, fix/*, chore/*
-
-Commits: short, imperative (e.g., feat(drivers): add card grid)
-
-Format on save; run npm run lint before PRs.
-
-Roadmap (near-term)
-Public polish: hero, About content, Sponsors grid by tier, Events formatting.
-
-Cloudinary uploads (driver headshots, sponsor logos) with unsigned presets.
-
-Transactional email via Resend for contact/confirmations.
-
-License
-MIT © Longhorn Sim Racing
+-   **Framework**: [Next.js](https://nextjs.org/) (App Router)
+-   **Language**: [TypeScript](https://www.typescriptlang.org/)
+-   **Styling**: [Tailwind CSS](https://tailwindcss.com/) with [shadcn/ui](https://ui.shadcn.com/)
+-   **Database**: [Supabase](https://supabase.com/) (PostgreSQL)
+-   **ORM**: [Prisma](https://www.prisma.io/)
+-   **Authentication**: [Supabase Auth](https://supabase.com/auth)
+-   **Deployment**: [Vercel](https://vercel.com/)
