@@ -26,9 +26,10 @@ export function SiteFooter() {
           <nav aria-label="Footer" className="grid grid-cols-2 gap-2 text-sm">
             <Link href="/news" className="hover:underline">News</Link>
             <Link href="/events" className="hover:underline">Events</Link>
-            <Link href="/drivers" className="hover:underline">Drivers</Link>
+            <Link href="/drivers" className="hover:underline">All Drivers</Link>
+            <Link href="/series/lone-star-cup" className="hover:underline">Lone Star Cup</Link>
+            <Link href="/gallery" className="hover:underline">Gallery</Link>
             <Link href="/sponsors" className="hover:underline">Sponsors</Link>
-            <Link href="/about" className="hover:underline">About</Link>
           </nav>
 
           {/* Contact */}

@@ -6,8 +6,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu"
-import { ChevronDown } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { ChevronDown, Menu } from "lucide-react"
 
 export function SiteHeader() {
   return (
@@ -22,28 +26,65 @@ export function SiteHeader() {
             className="rounded-sm"
             priority
           />
-          <span className="font-display text-xl leading-none">Longhorn Sim Racing</span>
+          <span className="hidden sm:inline font-display text-xl leading-none">Longhorn Sim Racing</span>
         </Link>
 
-        <div className="font-sans flex items-center gap-4 text-sm">
-          <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center gap-1">
-              <span>Drivers</span>
-              <ChevronDown className="h-4 w-4" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem asChild>
-                <Link href="/drivers">All drivers</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/series/lonestar-cup">Lonestar Cup</Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Link href="/events">Events</Link>
-          <Link href="/gallery">Gallery</Link>
-          <Link href="/news">News</Link>
+        <div className="flex items-center gap-2">
+          {/* Desktop navigation links */}
+          <div className="hidden md:flex items-center gap-4 text-sm">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1">
+                <span>Drivers</span>
+                <ChevronDown className="h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem asChild>
+                  <Link href="/drivers">All drivers</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/series/lone-star-cup">Lone Star Cup</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Link href="/events">Events</Link>
+            <Link href="/gallery">Gallery</Link>
+            <Link href="/news">News</Link>
+          </div>
+
+          {/* User menu is always visible */}
           <UserMenu />
+
+          {/* Mobile hamburger menu */}
+          <div className="md:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>Drivers</DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuItem asChild>
+                      <Link href="/drivers">All drivers</Link>
+                    </DropdownMenuItem>
+                                        <DropdownMenuItem asChild>
+                                          <Link href="/series/lone-star-cup">Lone Star Cup</Link>
+                                        </DropdownMenuItem>                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+                <DropdownMenuItem asChild>
+                  <Link href="/events">Events</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/gallery">Gallery</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/news">News</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </nav>
     </header>

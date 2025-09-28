@@ -84,36 +84,36 @@ export default async function SeriesPage({ params }: SeriesPageArgs) {
                     </CarouselItem>
                   ))}
                 </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
+                <CarouselPrevious className="left-4" />
+                <CarouselNext className="right-4" />
               </Carousel>
             </div>
 
             <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-6">
               <h2 className="font-display text-3xl text-lsr-orange tracking-wide">Standings</h2>
-              <div className="border rounded-lg mt-4">
-                <table className="w-full text-left">
+              <div className="overflow-x-auto border rounded-lg mt-4">
+                <table className="w-full text-left font-sans text-sm">
                   <thead>
                     <tr className="border-b">
-                      <th className="p-4">Rank</th>
-                      <th className="p-4">Driver</th>
-                      <th className="p-4">Car</th>
-                      <th className="p-4">Starts</th>
-                      <th className="p-4">Wins</th>
-                      <th className="p-4">Podiums</th>
-                      <th className="p-4">Points</th>
+                      <th className="p-2 md:p-4">Rank</th>
+                      <th className="p-2 md:p-4">Driver</th>
+                      <th className="p-2 md:p-4">Car</th>
+                      <th className="p-2 md:p-4">Starts</th>
+                      <th className="p-2 md:p-4">Wins</th>
+                      <th className="p-2 md:p-4">Podiums</th>
+                      <th className="p-2 md:p-4">Points</th>
                     </tr>
                   </thead>
                   <tbody>
                     {standings.map((standing: { driver: { id: string, name: string }, car: string | undefined, starts: number, wins: number, podiums: number, points: number }, index) => (
                       <tr key={standing.driver.id} className="border-b">
-                        <td className="p-4">{index + 1}</td>
-                        <td className="p-4">{standing.driver.name}</td>
-                        <td className="p-4">{standing.car}</td>
-                        <td className="p-4">{standing.starts}</td>
-                        <td className="p-4">{standing.wins}</td>
-                        <td className="p-4">{standing.podiums}</td>
-                        <td className="p-4">{standing.points}</td>
+                        <td className="p-2 md:p-4">{index + 1}</td>
+                        <td className="p-2 md:p-4">{standing.driver.name}</td>
+                        <td className="p-2 md:p-4">{standing.car}</td>
+                        <td className="p-2 md:p-4">{standing.starts}</td>
+                        <td className="p-2 md:p-4">{standing.wins}</td>
+                        <td className="p-2 md:p-4">{standing.podiums}</td>
+                        <td className="p-2 md:p-4">{standing.points}</td>
                       </tr>
                     ))}
                   </tbody>
