@@ -7,18 +7,20 @@ import { EventSeries } from "@prisma/client";
 
 export function SeriesForm({ series }: { series?: EventSeries }) {
   return (
-    <form action={series ? updateSeries.bind(null, series.id) : createSeries}>
-      <div className="space-y-4">
-        <div>
-          <label htmlFor="title">Title</label>
-          <Input id="title" name="title" defaultValue={series?.title} required />
+    <div className="overflow-x-auto">
+      <form action={series ? updateSeries.bind(null, series.id) : createSeries} className="min-w-[600px]">
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="title">Title</label>
+            <Input id="title" name="title" defaultValue={series?.title} required />
+          </div>
+          <div>
+            <label htmlFor="slug">Slug</label>
+            <Input id="slug" name="slug" defaultValue={series?.slug} required />
+          </div>
+          <Button type="submit">{series ? "Update Series" : "Create Series"}</Button>
         </div>
-        <div>
-          <label htmlFor="slug">Slug</label>
-          <Input id="slug" name="slug" defaultValue={series?.slug} required />
-        </div>
-        <Button type="submit">{series ? "Update Series" : "Create Series"}</Button>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 }
