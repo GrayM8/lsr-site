@@ -42,7 +42,7 @@ export function SiteHeader() {
                   <Link href="/drivers">All drivers</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/series/lonestar-cup">Lonestar Cup</Link>
+                  <Link href="/series/lone-star-cup">Lone Star Cup</Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -69,10 +69,9 @@ export function SiteHeader() {
                     <DropdownMenuItem asChild>
                       <Link href="/drivers">All drivers</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/series/lonestar-cup">Lonestar Cup</Link>
-                    </DropdownMenuItem>
-                  </DropdownMenuSubContent>
+                                        <DropdownMenuItem asChild>
+                                          <Link href="/series/lone-star-cup">Lone Star Cup</Link>
+                                        </DropdownMenuItem>                  </DropdownMenuSubContent>
                 </DropdownMenuSub>
                 <DropdownMenuItem asChild>
                   <Link href="/events">Events</Link>
