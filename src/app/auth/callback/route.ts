@@ -6,46 +6,50 @@ import { slugify } from '@/lib/slug';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
-  
-  try {
-    const code = searchParams.get('code');
+  const code = searchParams.get('code');
 
-    if (!code) {
-      throw new Error('No code provided in the callback URL.');
-    }
+  if (!code) {
+    return NextResponse.redirect(`${origin}/auth/auth-code-error?error=No code provided`);
+  }
 
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get: (name: string) => cookieStore.get(name)?.value,
-          set: (name: string, value: string, options: CookieOptions) => {
-            cookieStore.set({ name, value, ...options });
-          },
-          remove: (name: string, options: CookieOptions) => {
-            cookieStore.delete({ name, ...options });
-          },
+  const cookieStore = await cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get: (name: string) => cookieStore.get(name)?.value,
+        set: (name: string, value: string, options: CookieOptions) => {
+          cookieStore.set({ name, value, ...options });
+        },
+        remove: (name: string, options: CookieOptions) => {
+          cookieStore.delete({ name, ...options });
         },
       },
-    );
+    },
+  );
 
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (error) {
-      throw new Error(`Supabase session exchange error: ${error.message}`);
-    }
-    if (!data.user) {
-      throw new Error('No user data returned after session exchange.');
-    }
+  if (error || !data.user) {
+    console.error('[Auth Callback] Error exchanging code for session:', error);
+    const errorMessage = error ? error.message : 'No user data';
+    return NextResponse.redirect(`${origin}/auth/auth-code-error?error=${errorMessage}`);
+  }
 
-    const { user } = data;
+  const { user } = data;
 
+  try {
     const dbUser = await prisma.$transaction(async (tx) => {
       const existingUser = await tx.user.findUnique({ where: { id: user.id } });
 
       if (existingUser) {
+        if (existingUser.status !== 'active') {
+          return tx.user.update({
+            where: { id: user.id },
+            data: { status: 'active' },
+          });
+        }
         return existingUser;
       }
 
@@ -54,14 +58,20 @@ export async function GET(request: Request) {
       }
 
       const displayName = user.user_metadata.full_name || user.user_metadata.displayName || user.email.split('@')[0];
+      
+      // Create a unique handle, appending a number if necessary
       const baseHandle = slugify(displayName);
-      const randomSuffix = Math.random().toString(36).substring(2, 8);
-      const handle = `${baseHandle}-${randomSuffix}`;
+      let finalHandle = baseHandle;
+      let counter = 1;
+      while (await tx.user.findUnique({ where: { handle: finalHandle } })) {
+        finalHandle = `${baseHandle}-${counter}`;
+        counter++;
+      }
 
       const newUserPayload = {
         id: user.id,
         email: user.email,
-        handle: handle,
+        handle: finalHandle,
         displayName: displayName,
         avatarUrl: user.user_metadata.avatar_url,
         status: 'active' as const,
@@ -74,15 +84,9 @@ export async function GET(request: Request) {
     const redirectUrl = `${origin}/drivers/${dbUser.handle}`;
     return NextResponse.redirect(redirectUrl);
 
-  } catch (e) {
-    const error = e as Error;
-    const errorMessage = error.message || 'An unknown error occurred.';
-    const details = encodeURIComponent(JSON.stringify({
-      message: errorMessage,
-      stack: error.stack,
-      cause: error.cause,
-    }));
-    console.error(`[Auth Callback] Critical Error: ${errorMessage}`, e);
-    return NextResponse.redirect(`${origin}/auth/auth-code-error?error=${encodeURIComponent(errorMessage)}&details=${details}`);
+  } catch (dbError) {
+    console.error('[Auth Callback] A database error occurred:', dbError);
+    const errorMessage = (dbError instanceof Error) ? dbError.message : 'Unknown DB error';
+    return NextResponse.redirect(`${origin}/auth/auth-code-error?error=DB operation failed&details=${errorMessage}`);
   }
 }
