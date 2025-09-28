@@ -15,8 +15,8 @@ export default async function VenuesAdminPage() {
           <Link href="/admin/venues/new">New Venue</Link>
         </Button>
       </div>
-      <div className="border rounded-lg">
-        <table className="w-full text-left">
+      <div className="border rounded-lg overflow-x-auto">
+        <table className="w-full text-left min-w-[700px]">
           <thead>
             <tr className="border-b">
               <th className="p-4">Name</th>

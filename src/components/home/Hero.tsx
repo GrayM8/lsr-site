@@ -15,7 +15,7 @@ export default function Home() {
   const y = useTransform(scrollYProgress, [0, 1], ["0px", "-250px"]) // subtle upward drift
 
   return (
-    <section ref={heroRef} className="relative min-h-dvh bg-lsr-charcoal text-white grid place-items-center overflow-x-clip mb-10 md:mb-14">
+    <section ref={heroRef} className="relative min-h-dvh bg-lsr-charcoal text-white grid place-items-center overflow-hidden mb-10 md:mb-14">
       {/* Background image (blurred + dimmed) */}
       <motion.div
         aria-hidden
@@ -45,7 +45,7 @@ export default function Home() {
         initial={{opacity: 0, y: 24}}
         animate={{opacity: 1, y: 0}}
         transition={{duration: 0.6}}
-        className="z-10 max-w-6xl w-full px-6 md:px-8 text-center py-16 md:py-24"
+        className="relative z-10 max-w-6xl w-full px-6 md:px-8 text-center py-16 md:py-24"
       >
         {/* Badge (forces its own line) */}
         <div className="mb-6">
@@ -57,11 +57,11 @@ export default function Home() {
         </div>
 
         {/* Headline with searchlight-on-text */}
-        <div className="relative block w-fit mx-auto isolate">
+        <div className="relative block mx-auto isolate">
           {/* Base orange text */}
           <h1
-            className="relative z-10 font-display text-lsr-orange text-5xl md:text-7xl lg:text-8xl leading-[0.95] tracking-wide drop-shadow-[0_6px_24px_rgba(191,87,0,0.45)] font-bold">
-            LONGHORN&nbsp;SIM&nbsp;RACING
+            className="relative z-10 font-display text-lsr-orange text-4xl sm:text-5xl md:text-7xl lg:text-8xl leading-[0.95] tracking-wide drop-shadow-[0_6px_24px_rgba(191,87,0,0.45)] font-bold">
+            LONGHORN SIM RACING
           </h1>
 
           {/* Moving searchlight, clipped to letters only */}
@@ -87,7 +87,7 @@ export default function Home() {
               <motion.span
                 aria-hidden
                 className="pointer-events-none select-none absolute inset-0 z-20 font-display font-bold text-transparent mix-blend-screen
-                   text-5xl md:text-7xl lg:text-8xl leading-[0.95] tracking-wide"
+                   text-4xl sm:text-5xl md:text-7xl lg:text-8xl leading-[0.95] tracking-wide"
                 style={style}
                 animate={{
                   ["--gx"]: [0.15, 0.85, 0.25, 0.70, 0.40],
@@ -95,7 +95,7 @@ export default function Home() {
                 }}
                 transition={{duration: 12, ease: "easeInOut", repeat: Infinity, repeatType: "mirror"}}
               >
-                LONGHORN&nbsp;SIM&nbsp;RACING
+                LONGHORN SIM RACING
               </motion.span>
             )
           })()}

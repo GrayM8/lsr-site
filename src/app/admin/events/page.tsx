@@ -15,8 +15,8 @@ export default async function EventsAdminPage() {
           <Link href="/admin/events/new">New Event</Link>
         </Button>
       </div>
-      <div className="border rounded-lg">
-        <table className="w-full text-left">
+      <div className="border rounded-lg overflow-x-auto">
+        <table className="w-full text-left min-w-[700px]">
           <thead>
             <tr className="border-b">
               <th className="p-4">Title</th>

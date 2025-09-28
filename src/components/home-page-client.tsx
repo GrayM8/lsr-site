@@ -19,7 +19,7 @@ type Props = {
 
 export default function HomePageClient({ posts, featuredEvent, upcomingEvents, drivers }: Props) {
   return (
-    <main className="bg-lsr-charcoal text-white overflow-x-clip">
+    <main className="relative bg-lsr-charcoal text-white">
       <Hero />
 
       {/* Below-hero content */}
