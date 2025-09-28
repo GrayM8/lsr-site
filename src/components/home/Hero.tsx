@@ -15,7 +15,7 @@ export default function Home() {
   const y = useTransform(scrollYProgress, [0, 1], ["0px", "-250px"]) // subtle upward drift
 
   return (
-    <section ref={heroRef} className="relative min-h-dvh bg-lsr-charcoal text-white grid place-items-center px-6 md:px-8 overflow-x-clip mb-10 md:mb-14">
+    <section ref={heroRef} className="relative min-h-dvh bg-lsr-charcoal text-white grid place-items-center overflow-x-clip mb-10 md:mb-14">
       {/* Background image (blurred + dimmed) */}
       <motion.div
         aria-hidden
@@ -41,11 +41,11 @@ export default function Home() {
       </motion.div>
 
       {/* Content */}
-      <motion.section
+      <motion.div
         initial={{opacity: 0, y: 24}}
         animate={{opacity: 1, y: 0}}
         transition={{duration: 0.6}}
-        className="z-10 max-w-5xl w-full text-center py-16 md:py-24"
+        className="z-10 max-w-6xl w-full px-6 md:px-8 text-center py-16 md:py-24"
       >
         {/* Badge (forces its own line) */}
         <div className="mb-6">
@@ -148,11 +148,12 @@ export default function Home() {
         <p className="mt-6 text-xs text-white/60 italic">
           ⚠️ This website is in active development.
         </p>
-      </motion.section>
+      </motion.div>
 
       {/* scrolling stat ticker banner */}
       <div
-        className="group absolute bottom-0 inset-x-0 -mx-6 md:-mx-8 overflow-hidden border-t border-white/10 bg-black/20 backdrop-blur-sm z-20">        {/* edge fades */}
+        className="group absolute bottom-0 inset-x-0 overflow-hidden border-t border-white/10 bg-black/20 backdrop-blur-sm z-20">
+        {/* edge fades */}
         <div
           className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-lsr-charcoal to-transparent z-20"/>
         <div

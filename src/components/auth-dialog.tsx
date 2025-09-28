@@ -109,7 +109,7 @@ export function AuthDialog() {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-md w-[90%] max-h-[90vh] overflow-y-auto rounded-lg">
         <DialogHeader>
           <DialogTitle>{tab === "signup" ? "Create Account" : "Sign in"}</DialogTitle>
         </DialogHeader>
