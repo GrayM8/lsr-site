@@ -9,6 +9,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import Image from "next/image";
+import Link from "next/link";
 import { getStandings } from "@/server/queries/standings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -80,7 +81,10 @@ export default async function SeriesPage({ params }: SeriesPageArgs) {
                 <CarouselContent>
                   {series.events.map((event) => (
                     <CarouselItem key={event.id} className="md:basis-1/2 lg:basis-1/3">
-                      <div className="p-1">
+                      <Link
+                        href={`/events/${event.slug}`}
+                        className="block p-1 transition-transform duration-200 hover:scale-105 hover:brightness-110"
+                      >
                         <Card className="relative overflow-hidden">
                           {event.heroImageUrl && (
                             <>
@@ -101,7 +105,7 @@ export default async function SeriesPage({ params }: SeriesPageArgs) {
                             </p>
                           </CardContent>
                         </Card>
-                      </div>
+                      </Link>
                     </CarouselItem>
                   ))}
                 </CarouselContent>
