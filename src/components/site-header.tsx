@@ -52,7 +52,9 @@ export function SiteHeader() {
           </div>
 
           {/* User menu is always visible */}
-          <UserMenu />
+          <div className="ml-2">
+            <UserMenu />
+          </div>
 
           {/* Mobile hamburger menu */}
           <div className="md:hidden">
