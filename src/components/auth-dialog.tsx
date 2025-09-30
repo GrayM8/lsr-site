@@ -34,7 +34,6 @@ export function AuthDialog() {
   // signup-only
   const [displayName, setDisplayName] = useState("")
   const [eid, setEid] = useState("")
-  const [gradYear, setGradYear] = useState<string>("")
   const [marketing, setMarketing] = useState(true);
 
   useEffect(() => {
@@ -56,7 +55,6 @@ export function AuthDialog() {
           data: {
             displayName,
             eid,
-            gradYear: gradYear ? Number(gradYear) : undefined,
             marketingOptIn: marketing,
           },
         },
@@ -172,19 +170,6 @@ export function AuthDialog() {
                     value={eid}
                     onChange={(e) => setEid(e.target.value)}
                     placeholder="e.g., abc123 or 12345678"
-                  />
-                </div>
-
-                <div className="grid gap-1.5">
-                  <Label htmlFor="gradYear">Graduating Year</Label>
-                  <Input
-                    id="gradYear"
-                    type="number"
-                    inputMode="numeric"
-                    pattern="\d*"
-                    placeholder="2026"
-                    value={gradYear}
-                    onChange={(e) => setGradYear(e.target.value)}
                   />
                 </div>
 
