@@ -59,7 +59,7 @@ export default async function DriverProfilePage({
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-center gap-4">
             <Avatar className="h-20 w-20 border-2 border-white/10">
-              <AvatarImage src={user.avatarUrl ?? undefined} />
+              <AvatarImage src={user.avatarUrl ?? undefined} className="object-cover" />
               <AvatarFallback className="text-2xl">{initials || 'U'}</AvatarFallback>
             </Avatar>
             <div>
