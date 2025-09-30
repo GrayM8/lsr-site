@@ -150,24 +150,12 @@ export default async function DriverProfilePage({
 
         <Separator className="my-8 bg-white/10" />
 
-        {/* Recent Events */}
+        {/* My Events */}
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <h2 className="text-2xl font-semibold mb-4 text-lsr-orange tracking-wide">Recent Events</h2>
-          <ul className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <li key={i}
-                  className="flex items-center justify-between p-3 rounded-lg bg-lsr-charcoal-darker">
-                <div>
-                  <div className="font-semibold">Event Name Placeholder</div>
-                  <div className="text-sm text-white/60">Watkins Glen</div>
-                </div>
-                <div className="text-right">
-                  <div className="font-semibold">P{i + 5}</div>
-                  <div className="text-sm text-white/60">+10 iRating</div>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <h2 className="text-2xl font-semibold mb-4 text-lsr-orange tracking-wide">My Events</h2>
+          <p className="text-white/60">
+            This feature is coming soon! You&apos;ll be able to see and manage your upcoming events, RSVPs, and carpooling, as well as see past events and performance statistics.
+          </p>
         </div>
       </div>
     </main>
