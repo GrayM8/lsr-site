@@ -135,7 +135,7 @@ export default function Home() {
             size="lg"
             variant="outline"
             asChild
-            className="border-white/20 text-white hover:bg-white/10 px-7 py-6 rounded-xl"
+            className="px-7 py-6 rounded-xl"
           >
             <Link href="/sponsors">Sponsor LSR</Link>
           </Button>

@@ -46,12 +46,11 @@ export function NewsFilters({ allTags, selectedTags }: Props) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          size="icon"
-          variant={active ? "default" : "outline"}
-          aria-label="Filters"
-          title="Filters"
+          variant="outline"
+          className="border-white/10 bg-transparent hover:bg-white/10"
         >
-          <Filter className="h-4 w-4" />
+          <Filter className="h-4 w-4 mr-2" />
+          Filter
         </Button>
       </DropdownMenuTrigger>
 
