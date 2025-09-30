@@ -32,6 +32,15 @@ export default async function SeriesPage({ params }: SeriesPageArgs) {
       <div className="mx-auto max-w-6xl px-6 md:px-8 py-10">
         <h1 className="font-display text-4xl md:text-5xl text-lsr-orange tracking-wide">{series.title}</h1>
 
+        <Image src="/images/lsc-landscape-website-2.png" alt="LSC Landscape Banner" width={1200} height={400} className="mt-8 rounded-lg" />
+
+        <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h2 className="font-display text-3xl text-lsr-orange tracking-wide">What is LSC?</h2>
+          <p className="text-white/80 mt-4">
+            The Lone Star Cup is meant as an introduction to the exciting, competitive world of Sim Racing. Designed as  a welcoming seed for aspiring racers, this league brings together members of all experience levels, from seasoned veterans to those taking their very first turn on a track. Participation in the league involves an entry fee of $20 with our primary goal being to foster a community built on sportsmanship and shared passion for the art of racing. You’ll find an environment where learning is encouraged and experienced drivers are willing to help newcomers grow. This is more than just a race; it’s a friendly, yet competitive, foundation for your sim racing journey.
+          </p>
+        </div>
+
         <Tabs defaultValue="season1" className="mt-8">
           <TabsList>
             <TabsTrigger value="season1">Season 1</TabsTrigger>
@@ -132,13 +141,6 @@ export default async function SeriesPage({ params }: SeriesPageArgs) {
         </Tabs>
 
         <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-6">
-          <h2 className="font-display text-3xl text-lsr-orange tracking-wide">What is LSC?</h2>
-          <p className="text-white/80 mt-4">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl nec ultricies lacinia, nisl nisl aliquet nisl, eget aliquam nisl nisl sit amet nisl. Sed euismod, nisl nec ultricies lacinia, nisl nisl aliquet nisl, eget aliquam nisl nisl sit amet nisl.
-          </p>
-        </div>
-
-        <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-6">
           <h2 className="font-display text-3xl text-lsr-orange tracking-wide">Hosted By</h2>
           <div className="grid md:grid-cols-2 gap-8 mt-4">
             <div className="flex flex-col items-center">
@@ -152,7 +154,7 @@ export default async function SeriesPage({ params }: SeriesPageArgs) {
               <Image src="/path/to/armando.jpg" alt="Armando" width={150} height={150} className="rounded-full" />
               <h3 className="font-bold mt-4">Armando</h3>
               <p className="text-white/80 mt-2 text-center">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                My name is Armando Martinez and I am a Competitive Officer. I&apos;ve been playing racing games since the Cars Movie games on the PS3 and have spent most of my life racing on a controller and in all honesty am probably on the controller than on a wheel. Recently getting a wheel has been amazing since the immersion of sim-racing is important and its been a rewarding learning process. My goal is to teach people about racing and its tricky parts. That being said, reach out to us with any of your racing questions. Feel free to follow my instagram @mtz_mando.
               </p>
             </div>
           </div>
