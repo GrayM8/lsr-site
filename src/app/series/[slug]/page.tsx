@@ -81,8 +81,20 @@ export default async function SeriesPage({ params }: SeriesPageArgs) {
                   {series.events.map((event) => (
                     <CarouselItem key={event.id} className="md:basis-1/2 lg:basis-1/3">
                       <div className="p-1">
-                        <Card>
-                          <CardContent className="flex flex-col items-center justify-center p-6">
+                        <Card className="relative overflow-hidden">
+                          {event.heroImageUrl && (
+                            <>
+                              <Image
+                                src={event.heroImageUrl}
+                                alt={event.title}
+                                layout="fill"
+                                objectFit="cover"
+                                className="absolute inset-0 z-0 filter blur-[2px]"
+                              />
+                              <div className="absolute inset-0 bg-black/50 z-10" />
+                            </>
+                          )}
+                          <CardContent className="relative z-20 flex flex-col items-center justify-center p-6">
                             <h3 className="font-bold">{event.title}</h3>
                             <p className="text-white/80 mt-2">
                               {new Date(event.startsAtUtc).toLocaleDateString()}
