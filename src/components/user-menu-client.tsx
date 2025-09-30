@@ -53,7 +53,7 @@ export function UserMenuClient({
     .join("")
     .toUpperCase()
 
-  const isAdmin = roles.includes("admin");
+  const isAdmin = roles.includes("admin") || roles.includes("officer");
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>

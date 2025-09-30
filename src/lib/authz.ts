@@ -19,7 +19,7 @@ export async function isAdmin() {
   const count = await prisma.userRole.count({
     where: {
       userId: user.id,
-      role: { key: 'admin' },
+      role: { key: { in: ['admin', 'officer'] } },
     },
   });
   return count > 0;
@@ -32,7 +32,7 @@ export async function requireAdmin() {
   if (emailIsAllowlisted(user.email)) return { ok: true as const, user };
 
   const hasRole = await prisma.userRole.count({
-    where: { userId: user.id, role: { key: 'admin' } },
+    where: { userId: user.id, role: { key: { in: ['admin', 'officer'] } } },
   });
   return hasRole ? { ok: true as const, user } : { ok: false as const, reason: 'forbidden' as const };
 }
