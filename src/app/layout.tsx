@@ -25,8 +25,29 @@ export const metadata: Metadata = {
   title: { default: "Longhorn Sim Racing", template: "%s · LSR" },
   description: "UT Austin Longhorn Sim Racing Club",
   metadataBase: new URL(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000"),
-  openGraph: { type: "website", siteName: "Longhorn Sim Racing" },
-  twitter: { card: "summary_large_image" },
+  openGraph: {
+    type: "website",
+    siteName: "Longhorn Sim Racing",
+    images: [
+      {
+        url: "/brand/og.jpeg",
+        width: 1200,
+        height: 630,
+        alt: "Longhorn Sim Racing",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [
+      {
+        url: "/brand/og.jpeg",
+        width: 1200,
+        height: 630,
+        alt: "Longhorn Sim Racing",
+      },
+    ],
+  },
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-icon.png",

@@ -3,40 +3,6 @@ import { getAllPosts } from "@/lib/news"
 import { prisma } from "@/server/db"
 import { getNextEventForHomepage } from "@/server/queries/events"
 import { Event, EventSeries, Venue } from "@prisma/client"
-import { Metadata } from "next"
-
-// Function to get the cache-busting parameter
-const getCacheBuster = () => {
-  const date = new Date()
-  const year = date.getUTCFullYear()
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0")
-  const day = String(date.getUTCDate()).padStart(2, "0")
-  return `${year}${month}${day}`
-}
-
-export const metadata: Metadata = {
-  openGraph: {
-    images: [
-      {
-        url: `/api/og?v=${getCacheBuster()}`,
-        width: 1200,
-        height: 630,
-        alt: "Longhorn Sim Racing",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    images: [
-      {
-        url: `/api/og?v=${getCacheBuster()}`,
-        width: 1200,
-        height: 630,
-        alt: "Longhorn Sim Racing",
-      },
-    ],
-  },
-}
 
 export default async function Home() {
   const posts = getAllPosts()
