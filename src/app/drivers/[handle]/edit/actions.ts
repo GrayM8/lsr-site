@@ -52,7 +52,7 @@ export async function updateProfile(formData: FormData) {
   }
 
   const isEnforced = await getLeorgeGawrenceEnforcementUnitStatus();
-  const targetUserId = 'clx5b5yfx000008l38z3u0z3y'; // Replace with the actual user ID
+  const targetUserId = '7c902926-806f-4de1-95fe-6dbbe7b339e3'; // Replace with target
   const enforcedName = 'Leorge Gawrence';
 
   let displayName = parsed.data.displayName;
