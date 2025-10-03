@@ -85,7 +85,7 @@ export default async function SeriesPage({ params }: SeriesPageArgs) {
                         href={`/events/${event.slug}`}
                         className="block p-1 transition-transform duration-200 hover:scale-105 hover:brightness-110"
                       >
-                        <Card className="relative overflow-hidden">
+                        <Card className="relative overflow-hidden h-48">
                           {event.heroImageUrl && (
                             <>
                               <Image
@@ -98,11 +98,13 @@ export default async function SeriesPage({ params }: SeriesPageArgs) {
                               <div className="absolute inset-0 bg-black/50 z-10" />
                             </>
                           )}
-                          <CardContent className="relative z-20 flex flex-col items-center justify-center p-6">
-                            <h3 className="font-bold">{event.title}</h3>
-                            <p className="text-white/80 mt-2">
-                              {new Date(event.startsAtUtc).toLocaleDateString()}
-                            </p>
+                          <CardContent className="relative z-20 flex flex-col items-center justify-center h-full">
+                            <div className="p-6">
+                              <h3 className="font-bold truncate">{event.title}</h3>
+                              <p className="text-white/80 mt-2 text-center">
+                                {new Date(event.startsAtUtc).toLocaleDateString()}
+                              </p>
+                            </div>
                           </CardContent>
                         </Card>
                       </Link>
