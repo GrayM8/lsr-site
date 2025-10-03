@@ -8,15 +8,15 @@ export async function GET(req: NextRequest) {
   const v = searchParams.get("v") // Cache-busting param
 
   // Fonts
-  const bebasNeueBold = await fetch(
-    new URL("../../../../assets/BebasNeue-Bold.ttf", import.meta.url)
-  ).then((res) => res.arrayBuffer())
-  const inter = await fetch(
-    new URL("../../../../assets/Inter-Regular.ttf", import.meta.url)
-  ).then((res) => res.arrayBuffer())
+  const baseUrl = req.nextUrl.origin
+  const bebasNeueBold = await fetch(`${baseUrl}/fonts/BebasNeue-Bold.ttf`).then(
+    (res) => res.arrayBuffer()
+  )
+  const inter = await fetch(`${baseUrl}/fonts/Inter-Regular.ttf`).then((res) =>
+    res.arrayBuffer()
+  )
 
   // Background Image
-  const baseUrl = req.nextUrl.origin
   const bgImage = `${baseUrl}/images/lsr-hero3.jpg`
 
   return new ImageResponse(
