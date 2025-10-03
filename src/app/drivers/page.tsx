@@ -38,7 +38,7 @@ export default async function DriversIndexPage({
         ? { roles: { some: { role: { key: { in: selectedRoles } } } } }
         : {}),
     },
-    orderBy: [{ iRating: 'desc' }, { displayName: 'asc' }],
+    orderBy: [{ iRating: { sort: 'desc', nulls: 'last' } }, { displayName: 'asc' }],
     include: { roles: { include: { role: true } } },
   });
 

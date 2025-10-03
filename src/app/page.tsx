@@ -11,7 +11,7 @@ export default async function Home() {
   const upcomingEvents = upcomingEventsRaw.length > 0 ? upcomingEventsRaw.slice(1) : []
   const drivers = await prisma.user.findMany({
     where: { status: { not: "deleted" } },
-    orderBy: [{ iRating: "desc" }, { displayName: "asc" }],
+    orderBy: [{ iRating: { sort: 'desc', nulls: 'last' } }, { displayName: 'asc' }],
   })
 
   return <HomePageClient
