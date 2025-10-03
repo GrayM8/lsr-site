@@ -25,6 +25,13 @@ const UserSchema = z.object({
   youtube: z.string().url().optional().or(z.literal('')).transform(v => v || null),
 });
 
+
+
+
+
+
+import { getLeorgeGawrenceEnforcementUnitStatus } from '@/app/admin/tools/actions';
+
 // ----- SERVER ACTION (single-arg shape for <form action={...}>) -----
 export async function updateProfile(formData: FormData) {
   const user = await requireUser();
@@ -44,11 +51,20 @@ export async function updateProfile(formData: FormData) {
     throw new Error(parsed.error.flatten().formErrors.join(', ') || 'Invalid input.');
   }
 
+  const isEnforced = await getLeorgeGawrenceEnforcementUnitStatus();
+  const targetUserId = 'clx5b5yfx000008l38z3u0z3y'; // Replace with the actual user ID
+  const enforcedName = 'Leorge Gawrence';
+
+  let displayName = parsed.data.displayName;
+  if (isEnforced && user.id === targetUserId) {
+    displayName = enforcedName;
+  }
+
   const prevSocials = (user.socials as Record<string, string> | null) ?? {};
   await prisma.user.update({
     where: { id: user.id },
     data: {
-      displayName: parsed.data.displayName,
+      displayName: displayName,
       iRating: parsed.data.iRating ?? undefined,
       bio: parsed.data.bio ?? undefined,
       gradYear: parsed.data.gradYear ?? undefined,

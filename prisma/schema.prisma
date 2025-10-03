@@ -666,3 +666,9 @@ model EntityTag {
   @@index([entityType, entityId])
   @@index([tagId])
 }
+
+model FeatureFlag {
+  id      String  @id @default(uuid())
+  key     String  @unique
+  enabled Boolean @default(false)
+}
