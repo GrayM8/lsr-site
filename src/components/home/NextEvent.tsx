@@ -117,7 +117,7 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
         )}
 
         <div className="mt-6 pt-6 border-t border-white/10">
-          <h3 className="font-display text-2xl text-lsr-orange tracking-wide">Also Coming Up...</h3>
+          <h2 className="font-display text-2xl text-lsr-orange tracking-wide">Also Coming Up...</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {upcomingEvents.length > 0 ? upcomingEvents.slice(0, 4).map((event) => {
               const eventDate = new Date(event.startsAtUtc)

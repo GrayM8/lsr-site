@@ -18,7 +18,7 @@ export default function GalleryRibbon({ index }: { index: number }) {
       <div className="rounded-2xl border border-white/10 bg-white/5 p-6 md:p-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display text-3xl text-lsr-orange tracking-wide">Gallery</h2>
-          <Link href="/gallery" className="text-sm underline hover:no-underline">See more</Link>
+          <Link href="/gallery" className="text-sm underline hover:no-underline" aria-label="See more in the gallery">View gallery</Link>
         </div>
         <Carousel
           opts={{

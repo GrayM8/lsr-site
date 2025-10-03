@@ -60,7 +60,7 @@ export function UserMenuClient({
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="h-9 gap-2">
           <Avatar className="h-5 w-5">
-            <AvatarImage src={user.avatarUrl ?? undefined} />
+            <AvatarImage src={user.avatarUrl ?? undefined} alt={user.displayName ?? 'User avatar'} />
             <AvatarFallback className="text-[10px]">{initials || "U"}</AvatarFallback>
           </Avatar>
           <span className="truncate max-w-[10rem]">{user.displayName}</span>

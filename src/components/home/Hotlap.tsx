@@ -10,7 +10,7 @@ export default function Hotlap({ index }: { index: number }) {
         </div>
         <div className="p-6 flex items-center justify-between">
           <div>
-            <h3 className="font-display text-2xl text-lsr-orange tracking-wide">Hotlap of the Week</h3>
+            <h2 className="font-display text-2xl text-lsr-orange tracking-wide">Hotlap of the Week</h2>
             <p className="text-white/75">GT3 · COTA · 1:46.302 (placeholder)</p>
           </div>
           <TooltipProvider>

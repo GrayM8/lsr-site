@@ -52,7 +52,7 @@ export default function Leaderboard({ index, drivers }: Props) {
                           {driver.avatarUrl ? (
                             <Image
                               src={driver.avatarUrl}
-                              alt={driver.displayName}
+                              alt=""
                               width={32}
                               height={32}
                               className="h-full w-full object-cover"

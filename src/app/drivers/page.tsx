@@ -106,7 +106,7 @@ export default async function DriversIndexPage({
                             {d.avatarUrl ? (
                               <Image
                                 src={d.avatarUrl}
-                                alt={d.displayName}
+                                alt=""
                                 width={40}
                                 height={40}
                                 className="h-10 w-10 object-cover"
