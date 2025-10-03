@@ -25,6 +25,8 @@ export const metadata: Metadata = {
   title: { default: "Longhorn Sim Racing", template: "%s · LSR" },
   description: "UT Austin Longhorn Sim Racing Club",
   metadataBase: new URL(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000"),
+  colorScheme: "dark",
+  themeColor: "#262626", // lsr-charcoal
   openGraph: {
     type: "website",
     siteName: "Longhorn Sim Racing",
@@ -63,7 +65,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${bebas.variable} h-full`}
+      className={`${inter.variable} ${bebas.variable} h-full dark`}
+      style={{ colorScheme: "dark" }}
       suppressHydrationWarning
     >
     <body className="min-h-dvh flex flex-col font-sans">
