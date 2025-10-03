@@ -5,12 +5,12 @@ const galleryImages = [
   { src: "/images/lsr-hero.webp", alt: "Sim racing action" },
   { src: "/images/lsr-hero2.webp", alt: "Sim racing close up" },
   { src: "/images/lsr-hero3.webp", alt: "Sim racing track view" },
-  { src: "/images/lsr-hero2.webp", alt: "Sim racing close up" },
-  { src: "/images/lsr-hero3.webp", alt: "Sim racing track view" },
-  { src: "/images/lsr-hero.webp", alt: "Sim racing action" },
-  { src: "/images/lsr-hero3.webp", alt: "Sim racing track view" },
-  { src: "/images/lsr-hero.webp", alt: "Sim racing action" },
-  { src: "/images/lsr-hero2.webp", alt: "Sim racing close up" },
+  { src: "/images/gal_00.jpeg", alt: "Sim racing action" },
+  { src: "/images/gal_01.jpeg", alt: "Sim racing action" },
+  { src: "/images/gal_02.jpeg", alt: "Sim racing action" },
+  { src: "/images/gal_03.jpeg", alt: "Sim racing action" },
+  { src: "/images/gal_04.jpeg", alt: "Sim racing action" },
+  { src: "/images/gal_05.JPG", alt: "Sim racing action" },
 ]
 
 export default function GalleryPage() {
@@ -44,7 +44,17 @@ export default function GalleryPage() {
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                 ></iframe>
-            </div>
+              </div>
+              <div className="aspect-video rounded-lg overflow-hidden border border-white/10">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src="https://drive.google.com/file/d/14A8G21BfeFI8IFPnRRUxvCgDP6H9W5s4/preview"
+                  title="Google Drive video player"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                ></iframe>
+              </div>
           </div>
         </div>
 
