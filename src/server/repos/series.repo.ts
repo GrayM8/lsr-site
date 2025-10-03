@@ -19,6 +19,9 @@ export async function getSeriesBySlug(slug: string) {
     where: { slug },
     include: {
       events: {
+        orderBy: {
+          startsAtUtc: 'asc',
+        },
         include: {
           venue: true,
         },
