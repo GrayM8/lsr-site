@@ -91,8 +91,8 @@ export default async function SeriesPage({ params }: SeriesPageArgs) {
                               <Image
                                 src={event.heroImageUrl}
                                 alt={event.title}
-                                layout="fill"
-                                objectFit="cover"
+                                fill
+                                style={{ objectFit: "cover" }}
                                 className="absolute inset-0 z-0 filter blur-[2px]"
                               />
                               <div className="absolute inset-0 bg-black/50 z-10" />
@@ -162,14 +162,18 @@ export default async function SeriesPage({ params }: SeriesPageArgs) {
           <h2 className="font-display text-3xl text-lsr-orange tracking-wide">Hosted By</h2>
           <div className="grid md:grid-cols-2 gap-8 mt-4">
             <div className="flex flex-col items-center">
-              <Image src="/brand/lsr-mark.webp" alt="Bryan" width={150} height={150} className="rounded-full" />
+              <div className="relative w-[150px] h-[150px] rounded-full overflow-hidden">
+                <Image src="/images/bryan.jpg" alt="Bryan" fill style={{ objectFit: "cover" }} />
+              </div>
               <h3 className="font-bold mt-4">Bryan</h3>
               <p className="text-white/80 mt-2 text-center">
-                Hello! My name is Bryan Reyes, and I am one the Competitive Leads for Longhorn Sim Racing. Ever since I was little, I’ve been fascinated with racing. I still remember watching Cars for the first time and instantly wanting to be Lightning McQueen, I even dressed up as him for Halloween! Soon after, I was introduced to the world of NASCAR and racing games. I’ve played it all, from Mario Kart Double Dash, where my older brother always won, to Forza Motorsport 3 with a Ferrari wheel on the Xbox. As I got older, I was able to take that love for racing to the next level and develop my skills in a professional setting, competing in simulation. After gaining 5 years of racing experience, I have found that I enjoy coaching and teaching others about racing as much as being on the track. If ever you would like to reach out to me, whether it’s about racing, school, or anything else please feel free! My Instagram is @bryanreyes.16
+                Hello! My name is Bryan Reyes, and I am one of the Competitive Leads for Longhorn Sim Racing. Ever since I was little, I’ve been fascinated with racing. I still remember watching Cars for the first time and instantly wanting to be Lightning McQueen, I even dressed up as him for Halloween! Soon after, I was introduced to the world of NASCAR and racing games. I’ve played it all, from Mario Kart Double Dash, where my older brother always won, to Forza Motorsport 3 with a Ferrari wheel on the Xbox. As I got older, I was able to take that love for racing to the next level and develop my skills in a professional setting, competing in simulation. After gaining 5 years of racing experience, I have found that I enjoy coaching and teaching others about racing as much as being on the track. If ever you would like to reach out to me, whether it’s about racing, school, or anything else please feel free! My Instagram is @bryanreyes.16
               </p>
             </div>
             <div className="flex flex-col items-center">
-              <Image src="/images/armando.jpg" alt="Armando" width={150} height={150} className="rounded-full" />
+              <div className="relative w-[150px] h-[150px] rounded-full overflow-hidden">
+                <Image src="/images/armando.jpg" alt="Armando" fill style={{ objectFit: "cover" }} />
+              </div>
               <h3 className="font-bold mt-4">Armando</h3>
               <p className="text-white/80 mt-2 text-center">
                 My name is Armando Martinez and I am a Competitive Officer. I&apos;ve been playing racing games since the Cars Movie games on the PS3 and have spent most of my life racing on a controller and in all honesty am probably better on the controller than on a wheel. Recently getting a wheel has been amazing since the immersion of sim-racing is important and its been a rewarding learning process. My goal is to teach people about racing and its tricky parts. That being said, reach out to us with any of your racing questions. Feel free to follow my instagram @mtz_mando.
