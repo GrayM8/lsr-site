@@ -2,15 +2,7 @@ import Link from "next/link"
 import Image from "next/image"
 import SectionReveal from "./SectionReveal"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
-
-const galleryImages = [
-  { src: "/images/lsr-hero.webp", alt: "Sim racing action" },
-  { src: "/images/lsr-hero2.webp", alt: "Sim racing close up" },
-  { src: "/images/lsr-hero3.webp", alt: "Sim racing track view" },
-  { src: "/images/lsr-hero2.webp", alt: "Sim racing close up" },
-  { src: "/images/lsr-hero3.webp", alt: "Sim racing track view" },
-  { src: "/images/lsr-hero.webp", alt: "Sim racing action" },
-]
+import { galleryItems } from "@/lib/gallery"
 
 export default function GalleryRibbon({ index }: { index: number }) {
   return (
@@ -28,16 +20,27 @@ export default function GalleryRibbon({ index }: { index: number }) {
           className="w-full"
         >
           <CarouselContent>
-            {galleryImages.map((image, index) => (
+            {galleryItems.map((item, index) => (
               <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                <div className="aspect-[4/3] rounded-lg border border-white/10 overflow-hidden">
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    width={800}
-                    height={600}
-                    className="object-cover w-full h-full"
-                  />
+                <div className="aspect-video rounded-lg border border-white/10 overflow-hidden">
+                  {item.type === "image" ? (
+                    <Image
+                      src={item.src}
+                      alt={item.alt}
+                      width={800}
+                      height={600}
+                      className="object-cover w-full h-full"
+                    />
+                  ) : (
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      src={item.src}
+                      title={item.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    ></iframe>
+                  )}
                 </div>
               </CarouselItem>
             ))}

@@ -1,19 +1,11 @@
 import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
-
-const galleryImages = [
-  { src: "/images/lsr-hero.webp", alt: "Sim racing action" },
-  { src: "/images/lsr-hero2.webp", alt: "Sim racing close up" },
-  { src: "/images/lsr-hero3.webp", alt: "Sim racing track view" },
-  { src: "/images/gal_00.jpeg", alt: "Sim racing action" },
-  { src: "/images/gal_01.jpeg", alt: "Sim racing action" },
-  { src: "/images/gal_02.jpeg", alt: "Sim racing action" },
-  { src: "/images/gal_03.jpeg", alt: "Sim racing action" },
-  { src: "/images/gal_04.jpeg", alt: "Sim racing action" },
-  { src: "/images/gal_05.JPG", alt: "Sim racing action" },
-]
+import { galleryItems } from "@/lib/gallery";
 
 export default function GalleryPage() {
+  const videos = galleryItems.filter(item => item.type !== 'image');
+  const images = galleryItems.filter(item => item.type === 'image');
+
   return (
     <main className="bg-lsr-charcoal text-white min-h-screen">
       <div className="mx-auto max-w-6xl px-6 md:px-8 py-10">
@@ -25,36 +17,18 @@ export default function GalleryPage() {
         <div className="mt-6">
           <h2 className="font-display text-3xl text-lsr-orange tracking-wide">Videos</h2>
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="aspect-video rounded-lg overflow-hidden border border-white/10">
+            {videos.map((video, index) => (
+              <div key={index} className="aspect-video rounded-lg overflow-hidden border border-white/10">
                 <iframe
                   width="100%"
                   height="100%"
-                  src="https://www.youtube.com/embed/1G0uj-3s12o"
-                  title="YouTube video player"
+                  src={video.src}
+                  title={video.title}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                 ></iframe>
               </div>
-              <div className="aspect-video rounded-lg overflow-hidden border border-white/10">
-                <iframe
-                  width="100%"
-                  height="100%"
-                  src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                  title="YouTube video player"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                ></iframe>
-              </div>
-              <div className="aspect-video rounded-lg overflow-hidden border border-white/10">
-                <iframe
-                  width="100%"
-                  height="100%"
-                  src="https://drive.google.com/file/d/14A8G21BfeFI8IFPnRRUxvCgDP6H9W5s4/preview"
-                  title="Google Drive video player"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                ></iframe>
-              </div>
+            ))}
           </div>
         </div>
 
@@ -63,7 +37,7 @@ export default function GalleryPage() {
         <div className="mt-6">
           <h2 className="font-display text-3xl text-lsr-orange tracking-wide">Images</h2>
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {galleryImages.map((image, index) => (
+            {images.map((image, index) => (
               <div key={index} className="rounded-lg overflow-hidden border border-white/10">
                 <Image
                   src={image.src}
