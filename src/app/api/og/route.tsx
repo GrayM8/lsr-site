@@ -8,17 +8,11 @@ export async function GET(req: NextRequest) {
   const v = searchParams.get("v") // Cache-busting param
 
   // Fonts
-  const bebasNeueRegular = await fetch(
-    new URL("../../../../assets/BebasNeue-Regular.ttf", import.meta.url)
-  ).then((res) => res.arrayBuffer())
   const bebasNeueBold = await fetch(
     new URL("../../../../assets/BebasNeue-Bold.ttf", import.meta.url)
   ).then((res) => res.arrayBuffer())
   const inter = await fetch(
     new URL("../../../../assets/Inter-Regular.ttf", import.meta.url)
-  ).then((res) => res.arrayBuffer())
-  const interBold = await fetch(
-    new URL("../../../../assets/Inter-Bold.ttf", import.meta.url)
   ).then((res) => res.arrayBuffer())
 
   // Background Image
@@ -145,10 +139,8 @@ export async function GET(req: NextRequest) {
       width: 1200,
       height: 630,
       fonts: [
-        { name: "Bebas Neue", data: bebasNeueRegular, style: "normal", weight: 400 },
         { name: "Bebas Neue", data: bebasNeueBold, style: "normal", weight: 700 },
         { name: "Inter", data: inter, style: "normal", weight: 400 },
-        { name: "Inter", data: interBold, style: "normal", weight: 700 },
       ],
       headers: {
         "Cache-Control": "s-maxage=604800, stale-while-revalidate", // 7 days
