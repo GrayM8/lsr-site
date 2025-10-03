@@ -169,7 +169,7 @@ export default async function SeriesPage({ params }: SeriesPageArgs) {
               </p>
             </div>
             <div className="flex flex-col items-center">
-              <Image src="/brand/lsr-mark.webp" alt="Armando" width={150} height={150} className="rounded-full" />
+              <Image src="/images/armando.jfif" alt="Armando" width={150} height={150} className="rounded-full" />
               <h3 className="font-bold mt-4">Armando</h3>
               <p className="text-white/80 mt-2 text-center">
                 My name is Armando Martinez and I am a Competitive Officer. I&apos;ve been playing racing games since the Cars Movie games on the PS3 and have spent most of my life racing on a controller and in all honesty am probably better on the controller than on a wheel. Recently getting a wheel has been amazing since the immersion of sim-racing is important and its been a rewarding learning process. My goal is to teach people about racing and its tricky parts. That being said, reach out to us with any of your racing questions. Feel free to follow my instagram @mtz_mando.
