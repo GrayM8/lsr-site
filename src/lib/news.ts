@@ -39,7 +39,7 @@ export function getAllPosts(): Array<NewsFrontmatter & { slug: string }> {
     .map(getPostMeta)
     .filter(Boolean) as Array<NewsFrontmatter & { slug: string }>
   // sort by date desc
-  return metas.sort((a, b) => (a.date < b.date ? 1 : -1))
+  return metas.sort((a, b) => (new Date(a.date) < new Date(b.date) ? 1 : -1))
 }
 
 export async function getPostContent(slug: string) {
