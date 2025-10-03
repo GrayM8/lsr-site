@@ -25,4 +25,10 @@ export const galleryItems: GalleryItem[] = [
   { type: "youtube", src: "https://www.youtube.com/embed/dQw4w9WgXcQ", title: "YouTube video player" },
   { type: "image", src: "/images/gal_04.jpeg", alt: "Sim racing action" },
   { type: "image", src: "/images/gal_05.JPG", alt: "Sim racing action" },
+  { type: "image", src: "/images/gal_06.jpg", alt: "Sim racing action" },
+  { type: "image", src: "/images/gal_08.jpeg", alt: "Sim racing action" },
+  { type: "image", src: "/images/gal_09.jpeg", alt: "Sim racing action" },
+  { type: "image", src: "/images/gal_10.jpg", alt: "Sim racing action" },
+  { type: "image", src: "/images/gal_11.jpg", alt: "Sim racing action" },
+  { type: "image", src: "/images/gal_12.jpg", alt: "Sim racing action" },
 ];
