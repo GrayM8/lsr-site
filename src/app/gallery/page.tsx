@@ -1,10 +1,12 @@
 import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
 import { galleryItems } from "@/lib/gallery";
+import { getAllGalleryImages } from "@/server/queries/gallery";
 
-export default function GalleryPage() {
+export default async function GalleryPage() {
   const videos = galleryItems.filter(item => item.type !== 'image');
-  const images = galleryItems.filter(item => item.type === 'image');
+  const images = await getAllGalleryImages();
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
 
   return (
     <main className="bg-lsr-charcoal text-white min-h-screen">
@@ -37,11 +39,11 @@ export default function GalleryPage() {
         <div className="mt-6">
           <h2 className="font-display text-3xl text-lsr-orange tracking-wide">Images</h2>
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {images.map((image, index) => (
-              <div key={index} className="rounded-lg overflow-hidden border border-white/10">
+            {images.map((image) => (
+              <div key={image.id} className="rounded-lg overflow-hidden border border-white/10">
                 <Image
-                  src={image.src}
-                  alt={image.alt}
+                  src={`https://res.cloudinary.com/${cloudName}/image/upload/v1/${image.publicId}`}
+                  alt={image.alt ?? ''}
                   width={800}
                   height={600}
                   className="object-cover w-full h-full aspect-[4/3]"

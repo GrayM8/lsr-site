@@ -672,3 +672,12 @@ model FeatureFlag {
   key     String  @unique
   enabled Boolean @default(false)
 }
+
+model GalleryImage {
+  id        String   @id @default(uuid())
+  publicId  String   @unique
+  alt       String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
