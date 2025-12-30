@@ -19,7 +19,7 @@ function esc(s: string) {
 
 export async function GET() {
   const site = baseUrl()
-  const posts = getAllPosts()
+  const posts = await getAllPosts()
 
   const items = posts
     .map(p => {

@@ -16,6 +16,16 @@ const adminPages = [
     description: "Manage venues for events.",
     href: "/admin/venues",
   },
+  {
+    title: "Gallery",
+    description: "Upload and manage photo gallery images.",
+    href: "/admin/gallery",
+  },
+  {
+    title: "Misc. Tools",
+    description: "Access miscellaneous administrative tools.",
+    href: "/admin/tools",
+  },
 ];
 
 export default function Page() {

@@ -6,7 +6,8 @@ import { Separator } from "@/components/ui/separator"
 export const revalidate = 60
 
 export async function generateStaticParams() {
-  return getAllPosts().map(({ slug }) => ({ slug }))
+  const posts = await getAllPosts()
+  return posts.map(({ slug }) => ({ slug }))
 }
 
 type RouteParams = { slug: string }
@@ -17,9 +18,6 @@ export default async function NewsPostPage({
   params: Promise<RouteParams> // 👈 Next 15: params can be async
 }) {
   const { slug } = await params // 👈 await before using
-
-  const post = getAllPosts().find((p) => p.slug === slug)
-  if (!post) return notFound()
 
   const { content, frontmatter } = await getPostContent(slug)
 
