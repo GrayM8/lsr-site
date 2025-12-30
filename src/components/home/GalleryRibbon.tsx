@@ -2,9 +2,20 @@ import Link from "next/link"
 import Image from "next/image"
 import SectionReveal from "./SectionReveal"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
-import { galleryItems } from "@/lib/gallery"
+import { galleryItems as staticGalleryItems, GalleryItem } from "@/lib/gallery"
+import { GalleryImage } from "@prisma/client"
 
-export default function GalleryRibbon({ index }: { index: number }) {
+export default function GalleryRibbon({ index, galleryImages }: { index: number, galleryImages: GalleryImage[] }) {
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
+  
+  const dbItems: GalleryItem[] = galleryImages.map(img => ({
+    type: "image",
+    src: `https://res.cloudinary.com/${cloudName}/image/upload/v1/${img.publicId}`,
+    alt: img.alt ?? "Gallery Image"
+  }));
+
+  const items = [...dbItems, ...staticGalleryItems];
+
   return (
     <SectionReveal index={index} className="mx-auto max-w-6xl mt-10 md:mt-14" clipClass="rounded-2xl">
       <div className="rounded-2xl border border-white/10 bg-white/5 p-6 md:p-8">
@@ -20,7 +31,7 @@ export default function GalleryRibbon({ index }: { index: number }) {
           className="w-full"
         >
           <CarouselContent>
-            {galleryItems.map((item, index) => (
+            {items.map((item, index) => (
               <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
                 <div className="aspect-video rounded-lg border border-white/10 overflow-hidden">
                   {item.type === "image" ? (

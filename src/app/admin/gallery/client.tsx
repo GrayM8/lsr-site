@@ -6,6 +6,7 @@ import { createImage, deleteImage, updateImageOrder } from '@/app/admin/gallery/
 import { GalleryImage } from '@prisma/client';
 import Image from 'next/image';
 import { ConfirmSubmitButton } from '@/components/confirm-submit-button';
+import { Reorder } from "framer-motion";
 
 export function GalleryAdminClient({ images: initialImages }: { images: GalleryImage[] }) {
   const [images, setImages] = useState(initialImages);
@@ -36,7 +37,7 @@ export function GalleryAdminClient({ images: initialImages }: { images: GalleryI
     startTransition(async () => {
       const newImage = await createImage(json.public_id);
       if (newImage) {
-        setImages((prev) => [newImage, ...prev]);
+        setImages((prev) => [...prev, newImage]); // Append to end usually
       }
     });
   }
@@ -45,21 +46,17 @@ export function GalleryAdminClient({ images: initialImages }: { images: GalleryI
     inputRef.current?.click();
   }
 
-  function handleMove(id: string, direction: 'up' | 'down') {
-    const index = images.findIndex((img) => img.id === id);
-    if (index === -1) return;
-
-    const newImages = [...images];
-    const [movedImage] = newImages.splice(index, 1);
-    const newIndex = direction === 'up' ? index - 1 : index + 1;
-    newImages.splice(newIndex, 0, movedImage);
-
-    setImages(newImages);
-
-    const newOrder = newImages.map((img, i) => ({ id: img.id, order: i }));
+  function handleReorder(newOrder: GalleryImage[]) {
+    setImages(newOrder);
+    
+    // Map to { id, order } format expected by server action
+    const updates = newOrder.map((img, index) => ({
+      id: img.id,
+      order: index + 1 // 1-based order
+    }));
 
     startTransition(async () => {
-      await updateImageOrder(newOrder);
+      await updateImageOrder(updates);
     });
   }
 
@@ -71,31 +68,32 @@ export function GalleryAdminClient({ images: initialImages }: { images: GalleryI
           Upload Image
         </Button>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      
+      <Reorder.Group 
+        axis="y" 
+        values={images} 
+        onReorder={handleReorder} 
+        className="grid grid-cols-3 gap-4" // Requirement: Standardly 3 images wide
+        as="div"
+      >
         {images.map((image, index) => (
-          <div key={image.id} className="relative group">
-            <Image
-              src={`https://res.cloudinary.com/${cloudName}/image/upload/v1/${image.publicId}`}
-              alt={image.alt ?? ''}
-              width={400}
-              height={300}
-              className="object-cover w-full h-full aspect-[4/3] rounded-lg"
-            />
-            <div className="absolute top-2 right-2 flex flex-col gap-2">
-              <Button
-                size="sm"
-                onClick={() => handleMove(image.id, 'up')}
-                disabled={index === 0 || isPending}
-              >
-                Up
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => handleMove(image.id, 'down')}
-                disabled={index === images.length - 1 || isPending}
-              >
-                Down
-              </Button>
+          <Reorder.Item key={image.id} value={image} as="div" className="relative group cursor-move">
+             {/* Requirement: Number in top left indicating order */}
+            <div className="absolute top-2 left-2 z-10 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded">
+              {index + 1}
+            </div>
+
+            <div className="relative aspect-[4/3] rounded-lg overflow-hidden border bg-muted">
+                <Image
+                src={`https://res.cloudinary.com/${cloudName}/image/upload/v1/${image.publicId}`}
+                alt={image.alt ?? ''}
+                width={400}
+                height={300}
+                className="object-cover w-full h-full pointer-events-none" // pointer-events-none helps with dnd
+                />
+            </div>
+
+            <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <form
                 action={() =>
                   startTransition(async () => {
@@ -109,9 +107,9 @@ export function GalleryAdminClient({ images: initialImages }: { images: GalleryI
                 </ConfirmSubmitButton>
               </form>
             </div>
-          </div>
+          </Reorder.Item>
         ))}
-      </div>
+      </Reorder.Group>
     </div>
   );
 }

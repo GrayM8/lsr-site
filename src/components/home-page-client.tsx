@@ -10,16 +10,17 @@ import NewsHighlights from "@/components/home/NewsHighlights"
 import GalleryRibbon from "@/components/home/GalleryRibbon"
 import FinalCta from "@/components/home/FinalCta"
 import { type NewsFrontmatter } from '@/lib/news';
-import { type User, type Event, type Venue, type EventSeries } from '@prisma/client';
+import { type User, type Event, type Venue, type EventSeries, type GalleryImage } from '@prisma/client';
 
 type Props = {
   posts: Array<NewsFrontmatter & { slug: string }>;
   featuredEvent?: Event & { venue: Venue | null, series: EventSeries | null };
   upcomingEvents: (Event & { venue: Venue | null, series: EventSeries | null })[];
   drivers: User[];
+  galleryImages: GalleryImage[];
 }
 
-export default function HomePageClient({ posts, featuredEvent, upcomingEvents, drivers }: Props) {
+export default function HomePageClient({ posts, featuredEvent, upcomingEvents, drivers, galleryImages }: Props) {
   return (
     <main className="relative bg-lsr-charcoal text-white">
       <Hero />
@@ -32,7 +33,7 @@ export default function HomePageClient({ posts, featuredEvent, upcomingEvents, d
         <Hotlap index={3} />
         <NewsHighlights index={4} posts={posts} />
         <FinalCta index={5} />
-        <GalleryRibbon index={6} />
+        <GalleryRibbon index={6} galleryImages={galleryImages} />
         <SponsorStrip index={7} />
       </div>
     </main>
