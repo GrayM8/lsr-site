@@ -5,7 +5,7 @@ import { getNextEventForHomepage } from "@/server/queries/events"
 import { Event, EventSeries, Venue } from "@prisma/client"
 
 export default async function Home() {
-  const posts = getAllPosts()
+  const posts = await getAllPosts()
   const upcomingEventsRaw = await getNextEventForHomepage()
   const featuredEvent = upcomingEventsRaw.length > 0 ? upcomingEventsRaw[0] : null
   const upcomingEvents = upcomingEventsRaw.length > 0 ? upcomingEventsRaw.slice(1) : []

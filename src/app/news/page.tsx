@@ -17,7 +17,7 @@ export default async function NewsIndexPage({
   const selectedTags = (Array.isArray(tagParam) ? tagParam : tagParam ? [tagParam] : [])
     .map((t) => t.toString().toLowerCase())
 
-  const allPosts = getAllPosts()
+  const allPosts = await getAllPosts()
 
   const allTags = [...new Set(allPosts.flatMap((p) => p.tags || []))].sort()
 

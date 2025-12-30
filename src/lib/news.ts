@@ -1,10 +1,9 @@
-import fs from "node:fs"
-import path from "node:path"
-import matter from "gray-matter"
 import { compileMDX } from "next-mdx-remote/rsc"
 import remarkGfm from "remark-gfm"
 import rehypeSlug from "rehype-slug"
 import rehypeAutolinkHeadings from "rehype-autolink-headings"
+import { prisma } from "@/server/db"
+import { notFound } from "next/navigation"
 
 export type NewsFrontmatter = {
   title: string
@@ -15,42 +14,41 @@ export type NewsFrontmatter = {
   published?: boolean
 }
 
-const NEWS_DIR = path.join(process.cwd(), "content", "news")
+export async function getAllPosts() {
+  const posts = await prisma.post.findMany({
+    orderBy: { publishedAt: 'desc' },
+    where: {
+      publishedAt: { not: null } // Only show published posts publicly
+    },
+    include: {
+      author: true
+    }
+  });
 
-export function getNewsSlugs(): string[] {
-  if (!fs.existsSync(NEWS_DIR)) return []
-  return fs.readdirSync(NEWS_DIR)
-    .filter((f) => f.endsWith(".mdx"))
-    .map((f) => f.replace(/\.mdx$/, ""))
-}
-
-export function getPostMeta(slug: string): NewsFrontmatter & { slug: string } | null {
-  const file = path.join(NEWS_DIR, `${slug}.mdx`)
-  if (!fs.existsSync(file)) return null
-  const src = fs.readFileSync(file, "utf8")
-  const { data } = matter(src)
-  const fm = data as NewsFrontmatter
-  if (fm.published === false) return null
-  return { ...fm, slug }
-}
-
-export function getAllPosts(): Array<NewsFrontmatter & { slug: string }> {
-  const metas = getNewsSlugs()
-    .map(getPostMeta)
-    .filter(Boolean) as Array<NewsFrontmatter & { slug: string }>
-  // sort by date desc
-  return metas.sort((a, b) => (new Date(a.date) < new Date(b.date) ? 1 : -1))
+  return posts.map(p => ({
+    slug: p.slug,
+    title: p.title,
+    date: p.publishedAt?.toISOString() ?? new Date().toISOString(),
+    excerpt: p.excerpt ?? undefined,
+    author: p.author?.displayName ?? "LSR Team",
+    published: true,
+    tags: [] as string[] // TODO: Implement tags fetching
+  }));
 }
 
 export async function getPostContent(slug: string) {
-  const file = path.join(NEWS_DIR, `${slug}.mdx`)
-  const source = fs.readFileSync(file, "utf8")
+  const post = await prisma.post.findUnique({
+    where: { slug },
+    include: { author: true }
+  });
 
-  // compileMDX can parse frontmatter too, but we already used gray-matter above.
+  if (!post) notFound();
+
+  // MDX content is stored in bodyMd
   const mdx = await compileMDX<NewsFrontmatter>({
-    source,
+    source: post.bodyMd,
     options: {
-      parseFrontmatter: true,
+      parseFrontmatter: false, // content is pure MDX, metadata is in DB columns
       mdxOptions: {
         remarkPlugins: [remarkGfm],
         rehypePlugins: [
@@ -61,5 +59,14 @@ export async function getPostContent(slug: string) {
     },
   })
 
-  return mdx // { content, frontmatter }
+  // Construct frontmatter from DB fields to maintain compatibility
+  const frontmatter: NewsFrontmatter = {
+    title: post.title,
+    date: post.publishedAt?.toISOString() ?? new Date().toISOString(),
+    excerpt: post.excerpt ?? undefined,
+    author: post.author?.displayName ?? "LSR Team",
+    published: true
+  }
+
+  return { content: mdx.content, frontmatter }
 }
