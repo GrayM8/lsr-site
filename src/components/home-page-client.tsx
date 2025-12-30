@@ -1,3 +1,5 @@
+"use client"
+
 import Hero from "@/components/home/Hero"
 import NextEvent from "@/components/home/NextEvent"
 import WhatWeDo from "@/components/home/WhatWeDo"
@@ -9,6 +11,9 @@ import GalleryRibbon from "@/components/home/GalleryRibbon"
 import FinalCta from "@/components/home/FinalCta"
 import { type NewsFrontmatter } from '@/lib/news';
 import { type User, type Event, type Venue, type EventSeries } from '@prisma/client';
+import { useState, useEffect } from "react"
+import { AnimatePresence } from "framer-motion"
+import ReimaginedCountdown from "@/components/reimagined-countdown"
 
 type Props = {
   posts: Array<NewsFrontmatter & { slug: string }>;
@@ -18,6 +23,16 @@ type Props = {
 }
 
 export default function HomePageClient({ posts, featuredEvent, upcomingEvents, drivers }: Props) {
+  const [showCountdown, setShowCountdown] = useState(false)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowCountdown(true)
+    }, 3000)
+
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
     <main className="relative bg-lsr-charcoal text-white">
       <Hero />
@@ -33,6 +48,12 @@ export default function HomePageClient({ posts, featuredEvent, upcomingEvents, d
         <GalleryRibbon index={6} />
         <SponsorStrip index={7} />
       </div>
+
+      <AnimatePresence>
+        {showCountdown && (
+          <ReimaginedCountdown onClose={() => setShowCountdown(false)} />
+        )}
+      </AnimatePresence>
     </main>
   )
 }
