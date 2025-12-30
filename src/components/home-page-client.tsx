@@ -1,3 +1,5 @@
+"use client"
+
 import Hero from "@/components/home/Hero"
 import NextEvent from "@/components/home/NextEvent"
 import WhatWeDo from "@/components/home/WhatWeDo"
