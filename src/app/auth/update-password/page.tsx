@@ -21,7 +21,10 @@ export default function UpdatePasswordPage() {
     // Listen for auth state changes. 
     // The 'PASSWORD_RECOVERY' event is fired specifically when a user signs in via a password reset link.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
-      
+      console.log("[UpdatePassword] Auth Event:", event);
+      console.log("[UpdatePassword] Session:", session);
+      console.log("[UpdatePassword] AMR:", session?.user?.app_metadata, (session as any)?.amr);
+
       if (event === 'PASSWORD_RECOVERY') {
         setIsAllowed(true)
       } 
@@ -31,16 +34,19 @@ export default function UpdatePasswordPage() {
         const isRecovery = session.user?.app_metadata?.provider === 'email' && 
                            (session as any).amr?.find((m: any) => m.method === 'recovery');
         
+        console.log("[UpdatePassword] isRecovery check:", isRecovery);
+
         if (isRecovery) {
           setIsAllowed(true)
         } else {
           // If logged in but NOT via recovery, kick them out.
           // This prevents logged-in users from visiting this URL to change passwords without old password.
-          router.replace("/")
+          console.warn("[UpdatePassword] Not a recovery session. Would redirect to /.");
+          // router.replace("/") // Temporarily disabled for debugging
         }
       } 
       else if (event === 'SIGNED_OUT') {
-         router.replace("/")
+         // router.replace("/") // Temporarily disabled for debugging
       }
     })
 
