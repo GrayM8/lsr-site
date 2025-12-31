@@ -30,156 +30,207 @@ export default async function SeriesPage({ params }: SeriesPageArgs) {
 
   return (
     <main className="bg-lsr-charcoal text-white min-h-screen">
-      <div className="mx-auto max-w-6xl px-6 md:px-8 py-10">
-        <h1 className="font-display text-4xl md:text-5xl text-lsr-orange tracking-wide">{series.title}</h1>
-
-        <Image src="/images/lsc-landscape-website-2.png" alt="LSC Landscape Banner" width={1200} height={400} className="mt-8 rounded-lg" />
-
-        <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-6">
-          <h2 className="font-display text-3xl text-lsr-orange tracking-wide">What is LSC?</h2>
-          <p className="text-white/80 mt-4">
-            The Lone Star Cup is meant as an introduction to the exciting, competitive world of Sim Racing. Designed as  a welcoming seed for aspiring racers, this league brings together members of all experience levels, from seasoned veterans to those taking their very first turn on a track. Participation in the league involves an entry fee of $20 with our primary goal being to foster a community built on sportsmanship and shared passion for the art of racing. You’ll find an environment where learning is encouraged and experienced drivers are willing to help newcomers grow. This is more than just a race; it’s a friendly, yet competitive, foundation for your sim racing journey.
-          </p>
+      <div className="mx-auto max-w-6xl px-6 md:px-8 py-14 md:py-20">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+          <div>
+            <h1 className="font-display font-black italic text-5xl md:text-7xl text-white uppercase tracking-tighter leading-[0.9]">
+              {series.title}
+            </h1>
+            <p className="font-sans font-bold text-white/40 uppercase tracking-[0.3em] text-[10px] mt-4">Official Championship Series</p>
+          </div>
         </div>
 
-        <Tabs defaultValue="season1" className="mt-8">
-          <TabsList>
-            <TabsTrigger value="season1">Season 1</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
-          </TabsList>
-          <TabsContent value="season1">
-            <div className="mt-8 grid md:grid-cols-2 gap-8">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                <h2 className="font-display text-3xl text-lsr-orange tracking-wide">Last Race</h2>
-                <div className="border rounded-lg mt-4 p-4">
-                  <h3 className="font-bold">Placeholder Track Name</h3>
-                  <p className="text-white/80">Date: YYYY-MM-DD</p>
-                  <div className="mt-2">
-                    <h4 className="font-bold">Podium</h4>
-                    <ul className="list-disc list-inside">
-                      <li>1st: Placeholder Driver 1</li>
-                      <li>2nd: Placeholder Driver 2</li>
-                      <li>3rd: Placeholder Driver 3</li>
-                    </ul>
+        <div className="border border-white/10 bg-white/[0.02] p-1">
+          <Image src="/images/lsc-landscape-website-2.png" alt="LSC Landscape Banner" width={1200} height={400} className="w-full h-auto object-cover grayscale-[0.2]" />
+        </div>
+
+        <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
+          <div className="lg:col-span-2 space-y-12">
+            <section>
+              <h2 className="font-display font-black italic text-3xl text-white uppercase tracking-tighter mb-6 border-b border-white/10 pb-4">
+                Series <span className="text-lsr-orange">Manifesto</span>
+              </h2>
+              <div className="prose prose-invert prose-p:font-sans prose-p:text-white/70 prose-p:leading-relaxed max-w-none">
+                <p>
+                  The Lone Star Cup is meant as an introduction to the exciting, competitive world of Sim Racing. Designed as a welcoming seed for aspiring racers, this league brings together members of all experience levels, from seasoned veterans to those taking their very first turn on a track. Participation in the league involves an entry fee of $20 with our primary goal being to foster a community built on sportsmanship and shared passion for the art of racing. You’ll find an environment where learning is encouraged and experienced drivers are willing to help newcomers grow. This is more than just a race; it’s a friendly, yet competitive, foundation for your sim racing journey.
+                </p>
+              </div>
+            </section>
+
+            <Tabs defaultValue="season1" className="w-full">
+              <TabsList className="w-full justify-start bg-transparent border-b border-white/10 rounded-none h-auto p-0 gap-8">
+                <TabsTrigger value="season1" className="rounded-none border-b-2 border-transparent data-[state=active]:border-lsr-orange data-[state=active]:bg-transparent data-[state=active]:text-lsr-orange font-sans font-bold uppercase tracking-widest text-xs px-0 py-4 transition-all">Current Season</TabsTrigger>
+                <TabsTrigger value="history" className="rounded-none border-b-2 border-transparent data-[state=active]:border-lsr-orange data-[state=active]:bg-transparent data-[state=active]:text-lsr-orange font-sans font-bold uppercase tracking-widest text-xs px-0 py-4 transition-all">Archives</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="season1" className="pt-8 space-y-12 outline-none">
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="border border-white/10 bg-white/[0.02] p-6">
+                    <h3 className="font-sans font-black text-xs uppercase tracking-[0.2em] text-white/40 mb-4">Previous Round</h3>
+                    <div className="space-y-4">
+                      <div className="font-sans font-bold text-lg text-white">Placeholder Track Name</div>
+                      <div className="font-mono text-xs text-lsr-orange">YYYY-MM-DD</div>
+                      
+                      <div className="space-y-2 pt-4 border-t border-white/5">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-lsr-orange font-bold">P1</span>
+                          <span className="text-white/80">Placeholder Driver 1</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-white/40 font-bold">P2</span>
+                          <span className="text-white/80">Placeholder Driver 2</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-white/40 font-bold">P3</span>
+                          <span className="text-white/80">Placeholder Driver 3</span>
+                        </div>
+                      </div>
+                      
+                      <div className="pt-4 mt-2 border-t border-white/5 flex justify-between items-center">
+                        <span className="text-[10px] uppercase tracking-widest text-white/40">Fastest Lap</span>
+                        <span className="text-xs font-bold text-white">Placeholder Driver 4</span>
+                      </div>
+                      
+                      <a href="#" className="block w-full text-center bg-white/5 hover:bg-lsr-orange hover:text-white py-2 text-[10px] font-bold uppercase tracking-widest transition-colors mt-4">
+                        Watch Replay
+                      </a>
+                    </div>
                   </div>
-                  <p className="mt-2">Fastest Lap: Placeholder Driver 4</p>
-                  <a href="#" className="text-lsr-orange hover:underline mt-2 inline-block">Watch Broadcast</a>
+                  
+                  <div className="border border-white/10 bg-white/[0.02] p-6">
+                    <h3 className="font-sans font-black text-xs uppercase tracking-[0.2em] text-white/40 mb-4">Next Round</h3>
+                    <div className="space-y-4">
+                      <div className="font-sans font-bold text-lg text-white">Placeholder Track Name</div>
+                      <div className="font-mono text-xs text-lsr-orange">YYYY-MM-DD</div>
+                      <div className="aspect-video bg-black/50 border border-white/5 flex items-center justify-center">
+                        <span className="text-[10px] uppercase tracking-widest text-white/20">Track Map Unavailable</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                <h2 className="font-display text-3xl text-lsr-orange tracking-wide">Next Race</h2>
-                <div className="border rounded-lg mt-4 p-4">
-                  <h3 className="font-bold">Placeholder Track Name</h3>
-                  <p className="text-white/80">Date: YYYY-MM-DD</p>
-                </div>
-              </div>
-            </div>
 
-            <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-6">
-              <h2 className="font-display text-3xl text-lsr-orange tracking-wide">Race Calendar</h2>
-              <Carousel className="w-full mt-4">
-                <CarouselContent>
-                  {series.events.map((event) => (
-                    <CarouselItem key={event.id} className="md:basis-1/2 lg:basis-1/3">
-                      <Link
-                        href={`/events/${event.slug}`}
-                        className="block p-1 transition-transform duration-200 hover:scale-105 hover:brightness-110"
-                      >
-                        <Card className="relative overflow-hidden h-48">
-                          {event.heroImageUrl && (
-                            <>
-                              <Image
-                                src={event.heroImageUrl}
-                                alt={event.title}
-                                fill
-                                style={{ objectFit: "cover" }}
-                                className="absolute inset-0 z-0 filter blur-[2px]"
-                              />
-                              <div className="absolute inset-0 bg-black/50 z-10" />
-                            </>
-                          )}
-                          <CardContent className="relative z-20 flex flex-col items-center justify-center h-full">
-                            <div className="p-6">
-                              <h3 className="font-bold truncate">{event.title}</h3>
-                              <p className="text-white/80 mt-2 text-center">
-                                {new Date(event.startsAtUtc).toLocaleDateString()}
-                              </p>
+                <section>
+                  <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-tighter mb-6">
+                    Race <span className="text-lsr-orange">Calendar</span>
+                  </h3>
+                  <Carousel className="w-full">
+                    <CarouselContent className="-ml-4">
+                      {series.events.map((event) => (
+                        <CarouselItem key={event.id} className="pl-4 md:basis-1/2">
+                          <Link
+                            href={`/events/${event.slug}`}
+                            className="block group border border-white/10 bg-white/[0.02] hover:border-lsr-orange/50 transition-colors"
+                          >
+                            <div className="relative h-48 bg-black overflow-hidden">
+                              {event.heroImageUrl ? (
+                                <Image
+                                  src={event.heroImageUrl}
+                                  alt={event.title}
+                                  fill
+                                  style={{ objectFit: "cover" }}
+                                  className="opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500"
+                                />
+                              ) : (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <span className="text-[10px] uppercase tracking-widest text-white/20">No Preview</span>
+                                </div>
+                              )}
+                              <div className="absolute top-0 right-0 bg-lsr-orange text-white px-2 py-1 text-[9px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                                View
+                              </div>
                             </div>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious className="left-4" />
-                <CarouselNext className="right-4" />
-              </Carousel>
-            </div>
+                            <div className="p-4">
+                              <div className="font-mono text-[10px] text-lsr-orange mb-1">
+                                {new Date(event.startsAtUtc).toLocaleDateString()}
+                              </div>
+                              <h4 className="font-sans font-bold text-sm text-white uppercase tracking-tight truncate">{event.title}</h4>
+                            </div>
+                          </Link>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <div className="flex justify-end gap-2 mt-4">
+                      <CarouselPrevious className="static translate-y-0 h-8 w-8 rounded-none border-white/10 hover:bg-lsr-orange hover:border-lsr-orange hover:text-white" />
+                      <CarouselNext className="static translate-y-0 h-8 w-8 rounded-none border-white/10 hover:bg-lsr-orange hover:border-lsr-orange hover:text-white" />
+                    </div>
+                  </Carousel>
+                </section>
 
-            <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-6">
-              <h2 className="font-display text-3xl text-lsr-orange tracking-wide">Standings</h2>
-              <div className="overflow-x-auto border rounded-lg mt-4">
-                <table className="w-full text-left font-sans text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="p-2 md:p-4">Rank</th>
-                      <th className="p-2 md:p-4">Driver</th>
-                      <th className="p-2 md:p-4">Car</th>
-                      <th className="p-2 md:p-4">Starts</th>
-                      <th className="p-2 md:p-4">Wins</th>
-                      <th className="p-2 md:p-4">Podiums</th>
-                      <th className="p-2 md:p-4">Points</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {standings.map((standing: { driver: { id: string, name: string }, car: string | undefined, starts: number, wins: number, podiums: number, points: number }, index) => (
-                      <tr key={standing.driver.id} className="border-b">
-                        <td className="p-2 md:p-4">{index + 1}</td>
-                        <td className="p-2 md:p-4">{standing.driver.name}</td>
-                        <td className="p-2 md:p-4">{standing.car}</td>
-                        <td className="p-2 md:p-4">{standing.starts}</td>
-                        <td className="p-2 md:p-4">{standing.wins}</td>
-                        <td className="p-2 md:p-4">{standing.podiums}</td>
-                        <td className="p-2 md:p-4">{standing.points}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </TabsContent>
-          <TabsContent value="history">
-            <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-6">
-              <h2 className="font-display text-3xl text-lsr-orange tracking-wide">Previous Seasons</h2>
-              <p className="text-white/80 mt-4">
-                No previous seasons to display.
-              </p>
-            </div>
-          </TabsContent>
-        </Tabs>
+                <section>
+                  <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-tighter mb-6">
+                    Championship <span className="text-lsr-orange">Standings</span>
+                  </h3>
+                  <div className="overflow-x-auto border border-white/10">
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-white/5 font-sans font-black text-[9px] uppercase tracking-widest text-white/40">
+                        <tr>
+                          <th className="p-4 w-12">Pos</th>
+                          <th className="p-4">Driver</th>
+                          <th className="p-4">Car</th>
+                          <th className="p-4 text-center">Starts</th>
+                          <th className="p-4 text-center">Wins</th>
+                          <th className="p-4 text-center">Podiums</th>
+                          <th className="p-4 text-right">Pts</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5 font-sans text-white/80">
+                        {standings.map((standing: { driver: { id: string, name: string }, car: string | undefined, starts: number, wins: number, podiums: number, points: number }, index) => (
+                          <tr key={standing.driver.id} className="hover:bg-white/[0.02]">
+                            <td className="p-4 font-bold text-white">{index + 1}</td>
+                            <td className="p-4 font-bold text-white uppercase tracking-tight">{standing.driver.name}</td>
+                            <td className="p-4 text-xs text-white/50 uppercase">{standing.car}</td>
+                            <td className="p-4 text-center text-white/50">{standing.starts}</td>
+                            <td className="p-4 text-center text-white/50">{standing.wins}</td>
+                            <td className="p-4 text-center text-white/50">{standing.podiums}</td>
+                            <td className="p-4 text-right font-mono font-bold text-lsr-orange">{standing.points}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              </TabsContent>
+              
+              <TabsContent value="history">
+                <div className="border border-white/10 bg-white/[0.02] p-12 text-center">
+                  <p className="font-sans font-bold text-white/40 uppercase tracking-widest text-sm">No archive data available.</p>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
 
-        <Image src="/images/lsc-cal.png" alt="LSC Calendar" width={1200} height={800} className="mt-8 rounded-lg" />
+          <div className="lg:col-span-1 space-y-12">
+            <section>
+              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-tighter mb-6 border-b border-white/10 pb-4">
+                Series <span className="text-lsr-orange">Directors</span>
+              </h3>
+              <div className="space-y-8">
+                <div className="group">
+                  <div className="relative aspect-square border border-white/10 bg-black overflow-hidden mb-4">
+                    <Image src="/images/bryan.jpg" alt="Bryan" fill style={{ objectFit: "cover" }} className="opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
+                  </div>
+                  <h4 className="font-display font-black italic text-xl text-white uppercase tracking-tighter">Bryan Reyes</h4>
+                  <p className="font-sans font-bold text-[9px] uppercase tracking-widest text-lsr-orange mb-3">Competitive Lead</p>
+                  <p className="font-sans text-xs text-white/60 leading-relaxed">
+                    Ever since I was little, I’ve been fascinated with racing. I still remember watching Cars for the first time and instantly wanting to be Lightning McQueen. After gaining 5 years of racing experience, I have found that I enjoy coaching and teaching others about racing as much as being on the track.
+                  </p>
+                </div>
 
-        <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-6">
-          <h2 className="font-display text-3xl text-lsr-orange tracking-wide">Hosted By</h2>
-          <div className="grid md:grid-cols-2 gap-8 mt-4">
-            <div className="flex flex-col items-center">
-              <div className="relative w-[150px] h-[150px] rounded-full overflow-hidden">
-                <Image src="/images/bryan.jpg" alt="Bryan" fill style={{ objectFit: "cover" }} />
+                <div className="group">
+                  <div className="relative aspect-square border border-white/10 bg-black overflow-hidden mb-4">
+                    <Image src="/images/armando.jpg" alt="Armando" fill style={{ objectFit: "cover" }} className="opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
+                  </div>
+                  <h4 className="font-display font-black italic text-xl text-white uppercase tracking-tighter">Armando Martinez</h4>
+                  <p className="font-sans font-bold text-[9px] uppercase tracking-widest text-lsr-orange mb-3">Competitive Officer</p>
+                  <p className="font-sans text-xs text-white/60 leading-relaxed">
+                    I've spent most of my life racing on a controller and in all honesty am probably better on the controller than on a wheel. Recently getting a wheel has been amazing since the immersion of sim-racing is important. My goal is to teach people about racing and its tricky parts.
+                  </p>
+                </div>
               </div>
-              <h3 className="font-bold mt-4">Bryan</h3>
-              <p className="text-white/80 mt-2 text-center">
-                Hello! My name is Bryan Reyes, and I am one of the Competitive Leads for Longhorn Sim Racing. Ever since I was little, I’ve been fascinated with racing. I still remember watching Cars for the first time and instantly wanting to be Lightning McQueen, I even dressed up as him for Halloween! Soon after, I was introduced to the world of NASCAR and racing games. I’ve played it all, from Mario Kart Double Dash, where my older brother always won, to Forza Motorsport 3 with a Ferrari wheel on the Xbox. As I got older, I was able to take that love for racing to the next level and develop my skills in a professional setting, competing in simulation. After gaining 5 years of racing experience, I have found that I enjoy coaching and teaching others about racing as much as being on the track. If ever you would like to reach out to me, whether it’s about racing, school, or anything else please feel free! My Instagram is @bryanreyes.16
-              </p>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="relative w-[150px] h-[150px] rounded-full overflow-hidden">
-                <Image src="/images/armando.jpg" alt="Armando" fill style={{ objectFit: "cover" }} />
-              </div>
-              <h3 className="font-bold mt-4">Armando</h3>
-              <p className="text-white/80 mt-2 text-center">
-                My name is Armando Martinez and I am a Competitive Officer. I&apos;ve been playing racing games since the Cars Movie games on the PS3 and have spent most of my life racing on a controller and in all honesty am probably better on the controller than on a wheel. Recently getting a wheel has been amazing since the immersion of sim-racing is important and its been a rewarding learning process. My goal is to teach people about racing and its tricky parts. That being said, reach out to us with any of your racing questions. Feel free to follow my instagram @mtz_mando.
-              </p>
+            </section>
+
+            <div className="border border-white/10 p-1 bg-white/[0.02]">
+              <Image src="/images/lsc-cal.png" alt="LSC Calendar" width={1200} height={800} className="w-full h-auto opacity-80" />
             </div>
           </div>
         </div>

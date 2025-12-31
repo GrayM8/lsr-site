@@ -45,15 +45,17 @@ export function DriversFilters({ selectedRoles }: Props) {
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className="border-white/10 bg-transparent hover:bg-white/10"
+          className="rounded-none border-white/10 bg-white/5 hover:bg-white/10 font-sans font-bold uppercase tracking-widest text-[10px] h-9"
         >
-          <Filter className="h-4 w-4 mr-2" />
+          <Filter className="h-3 w-3 mr-2" />
           Filter
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-72">
-        <DropdownMenuLabel>Roles</DropdownMenuLabel>
+      <DropdownMenuContent align="end" className="w-72 bg-lsr-charcoal border-white/10 rounded-none p-2 shadow-2xl">
+        <DropdownMenuLabel className="font-sans font-black text-[9px] uppercase tracking-[0.3em] text-white/20 px-2 py-3">
+          Driver Roles
+        </DropdownMenuLabel>
 
         <div className="px-1 py-2">
           {ALL_ROLES.map((role) => (
@@ -61,17 +63,22 @@ export function DriversFilters({ selectedRoles }: Props) {
               key={role}
               checked={selectedRoles.includes(role)}
               onCheckedChange={(v) => toggleRole(role, Boolean(v))}
-              className="capitalize"
+              className="capitalize rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer data-[state=checked]:text-lsr-orange data-[state=checked]:focus:text-white"
             >
               {ROLE_LABEL[role]}
             </DropdownMenuCheckboxItem>
           ))}
         </div>
 
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="bg-white/5" />
         <div className="p-2">
-          <Button variant="ghost" size="sm" className="w-full" onClick={clearFilters}>
-            <X className="mr-2 h-4 w-4" />
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="w-full rounded-none font-sans font-bold uppercase tracking-widest text-[10px] hover:bg-red-900/50 hover:text-white transition-colors" 
+            onClick={clearFilters}
+          >
+            <X className="mr-2 h-3 w-3" />
             Clear filters
           </Button>
         </div>

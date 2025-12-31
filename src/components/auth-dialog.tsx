@@ -103,127 +103,140 @@ export function AuthDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" onClick={() => setTab("signup")}>
+        <Button size="sm" onClick={() => setTab("signup")} className="rounded-none bg-lsr-orange text-white hover:bg-white hover:text-lsr-charcoal font-bold uppercase tracking-widest text-[10px] h-9 px-6 transition-all">
           Sign In / Create Account
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-md w-[90%] max-h-[90vh] overflow-y-auto rounded-lg">
-        <DialogHeader>
-          <DialogTitle>{tab === "signup" ? "Create Account" : "Sign in"}</DialogTitle>
+      <DialogContent className="max-w-md w-[90%] max-h-[90vh] overflow-y-auto rounded-none bg-lsr-charcoal border-white/10 p-0 overflow-hidden">
+        <DialogHeader className="p-8 pb-0">
+          <DialogTitle className="font-display font-black italic text-3xl text-white uppercase tracking-tighter">
+            {tab === "signup" ? "Join the" : "Welcome"} <span className="text-lsr-orange">{tab === "signup" ? "Grid" : "Back"}</span>
+          </DialogTitle>
         </DialogHeader>
 
         <Tabs
           value={tab}
           onValueChange={(v: string) => setTab((v as TabKey) ?? "signup")}
+          className="p-8 pt-6"
         >
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signup">Create</TabsTrigger>
-            <TabsTrigger value="signin">Sign in</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 bg-white/5 rounded-none p-1 h-12">
+            <TabsTrigger value="signup" className="rounded-none font-sans font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-lsr-orange data-[state=active]:text-white transition-all">Create Account</TabsTrigger>
+            <TabsTrigger value="signin" className="rounded-none font-sans font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-lsr-orange data-[state=active]:text-white transition-all">Sign In</TabsTrigger>
           </TabsList>
 
           {/* ---------- SIGN UP ---------- */}
-          <TabsContent value="signup" className="mt-4">
-            <div className="grid gap-3">
+          <TabsContent value="signup" className="mt-8 outline-none">
+            <div className="grid gap-6">
               {/* Google first */}
               <GoogleButton />
 
               <OrDivider />
 
               {/* Email/password form */}
-              <form onSubmit={onSignup} className="grid gap-3">
-                <div className="grid gap-1.5">
-                  <Label htmlFor="name">Name</Label>
+              <form onSubmit={onSignup} className="grid gap-6">
+                <div className="grid gap-2">
+                  <Label htmlFor="name" className="font-sans font-bold uppercase tracking-[0.2em] text-[9px] text-white/40">Full Name</Label>
                   <Input
                     id="name"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
+                    className="rounded-none border-white/10 bg-white/5 focus:border-lsr-orange focus:ring-lsr-orange transition-all"
+                    placeholder="Enter your name"
                     required
                   />
                 </div>
 
-                <div className="grid gap-1.5">
-                  <Label htmlFor="email">Email</Label>
+                <div className="grid gap-2">
+                  <Label htmlFor="email" className="font-sans font-bold uppercase tracking-[0.2em] text-[9px] text-white/40">Email Address</Label>
                   <Input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    className="rounded-none border-white/10 bg-white/5 focus:border-lsr-orange focus:ring-lsr-orange transition-all"
+                    placeholder="you@email.com"
                     required
                   />
                 </div>
 
-                <div className="grid gap-1.5">
-                  <Label htmlFor="password">Password</Label>
+                <div className="grid gap-2">
+                  <Label htmlFor="password" className="font-sans font-bold uppercase tracking-[0.2em] text-[9px] text-white/40">Password</Label>
                   <Input
                     id="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    className="rounded-none border-white/10 bg-white/5 focus:border-lsr-orange focus:ring-lsr-orange transition-all"
+                    placeholder="••••••••"
                     required
                   />
                 </div>
 
-                <div className="grid gap-1.5">
-                  <Label htmlFor="eid">UT EID / Student ID</Label>
+                <div className="grid gap-2">
+                  <Label htmlFor="eid" className="font-sans font-bold uppercase tracking-[0.2em] text-[9px] text-white/40">UT EID / Student ID</Label>
                   <Input
                     id="eid"
                     value={eid}
                     onChange={(e) => setEid(e.target.value)}
-                    placeholder="e.g., abc123 or 12345678"
+                    className="rounded-none border-white/10 bg-white/5 focus:border-lsr-orange focus:ring-lsr-orange transition-all"
+                    placeholder="e.g., abc123"
                   />
                 </div>
 
-                <div className="flex items-center justify-between rounded-md border p-3">
-                  <div className="text-sm">
-                    <div className="font-medium">Marketing opt-in</div>
-                    <p className="text-muted-foreground">
-                      Get news & event updates. Change anytime.
+                <div className="flex items-center justify-between border border-white/10 bg-white/[0.02] p-4">
+                  <div className="space-y-1">
+                    <div className="font-sans font-bold uppercase tracking-widest text-[9px] text-white">Marketing Updates</div>
+                    <p className="font-sans text-[9px] text-white/30 uppercase tracking-tight">
+                      News & event notifications.
                     </p>
                   </div>
                   <Switch
                     checked={marketing}
                     onCheckedChange={(checked: boolean) => setMarketing(checked)}
+                    className="data-[state=checked]:bg-lsr-orange"
                   />
                 </div>
 
-                <Button type="submit" disabled={pending} className="w-full">
-                  Create account
+                <Button type="submit" disabled={pending} className="w-full rounded-none bg-lsr-orange text-white hover:bg-white hover:text-lsr-charcoal font-black uppercase tracking-[0.2em] text-[10px] h-12 transition-all">
+                  Initialize Account
                 </Button>
               </form>
             </div>
           </TabsContent>
 
           {/* ---------- SIGN IN ---------- */}
-          <TabsContent value="signin" className="mt-4">
-            <div className="grid gap-3">
+          <TabsContent value="signin" className="mt-8 outline-none">
+            <div className="grid gap-6">
               {/* Google first */}
               <GoogleButton />
 
               <OrDivider />
 
               {/* Email/password form */}
-              <form onSubmit={onSignin} className="grid gap-3">
-                <div className="grid gap-1.5">
-                  <Label htmlFor="email2">Email</Label>
+              <form onSubmit={onSignin} className="grid gap-6">
+                <div className="grid gap-2">
+                  <Label htmlFor="email2" className="font-sans font-bold uppercase tracking-[0.2em] text-[9px] text-white/40">Email Address</Label>
                   <Input
                     id="email2"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    className="rounded-none border-white/10 bg-white/5 focus:border-lsr-orange focus:ring-lsr-orange transition-all"
+                    placeholder="you@email.com"
                     required
                   />
                 </div>
 
-                <div className="grid gap-1.5">
+                <div className="grid gap-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="password2">Password</Label>
+                    <Label htmlFor="password2" className="font-sans font-bold uppercase tracking-[0.2em] text-[9px] text-white/40">Password</Label>
                     <Link
                       href="/auth/forgot-password"
-                      className="text-xs text-primary hover:underline"
+                      className="font-sans font-bold text-[9px] text-lsr-orange uppercase tracking-widest hover:text-white transition-colors"
                       onClick={() => setOpen(false)}
                     >
-                      Forgot your password?
+                      Reset Password?
                     </Link>
                   </div>
                   <Input
@@ -231,12 +244,14 @@ export function AuthDialog() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    className="rounded-none border-white/10 bg-white/5 focus:border-lsr-orange focus:ring-lsr-orange transition-all"
+                    placeholder="••••••••"
                     required
                   />
                 </div>
 
-                <Button type="submit" disabled={pending} className="w-full">
-                  Sign in
+                <Button type="submit" disabled={pending} className="w-full rounded-none bg-lsr-orange text-white hover:bg-white hover:text-lsr-charcoal font-black uppercase tracking-[0.2em] text-[10px] h-12 transition-all">
+                  Confirm Identity
                 </Button>
               </form>
             </div>

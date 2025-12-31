@@ -14,9 +14,9 @@ export const revalidate = 60;
 
 function StatCard({ label, value }: { label: string, value: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-      <div className="text-sm text-white/60">{label}</div>
-      <div className="text-xl font-semibold">{value}</div>
+    <div className="border border-white/10 bg-white/[0.02] p-4 flex flex-col justify-between h-full group hover:border-lsr-orange/50 transition-colors">
+      <div className="font-sans font-bold text-[9px] uppercase tracking-[0.2em] text-white/30 mb-2">{label}</div>
+      <div className="font-display font-black italic text-2xl text-white tracking-tight group-hover:text-lsr-orange transition-colors">{value}</div>
     </div>
   );
 }
@@ -54,108 +54,142 @@ export default async function DriverProfilePage({
 
   return (
     <main className="bg-lsr-charcoal text-white min-h-screen">
-      <div className="mx-auto max-w-6xl px-6 md:px-8 py-10">
-        {/* Header */}
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-20 w-20 border-2 border-white/10">
-              <AvatarImage src={user.avatarUrl ?? undefined} className="object-cover" />
-              <AvatarFallback className="text-2xl">{initials || 'U'}</AvatarFallback>
-            </Avatar>
-            <div>
-              <h1 className="font-display text-4xl md:text-5xl text-lsr-orange tracking-wide">
+      <div className="mx-auto max-w-6xl px-6 md:px-8 py-14 md:py-20">
+        
+        {/* Driver License Header */}
+        <div className="border-t-4 border-lsr-orange bg-lsr-charcoal border-b border-l border-r border-white/10 p-8 md:p-12 mb-12 relative overflow-hidden">
+          <div className="absolute top-4 right-4 flex gap-2">
+             <div className="h-2 w-2 bg-lsr-orange animate-pulse" />
+             <div className="h-2 w-2 bg-white/10" />
+             <div className="h-2 w-2 bg-white/10" />
+          </div>
+          
+          <div className="flex flex-col md:flex-row items-start gap-8 md:gap-12 relative z-10">
+            <div className="h-32 w-32 md:h-40 md:w-40 border border-white/20 bg-black flex-shrink-0 relative">
+              <Avatar className="h-full w-full rounded-none">
+                <AvatarImage src={user.avatarUrl ?? undefined} className="object-cover" />
+                <AvatarFallback className="text-3xl font-black bg-white/5 text-white/20 rounded-none">{initials || 'U'}</AvatarFallback>
+              </Avatar>
+              <div className="absolute -bottom-3 -right-3 w-12 h-12 border-b-2 border-r-2 border-lsr-orange" />
+            </div>
+            
+            <div className="flex-grow pt-2">
+              <div className="flex flex-wrap items-center gap-3 mb-4">
+                <span className="bg-white/10 text-white/60 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest">
+                  Driver Profile
+                </span>
+                {user.status === 'pending_verification' && (
+                  <span className="bg-red-900/50 text-red-200 border border-red-900 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest">
+                    Verification Pending
+                  </span>
+                )}
+              </div>
+              
+              <h1 className="font-display font-black italic text-5xl md:text-7xl text-white uppercase tracking-tighter leading-[0.85] mb-2">
                 {user.displayName}
               </h1>
-              <p className="text-white/60">@{user.handle}</p>
-            </div>
-          </div>
-
-          {isOwner && (
-            <Button
-              asChild
-              className="bg-lsr-orange text-lsr-charcoal hover:bg-lsr-orange/90"
-            >
-              <Link href={`/drivers/${handle}/edit`}>Edit details</Link>
-            </Button>
-          )}
-        </div>
-
-        <Separator className="my-6 bg-white/10" />
-
-        {/* Main Content */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Left Column */}
-          <div className="md:col-span-1 space-y-6">
-            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-              <h3 className="text-sm mb-2 text-white/60">Tags</h3>
-              <div className="flex flex-wrap gap-2">
-                {user.status === 'pending_verification' && (
-                  <Badge variant="destructive">Unverified</Badge>
-                )}
+              <p className="font-mono text-lsr-orange text-sm md:text-base tracking-widest">@{user.handle}</p>
+              
+              <div className="flex flex-wrap gap-2 mt-6">
                 {tags.length > 0 ? (
-                  tags.map(t => <Badge key={t.key}>{t.description}</Badge>)
+                  tags.map(t => (
+                    <span key={t.key} className="border border-white/20 px-3 py-1 text-[9px] font-sans font-bold uppercase tracking-widest text-white/70">
+                      {t.description}
+                    </span>
+                  ))
                 ) : (
-                  <p className="text-sm text-white/60">No tags yet.</p>
+                  <span className="text-[10px] text-white/30 font-bold uppercase tracking-widest">Rookie Class</span>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <StatCard label="iRating" value={user.iRating ?? '—'} />
-              <StatCard label="Grad Year" value={user.gradYear ?? '—'} />            </div>
-            <StatCard label="Major" value={user.major ?? '—'} />
+            {isOwner && (
+              <div className="absolute top-0 right-0 p-8">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="rounded-none border-white/20 hover:bg-white hover:text-lsr-charcoal font-bold uppercase tracking-widest text-[10px]"
+                >
+                  <Link href={`/drivers/${handle}/edit`}>Update Telemetry</Link>
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
 
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          {/* Left Column: Stats & Socials */}
+          <div className="lg:col-span-1 space-y-12">
+            <div>
+              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-tighter mb-6 border-b border-white/10 pb-4">
+                Driver <span className="text-lsr-orange">Stats</span>
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                <StatCard label="iRating" value={user.iRating ?? 'N/A'} />
+                <StatCard label="Class" value={user.gradYear ? `'${user.gradYear.toString().slice(-2)}` : 'N/A'} />
+                <div className="col-span-2">
+                  <StatCard label="Major" value={<span className="text-lg not-italic font-sans font-bold uppercase tracking-tight">{user.major ?? 'Undeclared'}</span>} />
+                </div>
+              </div>
+            </div>
 
-            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-              <h3 className="text-sm mb-2 text-white/60">Socials</h3>
-              <div className="flex items-center gap-3">
-                {Object.entries(socials).length > 0
-                  ? Object.entries(socials).map(([key, value]) => {
+            <div>
+              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-tighter mb-6 border-b border-white/10 pb-4">
+                Comms <span className="text-lsr-orange">Links</span>
+              </h3>
+              <div className="grid grid-cols-4 gap-4">
+                {Object.entries(socials).length > 0 ? (
+                  Object.entries(socials).map(([key, value]) => {
                     if (!value) return null;
-
-                    if (key in simpleIconSocials) {
-                      const IconData = simpleIconSocials[key];
-                      return (
-                        <a key={key} href={value} target="_blank" rel="noreferrer"
-                           className="text-white/60 hover:text-white transition-colors">
-                          <BrandIcon icon={IconData} className="h-5 w-5" />
-                        </a>
-                      );
-                    }
-
-                    if (key in componentIconSocials) {
-                      const IconComponent = componentIconSocials[key];
-                      return (
-                        <a key={key} href={value} target="_blank" rel="noreferrer"
-                           className="text-white/60 hover:text-white transition-colors">
-                          <IconComponent className="h-5 w-5" />
-                        </a>
-                      );
-                    }
-
-                    return null;
+                    const IconData = simpleIconSocials[key];
+                    const IconComponent = componentIconSocials[key];
+                    
+                    return (
+                      <a 
+                        key={key} 
+                        href={value} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="aspect-square border border-white/10 bg-white/[0.02] flex items-center justify-center hover:bg-lsr-orange hover:border-lsr-orange hover:text-white transition-all group"
+                      >
+                        {IconData ? (
+                          <BrandIcon icon={IconData} className="h-5 w-5 opacity-60 group-hover:opacity-100 transition-opacity" />
+                        ) : IconComponent ? (
+                          <IconComponent className="h-5 w-5 opacity-60 group-hover:opacity-100 transition-opacity" />
+                        ) : null}
+                      </a>
+                    );
                   })
-                  : <p className="text-sm text-white/60">No links yet.</p>
-                }
+                ) : (
+                  <div className="col-span-4 border border-white/10 bg-white/[0.02] p-4 text-center">
+                    <span className="font-sans font-bold text-[10px] uppercase tracking-widest text-white/30">No frequencies established</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Right Column */}
-          <div className="md:col-span-2 rounded-2xl border border-white/10 bg-white/5 p-6">
-            <h2 className="text-2xl font-semibold mb-4 text-lsr-orange tracking-wide">Bio</h2>
-            <p className="text-white/80 whitespace-pre-wrap">{user.bio || 'No bio yet.'}</p>
+          {/* Right Column: Bio & History */}
+          <div className="lg:col-span-2 space-y-12">
+            <div>
+              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-tighter mb-6 border-b border-white/10 pb-4">
+                Driver <span className="text-lsr-orange">Biography</span>
+              </h3>
+              <div className="prose prose-invert prose-p:font-sans prose-p:text-white/70 prose-p:leading-relaxed max-w-none">
+                <p className="whitespace-pre-wrap">{user.bio || 'No driver history available.'}</p>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-tighter mb-6 border-b border-white/10 pb-4">
+                Recent <span className="text-lsr-orange">Activity</span>
+              </h3>
+              <div className="border border-white/10 bg-white/[0.02] p-8 text-center">
+                <p className="font-sans font-bold text-white/40 uppercase tracking-widest text-xs mb-2">Telemetry Offline</p>
+                <p className="font-sans text-[10px] text-white/20 uppercase tracking-widest">Event history integration pending</p>
+              </div>
+            </div>
           </div>
-        </div>
-
-        <Separator className="my-8 bg-white/10" />
-
-        {/* My Events */}
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <h2 className="text-2xl font-semibold mb-4 text-lsr-orange tracking-wide">My Events</h2>
-          <p className="text-white/60">
-            This feature is coming soon! You&apos;ll be able to see and manage your upcoming events, RSVPs, and carpooling, as well as see past events and performance statistics.
-          </p>
         </div>
       </div>
     </main>

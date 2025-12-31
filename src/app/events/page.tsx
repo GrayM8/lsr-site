@@ -27,61 +27,65 @@ function FeaturedEventCard({ event }: { event: Event & { series: EventSeries | n
   const directionsUrl = hasCoords ? `https://www.google.com/maps/search/?api=1&query=${geo.coordinates[1]},${geo.coordinates[0]}` : null
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 flex flex-col md:flex-row overflow-hidden">
+    <div className="border-l-4 border-lsr-orange bg-white/[0.03] flex flex-col md:flex-row overflow-hidden group">
       {event.heroImageUrl && (
-        <div className="md:w-1/2">
-          <Image src={event.heroImageUrl} alt={event.title} width={800} height={600} className="w-full h-full object-cover" />
+        <div className="md:w-3/5 relative overflow-hidden">
+          <Image 
+            src={event.heroImageUrl} 
+            alt={event.title} 
+            width={800} 
+            height={600} 
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent md:bg-gradient-to-l md:from-black/80 md:to-transparent" />
         </div>
       )}
-      <div className="p-6 md:p-8 flex-grow md:w-1/2">
-        <div className="flex items-center gap-2 mb-2">
-          {live && <Badge className="bg-red-600 text-white">Live</Badge>}
-          <Badge variant="outline" className="border-lsr-orange text-lsr-orange">{event.series?.title}</Badge>
+      <div className="p-8 md:p-10 flex-grow md:w-2/5 flex flex-col justify-center">
+        <div className="flex items-center gap-3 mb-6">
+          {live && <span className="bg-red-600 text-white px-2 py-0.5 text-[10px] font-black uppercase tracking-widest animate-pulse">Live Now</span>}
+          {event.series && <span className="border border-lsr-orange text-lsr-orange px-2 py-0.5 text-[10px] font-black uppercase tracking-widest">{event.series.title}</span>}
         </div>
-        <h3 className="font-semibold text-2xl md:text-3xl">
-          <Link href={`/events/${event.slug}`} className="hover:underline">{event.title}</Link>
+        <h3 className="font-display font-black italic text-3xl md:text-4xl text-white uppercase tracking-tighter leading-none mb-4">
+          <Link href={`/events/${event.slug}`} className="hover:text-lsr-orange transition-colors">{event.title}</Link>
         </h3>
-        <p className="text-base text-white/70 mt-2 flex-grow">{event.summary || event.description}</p>
-        <div className="text-sm text-white/60 mt-4 space-y-2">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            <span>{startsAt.toLocaleDateString(undefined, {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}</span>
+        <p className="font-sans text-sm text-white/60 leading-relaxed mb-8 line-clamp-3">{event.summary || event.description}</p>
+        
+        <div className="space-y-4 mb-8">
+          <div className="flex items-center gap-3">
+            <Calendar className="h-4 w-4 text-lsr-orange" />
+            <span className="font-sans font-bold text-xs uppercase tracking-widest text-white/90">
+              {startsAt.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
+            </span>
           </div>
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4" />
-            <span>
+          <div className="flex items-center gap-3">
+            <Clock className="h-4 w-4 text-lsr-orange" />
+            <span className="font-sans font-bold text-xs uppercase tracking-widest text-white/90">
               {startsAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })} - {endsAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
             </span>
           </div>
           {venue && (
-            <div className="flex items-start gap-2">
-              <MapPin className="h-4 w-4 mt-0.5" />
+            <div className="flex items-start gap-3">
+              <MapPin className="h-4 w-4 mt-0.5 text-lsr-orange" />
               <div>
                 {directionsUrl ? (
-                  <Link href={directionsUrl} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
+                  <Link href={directionsUrl} target="_blank" rel="noopener noreferrer" className="hover:text-lsr-orange transition-colors flex items-center gap-1 font-sans font-bold text-xs uppercase tracking-widest text-white/90">
                     <span>{venue.name}</span>
                     <Send className="h-3 w-3" />
                   </Link>
                 ) : (
-                  <span>{venue.name}</span>
+                  <span className="font-sans font-bold text-xs uppercase tracking-widest text-white/90">{venue.name}</span>
                 )}
-                <div className="text-xs text-white/50">
-                  {[venue.addressLine1, venue.addressLine2, venue.city, venue.state, venue.postalCode].filter(Boolean).join(", ")}
+                <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">
+                  {[venue.city, venue.state].filter(Boolean).join(", ")}
                 </div>
               </div>
             </div>
           )}
         </div>
-        <div className="mt-4">
-          <Link href={`/events/${event.slug}`} className="text-lsr-orange hover:underline text-sm">
-            See Details
-          </Link>
-        </div>
+        
+        <Link href={`/events/${event.slug}`} className="inline-flex items-center gap-2 text-lsr-orange hover:text-white transition-colors font-sans font-black text-[10px] uppercase tracking-[0.2em]">
+          Race Details <span className="text-lg leading-none">→</span>
+        </Link>
       </div>
     </div>
   )
@@ -89,70 +93,54 @@ function FeaturedEventCard({ event }: { event: Event & { series: EventSeries | n
 
 function EventCard({ event }: { event: Event & { series: EventSeries | null, venue: Venue | null } }) {
   const startsAt = new Date(event.startsAtUtc)
-  const endsAt = new Date(event.endsAtUtc)
   const live = isLive(event);
 
-  const venue = event.venue
-  const geo = venue?.geo as GeoPoint | null
-  const hasCoords = geo?.type === "Point" && geo?.coordinates?.length === 2
-  const directionsUrl = hasCoords ? `https://www.google.com/maps/search/?api=1&query=${geo.coordinates[1]},${geo.coordinates[0]}` : null
-
   return (
-    <div
-      className={`rounded-2xl border border-white/10 bg-white/5 flex flex-col overflow-hidden`}>
+    <div className="group border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] transition-colors flex flex-col overflow-hidden">
       {event.heroImageUrl && (
-        <Image src={event.heroImageUrl} alt={event.title} width={400} height={200} className="w-full h-40 object-cover" />
-      )}
-      <div className="p-6 flex-grow flex flex-col">
-        <div className="flex-grow">
-          <div className="flex items-center gap-2 mb-2">
-            {live && <Badge className="bg-red-600 text-white">Live</Badge>}
-            <Badge variant="outline" className="border-lsr-orange text-lsr-orange">{event.series?.title}</Badge>
-          </div>
-          <h3 className={`font-semibold text-xl`}>
-            <Link href={`/events/${event.slug}`} className="hover:underline">{event.title}</Link>
-          </h3>
-          <p className={`text-sm text-white/70 mt-2 flex-grow`}>{event.summary || event.description}</p>
-        </div>
-        <div className="text-sm text-white/60 mt-4 space-y-2">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            <span>{startsAt.toLocaleDateString(undefined, {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4" />
-            <span>
-              {startsAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })} - {endsAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
-            </span>
-          </div>
-          {venue && (
-            <div className="flex items-start gap-2">
-              <MapPin className="h-4 w-4 mt-0.5" />
-              <div>
-                {directionsUrl ? (
-                  <Link href={directionsUrl} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
-                    <span>{venue.name}</span>
-                    <Send className="h-3 w-3" />
-                  </Link>
-                ) : (
-                  <span>{venue.name}</span>
-                )}
-                <div className="text-xs text-white/50">
-                  {[venue.addressLine1, venue.addressLine2, venue.city, venue.state, venue.postalCode].filter(Boolean).join(", ")}
-                </div>
-              </div>
+        <div className="relative h-48 overflow-hidden">
+          <Image 
+            src={event.heroImageUrl} 
+            alt={event.title} 
+            width={400} 
+            height={200} 
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+          />
+          {live && (
+            <div className="absolute top-2 right-2 bg-red-600 text-white px-2 py-0.5 text-[8px] font-black uppercase tracking-widest shadow-lg">
+              Live
             </div>
           )}
         </div>
-        <div className="mt-4">
-          <Link href={`/events/${event.slug}`} className="text-lsr-orange hover:underline text-sm">
-            See Details
-          </Link>
+      )}
+      <div className="p-6 flex-grow flex flex-col">
+        <div className="mb-4">
+          {event.series && (
+            <span className="text-[8px] font-black uppercase tracking-widest text-lsr-orange mb-2 block">
+              {event.series.title}
+            </span>
+          )}
+          <h3 className="font-sans font-bold text-lg text-white uppercase tracking-tight leading-tight mb-2 group-hover:text-lsr-orange transition-colors">
+            <Link href={`/events/${event.slug}`}>{event.title}</Link>
+          </h3>
+          <p className="font-sans text-xs text-white/50 line-clamp-2">{event.summary}</p>
+        </div>
+        
+        <div className="mt-auto pt-4 border-t border-white/5 space-y-2">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-3 w-3 text-white/40" />
+            <span className="font-sans font-bold text-[10px] uppercase tracking-widest text-white/60">
+              {startsAt.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+            </span>
+          </div>
+          {event.venue && (
+            <div className="flex items-center gap-2">
+              <MapPin className="h-3 w-3 text-white/40" />
+              <span className="font-sans font-bold text-[10px] uppercase tracking-widest text-white/60 truncate">
+                {event.venue.name}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -196,41 +184,50 @@ export default async function EventsIndexPage({
 
   return (
     <main className="bg-lsr-charcoal text-white min-h-screen">
-      <div className="mx-auto max-w-6xl px-6 md:px-8 py-10">
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="font-display text-4xl md:text-5xl text-lsr-orange tracking-wide">Events</h1>
-          <div className="ms-auto flex items-center gap-2">
+      <div className="mx-auto max-w-6xl px-6 md:px-8 py-14 md:py-20">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+          <div>
+            <h1 className="font-display font-black italic text-5xl md:text-6xl text-white uppercase tracking-tighter">
+              Race <span className="text-lsr-orange">Schedule</span>
+            </h1>
+            <p className="font-sans font-bold text-white/40 uppercase tracking-[0.3em] text-[10px] mt-2">Official Event Calendar</p>
+          </div>
+          <div className="flex items-center gap-2 w-full md:w-auto">
             <EventsSearch q={q} />
             <EventsFilters allTypes={allSeries} selectedTypes={selectedTypes} />
           </div>
         </div>
 
-        <Separator className="my-6 bg-white/10" />
-
         {featuredEvent && (
           <>
-            <h2 className="font-display text-3xl md:text-4xl text-lsr-orange tracking-wide mb-4">Next Event</h2>
+            <div className="flex items-end justify-between mb-6 border-b border-white/10 pb-4">
+              <h2 className="font-display font-black italic text-2xl md:text-3xl text-white uppercase tracking-tighter">Next <span className="text-lsr-orange">Green Flag</span></h2>
+            </div>
             <FeaturedEventCard event={featuredEvent} />
-            <Separator className="my-8 bg-white/10" />
+            <div className="h-12" />
           </>
         )}
 
         {otherUpcomingEvents.length > 0 && (
           <>
-            <h2 className="font-display text-3xl md:text-4xl text-lsr-orange tracking-wide mb-4">Upcoming Events</h2>
+            <div className="flex items-end justify-between mb-6 border-b border-white/10 pb-4">
+              <h2 className="font-display font-black italic text-2xl md:text-3xl text-white uppercase tracking-tighter">Upcoming <span className="text-lsr-orange">Sessions</span></h2>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {otherUpcomingEvents.map((e) => (
                 <EventCard key={e.id} event={e} />
               ))}
             </div>
-            <Separator className="my-8 bg-white/10" />
+            <div className="h-12" />
           </>
         )}
 
         {pastEvents.length > 0 && (
           <>
-            <h2 className="font-display text-3xl md:text-4xl text-lsr-orange tracking-wide mb-4">Past Events</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="flex items-end justify-between mb-6 border-b border-white/10 pb-4">
+              <h2 className="font-display font-black italic text-2xl md:text-3xl text-white/40 uppercase tracking-tighter">Past <span className="text-lsr-orange/40">Results</span></h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-60 hover:opacity-100 transition-opacity duration-500">
               {pastEvents.map((e) => (
                 <EventCard key={e.id} event={e} />
               ))}
@@ -239,7 +236,9 @@ export default async function EventsIndexPage({
         )}
 
         {filteredEvents.length === 0 && (
-          <p className="text-muted-foreground">No events found.</p>
+          <div className="border border-white/10 bg-white/[0.02] p-12 text-center">
+            <p className="font-sans font-bold text-white/40 uppercase tracking-widest text-sm">No events found matching your criteria.</p>
+          </div>
         )}
       </div>
     </main>

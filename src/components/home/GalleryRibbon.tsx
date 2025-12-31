@@ -22,23 +22,32 @@ export default function GalleryRibbon({ index, galleryImages }: { index: number,
   const items = [...dbItems, ...staticGalleryItems];
 
   return (
-    <SectionReveal index={index} className="mx-auto max-w-6xl mt-10 md:mt-14" clipClass="rounded-2xl">
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-6 md:p-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display text-3xl text-lsr-orange tracking-wide">Gallery</h2>
-          <Link href="/gallery" className="text-sm underline hover:no-underline" aria-label="See more in the gallery">View gallery</Link>
+    <SectionReveal index={index} className="mx-auto max-w-6xl mt-10 md:mt-14" clipClass="rounded-none">
+      <div className="bg-lsr-charcoal border border-white/5 p-6 md:p-10">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10">
+          <div>
+            <h2 className="font-display font-black italic text-4xl md:text-5xl text-white uppercase tracking-tighter">
+              The <span className="text-lsr-orange">Gallery</span>
+            </h2>
+            <p className="font-sans font-bold text-white/40 uppercase tracking-[0.3em] text-[10px] mt-2">Moments from the track</p>
+          </div>
+          <Link href="/gallery" className="group flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/60 hover:text-lsr-orange transition-colors" aria-label="See more in the gallery">
+            View All
+            <div className="h-px w-8 bg-white/20 group-hover:bg-lsr-orange group-hover:w-12 transition-all" />
+          </Link>
         </div>
+
         <Carousel
           opts={{
             align: "start",
             loop: true,
           }}
-          className="w-full"
+          className="w-full group/carousel"
         >
-          <CarouselContent>
+          <CarouselContent className="-ml-4">
             {items.map((item, index) => (
-              <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                <div className="aspect-video rounded-lg border border-white/10 overflow-hidden relative group">
+              <CarouselItem key={index} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                <div className="aspect-video border border-white/10 bg-black overflow-hidden relative group">
                   {item.type === "image" ? (
                     <>
                       <Image
@@ -46,22 +55,24 @@ export default function GalleryRibbon({ index, galleryImages }: { index: number,
                         alt={item.alt}
                         width={800}
                         height={600}
-                        className="object-cover w-full h-full"
+                        className="object-cover w-full h-full opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
                       />
                       {item.credit && (
-                        <div className="absolute bottom-2 left-2 flex items-center gap-1.5 px-2 py-1 bg-black/40 backdrop-blur-sm rounded-md text-[10px] text-white/90">
-                          <Camera className="w-3 h-3 text-white/70" />
+                        <div className="absolute bottom-0 left-0 flex items-center gap-2 px-3 py-1.5 bg-black/80 backdrop-blur-sm border-r border-t border-white/10">
+                          <Camera className="w-3 h-3 text-lsr-orange" />
                           {item.credit.url ? (
                             <a 
                               href={item.credit.url} 
                               target="_blank" 
                               rel="noopener noreferrer"
-                              className="hover:text-white hover:underline cursor-pointer"
+                              className="font-sans font-bold text-[9px] uppercase tracking-widest text-white/70 hover:text-white transition-colors"
                             >
                               {item.credit.name}
                             </a>
                           ) : (
-                            <span>{item.credit.name}</span>
+                            <span className="font-sans font-bold text-[9px] uppercase tracking-widest text-white/70">
+                              {item.credit.name}
+                            </span>
                           )}
                         </div>
                       )}
@@ -74,14 +85,21 @@ export default function GalleryRibbon({ index, galleryImages }: { index: number,
                       title={item.title}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       allowFullScreen
+                      className="opacity-80 group-hover:opacity-100 transition-opacity"
                     ></iframe>
                   )}
+                  {/* Decorative corner */}
+                  <div className="absolute top-0 right-0 w-8 h-8 pointer-events-none">
+                    <div className="absolute top-2 right-2 w-full h-full border-t border-r border-white/20" />
+                  </div>
                 </div>
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious className="left-4" />
-          <CarouselNext className="right-4" />
+          <div className="flex justify-end gap-2 mt-8">
+            <CarouselPrevious className="static translate-y-0 h-10 w-10 rounded-none bg-white/5 border-white/10 hover:bg-lsr-orange hover:border-lsr-orange hover:text-white transition-all" />
+            <CarouselNext className="static translate-y-0 h-10 w-10 rounded-none bg-white/5 border-white/10 hover:bg-lsr-orange hover:border-lsr-orange hover:text-white transition-all" />
+          </div>
         </Carousel>
       </div>
     </SectionReveal>

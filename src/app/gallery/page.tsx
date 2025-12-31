@@ -11,17 +11,23 @@ export default async function GalleryPage() {
 
   return (
     <main className="bg-lsr-charcoal text-white min-h-screen">
-      <div className="mx-auto max-w-6xl px-6 md:px-8 py-10">
-        <h1 className="font-display text-4xl md:text-5xl text-lsr-orange tracking-wide">Gallery</h1>
-        <p className="mt-2 text-white/80">A collection of moments from our races and community events.</p>
+      <div className="mx-auto max-w-6xl px-6 md:px-8 py-14 md:py-20">
+        <div className="mb-10">
+          <h1 className="font-display font-black italic text-5xl md:text-6xl text-white uppercase tracking-tighter">
+            The <span className="text-lsr-orange">Gallery</span>
+          </h1>
+          <p className="font-sans font-bold text-white/40 uppercase tracking-[0.3em] text-[10px] mt-2">Captured Moments from the Track</p>
+        </div>
 
-        <Separator className="my-6 bg-white/10" />
+        <Separator className="my-10 bg-white/10" />
 
-        <div className="mt-6">
-          <h2 className="font-display text-3xl text-lsr-orange tracking-wide">Videos</h2>
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mt-10">
+          <div className="flex items-end justify-between mb-6 border-b border-white/10 pb-4">
+            <h2 className="font-display font-black italic text-2xl md:text-3xl text-white uppercase tracking-tighter">Feature <span className="text-lsr-orange">Reels</span></h2>
+          </div>
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             {videos.map((video, index) => (
-              <div key={index} className="aspect-video rounded-lg overflow-hidden border border-white/10">
+              <div key={index} className="aspect-video border border-white/10 bg-black relative group">
                 <iframe
                   width="100%"
                   height="100%"
@@ -29,43 +35,58 @@ export default async function GalleryPage() {
                   title={video.title}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
+                  className="w-full h-full opacity-80 group-hover:opacity-100 transition-opacity duration-500"
                 ></iframe>
+                {/* Corner accent */}
+                <div className="absolute top-0 right-0 w-8 h-8 pointer-events-none">
+                  <div className="absolute top-0 right-0 w-full h-full border-t-2 border-r-2 border-lsr-orange opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        <Separator className="my-6 bg-white/10" />
-
-        <div className="mt-6">
-          <h2 className="font-display text-3xl text-lsr-orange tracking-wide">Images</h2>
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="mt-16">
+          <div className="flex items-end justify-between mb-6 border-b border-white/10 pb-4">
+            <h2 className="font-display font-black italic text-2xl md:text-3xl text-white uppercase tracking-tighter">Photo <span className="text-lsr-orange">Archive</span></h2>
+          </div>
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {images.map((image) => (
-              <div key={image.id} className="rounded-lg overflow-hidden border border-white/10 relative group">
+              <div key={image.id} className="aspect-[4/3] border border-white/10 bg-black relative group overflow-hidden">
                 <Image
                   src={`https://res.cloudinary.com/${cloudName}/image/upload/v1/${image.publicId}`}
                   alt={image.alt ?? ''}
                   width={800}
                   height={600}
-                  className="object-cover w-full h-full aspect-[4/3]"
+                  className="object-cover w-full h-full opacity-85 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
                 />
+                
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+                
                 {image.creditName && (
-                  <div className="absolute bottom-2 left-2 flex items-center gap-1.5 px-2 py-1 bg-black/40 backdrop-blur-sm rounded-md text-[10px] text-white/90">
-                    <Camera className="w-3 h-3 text-white/70" />
-                    {image.creditUrl ? (
-                      <a 
-                        href={image.creditUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="hover:text-white hover:underline cursor-pointer"
-                      >
-                        {image.creditName}
-                      </a>
-                    ) : (
-                      <span>{image.creditName}</span>
-                    )}
+                  <div className="absolute bottom-0 left-0 w-full p-4 z-10">
+                    <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-4 duration-1000">
+                      <Camera className="w-3 h-3 text-lsr-orange shadow-sm" />
+                      {image.creditUrl ? (
+                        <a 
+                          href={image.creditUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="font-sans font-bold text-[9px] uppercase tracking-widest text-white/90 hover:text-lsr-orange transition-colors"
+                        >
+                          {image.creditName}
+                        </a>
+                      ) : (
+                        <span className="font-sans font-bold text-[9px] uppercase tracking-widest text-white/90">{image.creditName}</span>
+                      )}
+                    </div>
                   </div>
                 )}
+                
+                {/* Corner accent */}
+                <div className="absolute bottom-0 right-0 w-6 h-6 pointer-events-none">
+                  <div className="absolute bottom-0 right-0 w-full h-full border-b-2 border-r-2 border-lsr-orange opacity-0 group-hover:opacity-100 transition-opacity delay-100" />
+                </div>
               </div>
             ))}
           </div>

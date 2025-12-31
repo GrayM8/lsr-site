@@ -29,66 +29,112 @@ export default async function EventPage({ params }: EventPageArgs) {
 
   return (
     <main className="bg-lsr-charcoal text-white min-h-screen">
-      <div className="mx-auto max-w-6xl px-6 md:px-8 py-10">
-        <div className="mb-4">
-          <Button asChild>
-            <Link href="/events">Back to All Events</Link>
+      <div className="mx-auto max-w-6xl px-6 md:px-8 py-10 md:py-14">
+        <div className="mb-8">
+          <Button asChild variant="ghost" className="pl-0 hover:bg-transparent hover:text-lsr-orange transition-colors font-sans font-bold uppercase tracking-widest text-[10px] text-white/50">
+            <Link href="/events">← Return to Calendar</Link>
           </Button>
         </div>
-        {event.heroImageUrl && (
-          <div className="mb-8">
-            <Image src={event.heroImageUrl} alt={event.title} width={1200} height={400} className="w-full h-64 object-cover rounded-2xl" />
-          </div>
-        )}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="md:col-span-2">
-            {event.series && (
-              <Badge variant="outline" className="border-lsr-orange text-lsr-orange mb-4">{event.series.title}</Badge>
-            )}
-            <h1 className="font-display text-4xl md:text-5xl text-lsr-orange tracking-wide mb-4">{event.title}</h1>
-            <p className="text-white/70 mt-2">{event.summary || event.description}</p>
-          </div>
-          <div className="space-y-4 text-white/80">
-            <div className="p-4 rounded-2xl border border-white/10 bg-white/5">
-              <h2 className="font-semibold text-lg mb-3">Event Details</h2>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <Calendar className="h-5 w-5 text-lsr-orange" />
-                  <span>{startsAt.toLocaleDateString(undefined, {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-lsr-orange" />
-                  <span>
-                    {startsAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })} - {endsAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
+
+        <div className="border border-white/10 bg-white/[0.02] p-8 md:p-12 mb-12 relative overflow-hidden">
+          {/* Background decorative elements */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-lsr-orange/5 -rotate-45 translate-x-16 -translate-y-16 pointer-events-none" />
+          
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-12">
+            <div className="lg:col-span-2">
+              <div className="flex flex-wrap items-center gap-3 mb-6">
+                {event.series && (
+                  <span className="bg-lsr-orange text-white px-2 py-0.5 text-[9px] font-black uppercase tracking-widest">
+                    {event.series.title}
                   </span>
-                </div>
-                {venue && (
-                  <div className="flex items-start gap-3">
-                    <MapPin className="h-5 w-5 text-lsr-orange mt-0.5" />
+                )}
+                <span className="border border-white/20 text-white/60 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest">
+                  Official Session
+                </span>
+              </div>
+              
+              <h1 className="font-display font-black italic text-4xl md:text-6xl text-white uppercase tracking-tighter leading-[0.9] mb-6">
+                {event.title}
+              </h1>
+              
+              <div className="prose prose-invert prose-p:font-sans prose-p:text-white/70 prose-p:text-sm prose-p:leading-relaxed max-w-none">
+                <p>{event.summary || event.description}</p>
+              </div>
+            </div>
+
+            <div className="lg:col-span-1">
+              <div className="bg-black border border-white/10 p-6 space-y-6">
+                <h3 className="font-sans font-black text-xs uppercase tracking-[0.2em] text-white/30 border-b border-white/10 pb-4">
+                  Session Logistics
+                </h3>
+                
+                <div className="space-y-5">
+                  <div className="flex items-start gap-4">
+                    <Calendar className="h-5 w-5 text-lsr-orange mt-0.5 shrink-0" />
                     <div>
-                      {directionsUrl ? (
-                        <Link href={directionsUrl} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
-                          <span>{venue.name}</span>
-                          <Send className="h-3 w-3" />
-                        </Link>
-                      ) : (
-                        <span>{venue.name}</span>
-                      )}
-                      <div className="text-sm text-white/50">
-                        {[venue.addressLine1, venue.addressLine2, venue.city, venue.state, venue.postalCode].filter(Boolean).join(", ")}
+                      <div className="font-sans font-bold text-[10px] uppercase tracking-widest text-white/40 mb-1">Date</div>
+                      <div className="font-sans font-bold text-sm text-white">
+                        {startsAt.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
                       </div>
                     </div>
                   </div>
-                )}
+
+                  <div className="flex items-start gap-4">
+                    <Clock className="h-5 w-5 text-lsr-orange mt-0.5 shrink-0" />
+                    <div>
+                      <div className="font-sans font-bold text-[10px] uppercase tracking-widest text-white/40 mb-1">Time</div>
+                      <div className="font-sans font-bold text-sm text-white">
+                        {startsAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })} - {endsAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {venue && (
+                    <div className="flex items-start gap-4">
+                      <MapPin className="h-5 w-5 text-lsr-orange mt-0.5 shrink-0" />
+                      <div>
+                        <div className="font-sans font-bold text-[10px] uppercase tracking-widest text-white/40 mb-1">Circuit / Venue</div>
+                        {directionsUrl ? (
+                          <Link href={directionsUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 font-sans font-bold text-sm text-white hover:text-lsr-orange transition-colors group">
+                            <span>{venue.name}</span>
+                            <Send className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </Link>
+                        ) : (
+                          <div className="font-sans font-bold text-sm text-white">{venue.name}</div>
+                        )}
+                        <div className="text-xs text-white/40 mt-1">
+                          {[venue.city, venue.state].filter(Boolean).join(", ")}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-6 border-t border-white/10">
+                  <Button className="w-full rounded-none bg-lsr-orange text-white hover:bg-white hover:text-lsr-charcoal font-black uppercase tracking-[0.2em] text-[10px] h-12 transition-all">
+                    Register for Event
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
+        {event.heroImageUrl && (
+          <div className="aspect-[21/9] w-full border border-white/10 bg-black relative overflow-hidden group">
+            <Image 
+              src={event.heroImageUrl} 
+              alt={event.title} 
+              width={1600} 
+              height={800} 
+              className="object-cover w-full h-full opacity-60 group-hover:opacity-80 transition-opacity duration-700" 
+            />
+            <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px] opacity-20 pointer-events-none" />
+            <div className="absolute bottom-4 right-4 bg-black/80 px-3 py-1 border border-white/10">
+              <span className="font-sans font-black text-[9px] uppercase tracking-widest text-white/50">Track Preview</span>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );

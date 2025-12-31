@@ -58,72 +58,72 @@ export function UserMenuClient({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="h-9 gap-2">
-          <Avatar className="h-5 w-5">
-            <AvatarImage src={user.avatarUrl ?? undefined} alt={user.displayName ?? 'User avatar'} />
-            <AvatarFallback className="text-[10px]">{initials || "U"}</AvatarFallback>
+        <Button variant="outline" className="h-10 gap-3 rounded-none border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold transition-all px-4">
+          <Avatar className="h-6 w-6 rounded-none border border-white/20">
+            <AvatarImage src={user.avatarUrl ?? undefined} alt={user.displayName ?? 'User avatar'} className="rounded-none" />
+            <AvatarFallback className="text-[9px] font-black uppercase bg-lsr-orange text-white rounded-none">{initials || "U"}</AvatarFallback>
           </Avatar>
-          <span className="truncate max-w-[10rem]">{user.displayName}</span>
+          <span className="truncate max-w-[10rem] font-sans text-[10px] uppercase tracking-widest">{user.displayName}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>
-          <div className="truncate">{user.displayName}</div>
-          {user.email && <div className="text-xs text-muted-foreground truncate">{user.email}</div>}
+      <DropdownMenuContent align="end" className="w-64 bg-lsr-charcoal border-white/10 rounded-none p-2 shadow-2xl">
+        <DropdownMenuLabel className="p-4">
+          <div className="truncate font-sans font-bold text-white uppercase tracking-tight text-sm">{user.displayName}</div>
+          {user.email && <div className="text-[9px] font-bold text-white/30 uppercase tracking-widest truncate mt-1">{user.email}</div>}
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="bg-white/5" />
 
-        <DropdownMenuItem onSelect={() => router.push(user.handle ? `/drivers/${user.handle}` : "/drivers/me")}>
+        <DropdownMenuItem 
+          onSelect={() => router.push(user.handle ? `/drivers/${user.handle}` : "/drivers/me")}
+          className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
+        >
           My driver page
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => router.push("/account")}>
+        <DropdownMenuItem 
+          onSelect={() => router.push("/account")}
+          className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
+        >
           Account details
         </DropdownMenuItem>
 
         {isAdmin && (
           <>
-            <DropdownMenuSeparator />
-            <DropdownMenuLabel>Admin</DropdownMenuLabel>
-            <DropdownMenuItem onSelect={() => router.push("/admin")}>
-              <Shield className="mr-2 h-4 w-4" />
+            <DropdownMenuSeparator className="bg-white/5" />
+            <DropdownMenuLabel className="px-4 py-2 font-sans font-black text-[9px] uppercase tracking-[0.3em] text-white/20">System Admin</DropdownMenuLabel>
+            <DropdownMenuItem 
+              onSelect={() => router.push("/admin")}
+              className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
+            >
+              <Shield className="mr-2 h-3 w-3" />
               <span>Dashboard</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => router.push("/admin/events")}>
-              <Shield className="mr-2 h-4 w-4" />
+            <DropdownMenuItem 
+              onSelect={() => router.push("/admin/events")}
+              className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
+            >
+              <Shield className="mr-2 h-3 w-3" />
               <span>Events</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => router.push("/admin/series")}>
-              <Shield className="mr-2 h-4 w-4" />
-              <span>Series</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => router.push("/admin/venues")}>
-              <Shield className="mr-2 h-4 w-4" />
-              <span>Venues</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => router.push("/admin/gallery")}>
-              <Shield className="mr-2 h-4 w-4" />
-              <span>Gallery</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => router.push("/admin/news")}>
-              <Shield className="mr-2 h-4 w-4" />
+            <DropdownMenuItem 
+              onSelect={() => router.push("/admin/news")}
+              className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
+            >
+              <Shield className="mr-2 h-3 w-3" />
               <span>News</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => router.push("/admin/tools")}>
-              <Shield className="mr-2 h-4 w-4" />
-              <span>Misc. Tools</span>
             </DropdownMenuItem>
           </>
         )}
 
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="bg-white/5" />
 
         <DropdownMenuItem
           onSelect={(e) => {
             e.preventDefault()
             logout()
           }}
+          className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-red-600 focus:text-white cursor-pointer"
         >
-          Logout
+          Terminate Session
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

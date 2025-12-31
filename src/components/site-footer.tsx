@@ -8,53 +8,57 @@ export function SiteFooter() {
   const year = new Date().getFullYear()
 
   return (
-    <footer role="contentinfo" className="border-t bg-background/50">
-      <div className="mx-auto max-w-6xl px-4 py-10 md:py-12">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+    <footer role="contentinfo" className="border-t border-white/5 bg-black">
+      <div className="mx-auto max-w-6xl px-6 py-16 md:py-24">
+        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
-          <div className="space-y-2">
-            <Link href="/" className="font-bold text-lg text-lsr-orange">
-              LONGHORN SIM RACING
+          <div className="space-y-6">
+            <Link href="/" className="font-display font-black italic text-2xl text-lsr-orange tracking-tighter uppercase block">
+              Longhorn<br/>Sim Racing
             </Link>
-            <p className="text-sm text-muted-foreground">
-              UT Austin’s sim racing community. Bringing motorsports closer to Longhorns and Longhorns closer to the
-              podium.
+            <p className="font-sans text-xs text-white/40 uppercase tracking-widest leading-loose max-w-[240px]">
+              UT Austin&apos;s premier simulation racing organization. Performance. Engineering. Community.
             </p>
           </div>
 
           {/* Quick links */}
-          <nav aria-label="Footer" className="grid grid-cols-2 gap-2 text-sm">
-            <Link href="/news" className="hover:underline">News</Link>
-            <Link href="/events" className="hover:underline">Events</Link>
-            <Link href="/drivers" className="hover:underline">All Drivers</Link>
-            <Link href="/series/lone-star-cup" className="hover:underline">Lone Star Cup</Link>
-            <Link href="/gallery" className="hover:underline">Gallery</Link>
-            <Link href="/sponsors" className="hover:underline">Sponsors</Link>
-          </nav>
+          <div className="space-y-6">
+            <h3 className="font-sans font-black text-[10px] uppercase tracking-[0.3em] text-white/20">The Grid</h3>
+            <nav aria-label="Footer" className="flex flex-col gap-3 text-xs font-bold uppercase tracking-widest">
+              <Link href="/news" className="text-white/60 hover:text-lsr-orange transition-colors">News</Link>
+              <Link href="/events" className="text-white/60 hover:text-lsr-orange transition-colors">Events</Link>
+              <Link href="/drivers" className="text-white/60 hover:text-lsr-orange transition-colors">Drivers</Link>
+              <Link href="/gallery" className="text-white/60 hover:text-lsr-orange transition-colors">Gallery</Link>
+              <Link href="/sponsors" className="text-white/60 hover:text-lsr-orange transition-colors">Sponsors</Link>
+            </nav>
+          </div>
 
           {/* Contact */}
-          <div className="space-y-2 text-sm">
-            <div className="font-medium">Contact</div>
-            <a
-              href="mailto:info@longhornsimracing.org"
-              className="flex items-center gap-2 hover:underline"
-            >
-              <Mail className="h-4 w-4" />
-              info@longhornsimracing.org
-            </a>
+          <div className="space-y-6 text-xs">
+            <h3 className="font-sans font-black text-[10px] uppercase tracking-[0.3em] text-white/20">Headquarters</h3>
+            <div className="space-y-4">
+              <p className="text-white/60 font-bold uppercase tracking-widest">Austin, Texas</p>
+              <a
+                href="mailto:info@longhornsimracing.org"
+                className="flex items-center gap-2 text-white/60 hover:text-lsr-orange transition-colors font-bold uppercase tracking-widest"
+              >
+                <Mail className="h-3 w-3" />
+                info@lsr.org
+              </a>
+            </div>
           </div>
 
           {/* Social */}
-          <div className="space-y-2 text-sm">
-            <div className="font-medium">Follow</div>
-            <ul className="space-y-2">
+          <div className="space-y-6 text-xs">
+            <h3 className="font-sans font-black text-[10px] uppercase tracking-[0.3em] text-white/20">Network</h3>
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-3">
               <li>
                 <a
                   href="https://discord.gg/5Uv9YwpnFz"
                   target="_blank" rel="noreferrer"
-                  className="flex items-center gap-2 hover:underline"
+                  className="flex items-center gap-2 text-white/60 hover:text-lsr-orange transition-colors font-bold uppercase tracking-widest"
                 >
-                  <BrandIcon icon={siDiscord} className="h-4 w-4" />
+                  <BrandIcon icon={siDiscord} className="h-3 w-3" />
                   Discord
                 </a>
               </li>
@@ -62,55 +66,26 @@ export function SiteFooter() {
                 <a
                   href="https://instagram.com/longhorn_sim_racing"
                   target="_blank" rel="noreferrer"
-                  className="flex items-center gap-2 hover:underline"
+                  className="flex items-center gap-2 text-white/60 hover:text-lsr-orange transition-colors font-bold uppercase tracking-widest"
                 >
-                  <BrandIcon icon={siInstagram} className="h-4 w-4" />
-                  Instagram
+                  <BrandIcon icon={siInstagram} className="h-3 w-3" />
+                  Insta
                 </a>
-              </li>
-              <li>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <a
-                        href="https://youtube.com/"
-                        target="_blank" rel="noreferrer"
-                        className="flex items-center gap-2 hover:underline"
-                      >
-                        <BrandIcon icon={siYoutube} className="h-4 w-4" />
-                        YouTube
-                      </a>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>YouTube channel coming soon!</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
               </li>
               <li>
                 <a
                   href="https://www.twitch.tv/longhorn_sim_racing"
                   target="_blank" rel="noreferrer"
-                  className="flex items-center gap-2 hover:underline"
+                  className="flex items-center gap-2 text-white/60 hover:text-lsr-orange transition-colors font-bold uppercase tracking-widest"
                 >
-                  <BrandIcon icon={siTwitch} className="h-4 w-4" />
+                  <BrandIcon icon={siTwitch} className="h-3 w-3" />
                   Twitch
                 </a>
               </li>
               <li>
-                <a
-                  href="https://www.linkedin.com/company/longhorn-sim-racing" /* TODO: replace */
-                  target="_blank" rel="noreferrer"
-                  className="flex items-center gap-2 hover:underline"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  LinkedIn
-                </a>
-              </li>
-              <li>
-                <Link href="/news/subscribe" className="flex items-center gap-2 hover:underline">
-                  <Rss className="h-4 w-4" />
-                  Subscribe
+                <Link href="/news/subscribe" className="flex items-center gap-2 text-white/60 hover:text-lsr-orange transition-colors font-bold uppercase tracking-widest">
+                  <Rss className="h-3 w-3" />
+                  RSS
                 </Link>
               </li>
             </ul>
@@ -119,15 +94,15 @@ export function SiteFooter() {
 
         {/* Bottom bar */}
         <div
-          className="mt-10 flex flex-col items-start justify-between gap-2 border-t pt-6 text-xs text-muted-foreground sm:flex-row">
-          <p>© {year} Longhorn Sim Racing</p>
-          <div className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-3">
-            <p>Built with Next.js • Deployed on Vercel • Made with ☕ & ❤️ by{" "}
+          className="mt-20 flex flex-col items-start justify-between gap-6 border-t border-white/5 pt-10 text-[9px] font-bold uppercase tracking-[0.2em] text-white/20 sm:flex-row">
+          <p>© {year} Longhorn Sim Racing · University of Texas at Austin</p>
+          <div className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-6">
+            <p>Built with Next.js • Vercel • Made by{" "}
               <a
                 href="https://graymarshall.dev"
                 target="_blank"
                 rel="noreferrer"
-                className="underline"
+                className="text-white/40 hover:text-white transition-colors"
               >
                 Gray Marshall
               </a>

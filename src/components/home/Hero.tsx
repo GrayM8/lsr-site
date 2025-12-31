@@ -16,7 +16,7 @@ export default function Home() {
 
   return (
     <section ref={heroRef} className="relative min-h-dvh bg-lsr-charcoal text-white grid place-items-center overflow-hidden mb-10 md:mb-14">
-      {/* Background image (blurred + dimmed) */}
+      {/* Background image (intense + dynamic) */}
       <motion.div
         aria-hidden
         className="absolute inset-0 z-0 overflow-hidden transform-gpu [will-change:transform]"
@@ -28,126 +28,85 @@ export default function Home() {
           fill
           priority
           sizes="100vw"
-          className="object-cover blur-[2.5px] md:blur-[3px] scale-110 opacity-60"
+          className="object-cover scale-105 opacity-50"
         />
-        {/* soft radial vignette toward the center */}
-        <div className="absolute inset-1 bg-[radial-gradient(900px_circle_at_50%_35%,transparent,rgba(0,0,0,0.65))]"/>
+        {/* strong vignette */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0%,rgba(0,0,0,0.8)_100%)]"/>
         {/* extra readability layers */}
-        <div className="absolute inset-0 bg-lsr-charcoal/30"/>
-        <div className="absolute inset-0 bg-gradient-to-b from-lsr-charcoal/80 via-transparent to-lsr-charcoal/90"/>
+        <div className="absolute inset-0 bg-lsr-charcoal/40"/>
+        <div className="absolute inset-0 bg-gradient-to-b from-lsr-charcoal/80 via-transparent to-lsr-charcoal"/>
         {/* subtle tech pattern */}
         <div
-          className="absolute inset-0 opacity-[0.03] mix-blend-overlay [background-image:repeating-linear-gradient(135deg,white_0px,white_1px,transparent_1px,transparent_11px)]"/>
+          className="absolute inset-0 opacity-[0.05] mix-blend-overlay [background-image:repeating-linear-gradient(45deg,white_0px,white_1px,transparent_1px,transparent_10px)]"/>
       </motion.div>
 
       {/* Content */}
       <motion.div
-        initial={{opacity: 0, y: 24}}
+        initial={{opacity: 0, y: 30}}
         animate={{opacity: 1, y: 0}}
-        transition={{duration: 0.6}}
+        transition={{duration: 0.8, ease: "easeOut"}}
         className="relative z-10 max-w-6xl w-full px-6 md:px-8 text-center py-16 md:py-24"
       >
-        {/* Badge (forces its own line) */}
-        <div className="mb-6">
+        {/* Badge */}
+        <div className="mb-8">
           <div
-            className="mx-auto w-fit inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-[10px] md:text-xs uppercase tracking-wider text-white/70">
-            <span className="inline-block h-2 w-2 rounded-full bg-lsr-orange"/>
-            Established 2025 · UT Austin
+            className="mx-auto w-fit inline-flex items-center gap-2 rounded-full border border-lsr-orange/30 bg-lsr-orange/10 px-4 py-1.5 text-[10px] md:text-xs uppercase tracking-[0.2em] text-lsr-orange font-bold">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-lsr-orange animate-pulse"/>
+            ESTABLISHED 2025 · UT AUSTIN
           </div>
         </div>
 
-        {/* Headline with searchlight-on-text */}
-        <div className="relative block mx-auto isolate">
-          {/* Base orange text */}
+        {/* Headline */}
+        <div className="relative block mx-auto isolate overflow-visible">
           <h1
-            className="relative z-10 font-display text-lsr-orange text-4xl sm:text-5xl md:text-7xl lg:text-8xl leading-[0.95] tracking-wide drop-shadow-[0_6px_24px_rgba(191,87,0,0.45)] font-bold">
+            className="relative z-10 font-display font-black italic text-white text-2xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl leading-none tracking-tighter uppercase whitespace-nowrap">
             LONGHORN SIM RACING
           </h1>
-
-          {/* Moving searchlight, clipped to letters only */}
-          {(() => {
-            type SpotlightVars = {
-              "--gx": number
-              "--gy": number
-              backgroundImage: string
-              WebkitTextFillColor: string
-              WebkitBackgroundClip: string
-              backgroundClip: string
-            }
-            const style: React.CSSProperties & SpotlightVars = {
-              "--gx": 0.25,
-              "--gy": 0.35,
-              backgroundImage:
-                "radial-gradient(170px 120px at calc(var(--gx) * 100%) calc(var(--gy) * 100%), rgba(255,255,255,0.95), rgba(255,255,255,0) 60%)",
-              WebkitTextFillColor: "transparent",
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-            }
-            return (
-              <motion.span
-                aria-hidden
-                className="pointer-events-none select-none absolute inset-0 z-20 font-display font-bold text-transparent mix-blend-screen
-                   text-4xl sm:text-5xl md:text-7xl lg:text-8xl leading-[0.95] tracking-wide"
-                style={style}
-                animate={{
-                  ["--gx"]: [0.15, 0.85, 0.25, 0.70, 0.40],
-                  ["--gy"]: [0.30, 0.30, 0.65, 0.50, 0.35],
-                }}
-                transition={{duration: 12, ease: "easeInOut", repeat: Infinity, repeatType: "mirror"}}
-              >
-                LONGHORN SIM RACING
-              </motion.span>
-            )
-          })()}
+          
+          {/* Subtle glow behind headline */}
+          <div className="absolute inset-0 -z-10 bg-lsr-orange/10 blur-[100px] opacity-30 pointer-events-none" />
         </div>
 
-
-        <p className="mt-5 md:mt-6 text-base md:text-xl text-white/85">
+        <p className="mt-8 md:mt-10 text-lg md:text-2xl text-white/90 font-sans font-medium max-w-3xl mx-auto leading-relaxed">
           Bringing motorsports closer to Longhorns and Longhorns closer to the podium.
         </p>
 
         {/* credibility chips */}
-        <ul
-          className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs md:text-sm text-white/70">
-          <li className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-lsr-orange"/> iRacing
-          </li>
-          <li className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-lsr-orange"/> Assetto Corsa
-          </li>
-          <li className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-lsr-orange"/> Weekly Events
-          </li>
-          <li className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-lsr-orange"/> Driver Development
-          </li>
-        </ul>
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-[10px] md:text-xs font-bold uppercase tracking-widest text-white/50">
+          <span className="flex items-center gap-2 border-r border-white/10 pr-8 last:border-0 last:pr-0">
+            iRacing
+          </span>
+          <span className="flex items-center gap-2 border-r border-white/10 pr-8 last:border-0 last:pr-0">
+            Assetto Corsa
+          </span>
+          <span className="flex items-center gap-2 border-r border-white/10 pr-8 last:border-0 last:pr-0">
+            Weekly Events
+          </span>
+          <span className="flex items-center gap-2">
+            Driver Development
+          </span>
+        </div>
 
-        <div className="mt-8 md:mt-10 flex items-center justify-center gap-4">
+        <div className="mt-12 md:mt-16 flex flex-col sm:flex-row items-center justify-center gap-6">
           <Button
             size="lg"
             asChild
-            className="bg-lsr-orange text-white hover:bg-lsr-orange/90 font-semibold px-7 py-6 rounded-xl shadow-lg"
+            className="group relative bg-lsr-orange text-white hover:bg-lsr-orange/90 font-bold uppercase tracking-widest px-10 py-8 rounded-none transition-all duration-300 hover:scale-105 active:scale-95"
           >
-            <Link href="#join-the-grid">Join the Grid</Link>
+            <Link href="#join-the-grid">
+              Join the Grid
+              <span className="absolute bottom-0 left-0 w-full h-1 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"/>
+            </Link>
           </Button>
           <Button
             size="lg"
             variant="outline"
             asChild
-            className="px-7 py-6 rounded-xl"
+            className="border-2 border-white/20 hover:border-white text-white font-bold uppercase tracking-widest px-10 py-8 rounded-none bg-transparent hover:bg-white hover:text-lsr-charcoal transition-all duration-300"
           >
             <Link href="/sponsors">Sponsor LSR</Link>
           </Button>
         </div>
-
-        {/* subtle divider */}
-        <div className="mx-auto mt-10 h-px w-40 bg-gradient-to-r from-transparent via-white/30 to-transparent"/>
-
-        {/* development note */}
-        <p className="mt-6 text-xs text-white/60 italic">
-          ⚠️ This website is in active development.
-        </p>
       </motion.div>
 
       {/* scrolling stat ticker banner */}
