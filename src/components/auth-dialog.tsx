@@ -1,6 +1,7 @@
 "use client"
 
 import { createSupabaseBrowser } from "@/lib/supabase-browser";
+import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import * as React from "react"
 import { useState, useTransition, useEffect } from "react"
@@ -215,7 +216,16 @@ export function AuthDialog() {
                 </div>
 
                 <div className="grid gap-1.5">
-                  <Label htmlFor="password2">Password</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password2">Password</Label>
+                    <Link
+                      href="/auth/forgot-password"
+                      className="text-xs text-primary hover:underline"
+                      onClick={() => setOpen(false)}
+                    >
+                      Forgot your password?
+                    </Link>
+                  </div>
                   <Input
                     id="password2"
                     type="password"

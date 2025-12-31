@@ -81,7 +81,8 @@ export async function GET(request: Request) {
       return tx.user.create({ data: newUserPayload });
     });
 
-    const redirectUrl = `${origin}/drivers/${dbUser.handle}`;
+    const next = searchParams.get('next');
+    const redirectUrl = next ? `${origin}${next}` : `${origin}/drivers/${dbUser.handle}`;
     return NextResponse.redirect(redirectUrl);
 
   } catch (dbError) {
