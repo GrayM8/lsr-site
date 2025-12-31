@@ -2,6 +2,7 @@ import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
 import { galleryItems } from "@/lib/gallery";
 import { getAllGalleryImages } from "@/server/queries/gallery";
+import { Camera } from "lucide-react";
 
 export default async function GalleryPage() {
   const videos = galleryItems.filter(item => item.type !== 'image');
@@ -40,7 +41,7 @@ export default async function GalleryPage() {
           <h2 className="font-display text-3xl text-lsr-orange tracking-wide">Images</h2>
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {images.map((image) => (
-              <div key={image.id} className="rounded-lg overflow-hidden border border-white/10">
+              <div key={image.id} className="rounded-lg overflow-hidden border border-white/10 relative group">
                 <Image
                   src={`https://res.cloudinary.com/${cloudName}/image/upload/v1/${image.publicId}`}
                   alt={image.alt ?? ''}
@@ -48,6 +49,23 @@ export default async function GalleryPage() {
                   height={600}
                   className="object-cover w-full h-full aspect-[4/3]"
                 />
+                {image.creditName && (
+                  <div className="absolute bottom-2 left-2 flex items-center gap-1.5 px-2 py-1 bg-black/40 backdrop-blur-sm rounded-md text-[10px] text-white/90">
+                    <Camera className="w-3 h-3 text-white/70" />
+                    {image.creditUrl ? (
+                      <a 
+                        href={image.creditUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="hover:text-white hover:underline cursor-pointer"
+                      >
+                        {image.creditName}
+                      </a>
+                    ) : (
+                      <span>{image.creditName}</span>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
