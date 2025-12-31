@@ -18,6 +18,18 @@ export default function UpdatePasswordPage() {
   const supabase = createSupabaseBrowser()
 
   useEffect(() => {
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("[UpdatePassword] Initial Session:", session);
+      if (session) {
+         // Attempt to validate immediately
+         const isRecovery = session.user?.app_metadata?.provider === 'email' && 
+                           (session as any).amr?.find((m: any) => m.method === 'recovery');
+         console.log("[UpdatePassword] Initial check isRecovery:", isRecovery);
+         if (isRecovery) setIsAllowed(true);
+      }
+    });
+
     // Listen for auth state changes. 
     // The 'PASSWORD_RECOVERY' event is fired specifically when a user signs in via a password reset link.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
