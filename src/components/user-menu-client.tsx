@@ -104,6 +104,10 @@ export function UserMenuClient({
               <Shield className="mr-2 h-4 w-4" />
               <span>Gallery</span>
             </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => router.push("/admin/news")}>
+              <Shield className="mr-2 h-4 w-4" />
+              <span>News</span>
+            </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => router.push("/admin/tools")}>
               <Shield className="mr-2 h-4 w-4" />
               <span>Misc. Tools</span>

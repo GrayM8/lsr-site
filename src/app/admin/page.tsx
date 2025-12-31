@@ -22,6 +22,11 @@ const adminPages = [
     href: "/admin/gallery",
   },
   {
+    title: "News",
+    description: "Create and manage news articles.",
+    href: "/admin/news",
+  },
+  {
     title: "Misc. Tools",
     description: "Access miscellaneous administrative tools.",
     href: "/admin/tools",
