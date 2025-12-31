@@ -1,68 +1,35 @@
-"use client"
+import { redirect } from "next/navigation"
+import { createSupabaseServer } from "@/lib/supabase-server"
+import { UpdatePasswordForm } from "@/components/auth/update-password-form"
 
-import { useState, useTransition } from "react"
-import { createSupabaseBrowser } from "@/lib/supabase-browser"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+export default async function UpdatePasswordPage() {
+  const supabase = await createSupabaseServer()
+  const { data: { session } } = await supabase.auth.getSession()
 
-export default function UpdatePasswordPage() {
-  const [password, setPassword] = useState("")
-  const [pending, startTransition] = useTransition()
-  const [error, setError] = useState("")
-  const router = useRouter()
-  const supabase = createSupabaseBrowser()
+  // 1. Must have a session
+  if (!session) {
+    redirect("/")
+  }
 
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setError("")
-    startTransition(async () => {
-      const { error } = await supabase.auth.updateUser({ password })
+  // 2. Must be a recovery session (clicked "Forgot Password" link)
+  const isRecovery = session.user?.app_metadata?.provider === 'email' && 
+                     session.user?.aud === 'authenticated' &&
+                     (session as any).amr?.find((m: any) => m.method === 'recovery' || m.method === 'otp');
 
-      if (error) {
-        setError(error.message)
-      } else {
-        alert("Password updated successfully!")
-        router.push("/")
-      }
-    })
+  // If strict check is needed:
+  // Supabase sets `amr: [{ method: 'recovery', timestamp: ... }]` for password reset links.
+  const amr = (session as any).amr || []
+  const hasRecovery = amr.some((x: any) => x.method === 'recovery')
+
+  if (!hasRecovery) {
+    // If user is logged in but NOT via recovery, redirect them to home or settings.
+    // This prevents random access to this page.
+    redirect("/")
   }
 
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
-      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-        <div className="flex flex-col space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Reset Password
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Enter your new password below.
-          </p>
-        </div>
-
-        <form onSubmit={onSubmit} className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="password">New Password</Label>
-            <Input
-              id="password"
-              type="password"
-              disabled={pending}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          {error && (
-            <div className="text-sm text-red-500">
-              {error}
-            </div>
-          )}
-          <Button disabled={pending}>
-            {pending ? "Updating..." : "Update Password"}
-          </Button>
-        </form>
-      </div>
+      <UpdatePasswordForm />
     </div>
   )
 }
