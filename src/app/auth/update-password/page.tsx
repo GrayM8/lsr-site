@@ -8,6 +8,20 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AuthChangeEvent, Session } from "@supabase/supabase-js"
 
+// Helper to decode JWT payload safely on client
+function decodeJwtPayload(token: string) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
+
 export default function UpdatePasswordPage() {
   const [password, setPassword] = useState("")
   const [pending, startTransition] = useTransition()
@@ -18,47 +32,43 @@ export default function UpdatePasswordPage() {
   const supabase = createSupabaseBrowser()
 
   useEffect(() => {
+    // Shared verification logic
+    const checkSession = (session: Session | null) => {
+      if (!session) return;
+
+      // 1. Try checking the 'amr' claim directly from the token if possible
+      const payload = session.access_token ? decodeJwtPayload(session.access_token) : null;
+      const amr = payload?.amr || [];
+      const isRecovery = amr.some((m: any) => m.method === 'recovery');
+
+      if (isRecovery) {
+        setIsAllowed(true)
+      } else {
+        // If logged in but NOT via recovery, redirect.
+        router.replace("/")
+      }
+    }
+
     // Check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("[UpdatePassword] Initial Session:", session);
       if (session) {
-         // Attempt to validate immediately
-         const isRecovery = session.user?.app_metadata?.provider === 'email' && 
-                           (session as any).amr?.find((m: any) => m.method === 'recovery');
-         console.log("[UpdatePassword] Initial check isRecovery:", isRecovery);
-         if (isRecovery) setIsAllowed(true);
+         checkSession(session);
+      } else {
+         // No session at all? likely wait for auth state change or redirect?
+         // We'll let the onAuthStateChange handle the 'no session' case or eventual sign in.
       }
     });
 
-    // Listen for auth state changes. 
-    // The 'PASSWORD_RECOVERY' event is fired specifically when a user signs in via a password reset link.
+    // Listen for auth state changes.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
-      console.log("[UpdatePassword] Auth Event:", event);
-      console.log("[UpdatePassword] Session:", session);
-      console.log("[UpdatePassword] AMR:", session?.user?.app_metadata, (session as any)?.amr);
-
       if (event === 'PASSWORD_RECOVERY') {
         setIsAllowed(true)
       } 
       else if (event === 'SIGNED_IN' && session) {
-        // Fallback check: If the session has the 'recovery' method in 'amr' (Authentication Method Reference)
-        // This handles cases where the event might have been missed or processed as a generic sign-in.
-        const isRecovery = session.user?.app_metadata?.provider === 'email' && 
-                           (session as any).amr?.find((m: any) => m.method === 'recovery');
-        
-        console.log("[UpdatePassword] isRecovery check:", isRecovery);
-
-        if (isRecovery) {
-          setIsAllowed(true)
-        } else {
-          // If logged in but NOT via recovery, kick them out.
-          // This prevents logged-in users from visiting this URL to change passwords without old password.
-          console.warn("[UpdatePassword] Not a recovery session. Would redirect to /.");
-          // router.replace("/") // Temporarily disabled for debugging
-        }
+        checkSession(session);
       } 
       else if (event === 'SIGNED_OUT') {
-         // router.replace("/") // Temporarily disabled for debugging
+         router.replace("/")
       }
     })
 
