@@ -1,7 +1,7 @@
 import "./globals.css"
 import type { Metadata } from "next"
 import { ThemeProvider } from "@/components/theme-provider"
-import { Inter, Bebas_Neue } from "next/font/google"
+import { Montserrat, Kanit } from "next/font/google"
 import { SiteHeader } from "@/components/site-header"
 import { Analytics } from "@vercel/analytics/react"
 import React from "react";
@@ -9,15 +9,16 @@ import { SiteFooter } from "@/components/site-footer"
 import { LiveBanner } from "@/components/live-banner";
 import ReimaginedGlobalBanner from "@/components/reimagined-global-banner";
 
-const inter = Inter({
+const montserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-sans", // for body text
   display: "swap",
 })
 
-const bebas = Bebas_Neue({
+const kanit = Kanit({
   subsets: ["latin"],
-  weight: "400",
+  weight: ["400", "500", "600", "700", "800", "900"],
+  style: ["normal", "italic"],
   variable: "--font-display", // for headings
   display: "swap",
 })
@@ -66,7 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${bebas.variable} h-full dark`}
+      className={`${montserrat.variable} ${kanit.variable} h-full dark`}
       style={{ colorScheme: "dark" }}
       suppressHydrationWarning
     >
