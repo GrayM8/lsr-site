@@ -5,9 +5,10 @@ import { requireRole } from '@/server/auth/guards';
 import { newsPostSchema, NewsPostSchema } from '@/schemas/news.schema';
 import { revalidatePath } from 'next/cache';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { slugify } from '@/lib/slug';
 
 export async function createPost(data: NewsPostSchema) {
-  const user = await requireRole(['admin', 'officer']);
+  await requireRole(['admin', 'officer']);
   
   const validated = newsPostSchema.parse(data);
 
@@ -18,10 +19,28 @@ export async function createPost(data: NewsPostSchema) {
         slug: validated.slug,
         excerpt: validated.excerpt,
         bodyMd: validated.bodyMd,
-        publishedAt: validated.published ? new Date() : null,
-        authorId: user.id,
+        publishedAt: validated.publishedAt,
+        authorId: validated.authorId,
       },
     });
+
+    // Handle Tags
+    if (validated.tags && validated.tags.length > 0) {
+      for (const tagName of validated.tags) {
+        const tagSlug = slugify(tagName);
+        let tag = await prisma.tag.findUnique({ where: { slug: tagSlug } });
+        if (!tag) {
+          tag = await prisma.tag.create({ data: { name: tagName, slug: tagSlug } });
+        }
+        await prisma.entityTag.create({
+          data: {
+            tagId: tag.id,
+            entityType: 'post',
+            entityId: post.id,
+          },
+        });
+      }
+    }
 
     revalidatePath('/admin/news');
     revalidatePath('/news');
@@ -44,14 +63,8 @@ export async function updatePost(id: string, data: NewsPostSchema) {
     return { success: false, error: 'Post not found' };
   }
 
-  let publishedAt = existingPost.publishedAt;
-  if (validated.published && !publishedAt) {
-    publishedAt = new Date();
-  } else if (!validated.published) {
-    publishedAt = null;
-  }
-
   try {
+    // Update Post fields
     const post = await prisma.post.update({
       where: { id },
       data: {
@@ -59,14 +72,39 @@ export async function updatePost(id: string, data: NewsPostSchema) {
         slug: validated.slug,
         excerpt: validated.excerpt,
         bodyMd: validated.bodyMd,
-        publishedAt,
+        publishedAt: validated.publishedAt,
+        authorId: validated.authorId,
       },
     });
+
+    // Handle Tags (Sync)
+    // First, remove all existing tags for this post
+    await prisma.entityTag.deleteMany({
+      where: { entityType: 'post', entityId: id },
+    });
+
+    // Then re-add selected tags
+    if (validated.tags && validated.tags.length > 0) {
+        for (const tagName of validated.tags) {
+          const tagSlug = slugify(tagName);
+          let tag = await prisma.tag.findUnique({ where: { slug: tagSlug } });
+          if (!tag) {
+            tag = await prisma.tag.create({ data: { name: tagName, slug: tagSlug } });
+          }
+          await prisma.entityTag.create({
+            data: {
+              tagId: tag.id,
+              entityType: 'post',
+              entityId: post.id,
+            },
+          });
+        }
+    }
 
     revalidatePath('/admin/news');
     revalidatePath('/news');
     if (post.slug !== existingPost.slug) {
-        revalidatePath(`/news/${existingPost.slug}`); // In case old slug is cached?
+        revalidatePath(`/news/${existingPost.slug}`);
     }
     revalidatePath(`/news/${post.slug}`);
     

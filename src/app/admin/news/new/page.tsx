@@ -1,10 +1,24 @@
+import { prisma } from "@/server/db"
 import { PostForm } from "../_components/post-form"
 
-export default function NewPostPage() {
+export default async function NewPostPage() {
+  const users = await prisma.user.findMany({
+    select: { id: true, displayName: true },
+    orderBy: { displayName: 'asc' }
+  });
+
+  const tags = await prisma.tag.findMany({
+    select: { name: true },
+    orderBy: { name: 'asc' }
+  });
+
   return (
     <div className="mx-auto max-w-4xl p-8">
       <h1 className="text-3xl font-bold mb-8">Create New Post</h1>
-      <PostForm />
+      <PostForm 
+        users={users} 
+        availableTags={tags.map(t => t.name)}
+      />
     </div>
   )
 }

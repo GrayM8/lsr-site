@@ -6,7 +6,9 @@ export const newsPostSchema = z.object({
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug must be lowercase, alphanumeric, and hyphenated"),
   excerpt: z.string().optional(),
   bodyMd: z.string().min(1, "Content is required"),
-  published: z.boolean(),
+  authorId: z.string().min(1, "Author is required"),
+  publishedAt: z.date().nullable().optional(), // Nullable for drafts
+  tags: z.array(z.string()),
 });
 
 export type NewsPostSchema = z.infer<typeof newsPostSchema>;

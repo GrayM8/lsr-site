@@ -8,6 +8,8 @@ interface PageProps {
 
 export default async function EditPostPage({ params }: PageProps) {
   const { id } = await params
+  
+  // Fetch post with relational data (tags via EntityTag)
   const post = await prisma.post.findUnique({
     where: { id },
   })
@@ -16,6 +18,24 @@ export default async function EditPostPage({ params }: PageProps) {
     notFound()
   }
 
+  // Fetch tags for this post
+  const entityTags = await prisma.entityTag.findMany({
+    where: { entityType: 'post', entityId: id },
+    include: { tag: true }
+  });
+  const postTags = entityTags.map(et => et.tag.name);
+
+  // Fetch data for dropdowns
+  const users = await prisma.user.findMany({
+    select: { id: true, displayName: true },
+    orderBy: { displayName: 'asc' }
+  });
+
+  const tags = await prisma.tag.findMany({
+    select: { name: true },
+    orderBy: { name: 'asc' }
+  });
+
   // Transform to schema shape
   const postData = {
     id: post.id,
@@ -23,13 +43,19 @@ export default async function EditPostPage({ params }: PageProps) {
     slug: post.slug,
     excerpt: post.excerpt ?? "",
     bodyMd: post.bodyMd,
-    published: post.publishedAt !== null,
+    authorId: post.authorId ?? "",
+    publishedAt: post.publishedAt,
+    tags: postTags,
   }
 
   return (
     <div className="mx-auto max-w-4xl p-8">
       <h1 className="text-3xl font-bold mb-8">Edit Post</h1>
-      <PostForm post={postData} />
+      <PostForm 
+        post={postData} 
+        users={users}
+        availableTags={tags.map(t => t.name)}
+      />
     </div>
   )
 }
