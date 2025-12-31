@@ -36,3 +36,13 @@ export async function deleteImage(id: string) {
   revalidatePath('/admin/gallery');
   revalidatePath('/gallery');
 }
+
+export async function updateImageCredit(id: string, creditName: string | null, creditUrl: string | null) {
+  await requireAdmin();
+  await prisma.galleryImage.update({
+    where: { id },
+    data: { creditName, creditUrl },
+  });
+  revalidatePath('/admin/gallery');
+  revalidatePath('/gallery');
+}

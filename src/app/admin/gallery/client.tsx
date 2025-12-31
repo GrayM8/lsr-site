@@ -25,6 +25,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { CreditDialog } from './_components/credit-dialog';
 
 // --- Sortable Item Component ---
 function SortableGalleryItem({
@@ -50,6 +51,8 @@ function SortableGalleryItem({
     transition,
     isDragging,
   } = useSortable({ id: image.id });
+  
+  const [showCreditDialog, setShowCreditDialog] = useState(false);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -79,42 +82,62 @@ function SortableGalleryItem({
   }
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className="relative group cursor-grab touch-none"
-    >
-      <div className="absolute top-2 left-2 z-10 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded">
-        {index + 1}
-      </div>
+    <>
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        className="relative group cursor-grab touch-none"
+      >
+        <div className="absolute top-2 left-2 z-10 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded">
+          {index + 1}
+        </div>
 
-      <div className="relative aspect-[4/3] rounded-lg overflow-hidden border bg-muted group-hover:border-white/50 transition-colors">
-        <Image
-          src={`https://res.cloudinary.com/${cloudName}/image/upload/v1/${image.publicId}`}
-          alt={image.alt ?? ''}
-          width={400}
-          height={300}
-          className="object-cover w-full h-full pointer-events-none"
-        />
-      </div>
+        <div className="relative aspect-[4/3] rounded-lg overflow-hidden border bg-muted group-hover:border-white/50 transition-colors">
+          <Image
+            src={`https://res.cloudinary.com/${cloudName}/image/upload/v1/${image.publicId}`}
+            alt={image.alt ?? ''}
+            width={400}
+            height={300}
+            className="object-cover w-full h-full pointer-events-none"
+          />
+        </div>
 
-      <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-        {/* We use onPointerDown to stop propagation so clicking delete doesn't drag */}
-        <div onPointerDown={(e) => e.stopPropagation()}>
-            <form
-            action={() => {
-                if(onDelete) onDelete(image.id);
-            }}
-            >
-            <ConfirmSubmitButton size="sm" variant="destructive" message="Are you sure?" disabled={isPending}>
-                Delete
-            </ConfirmSubmitButton>
-            </form>
+        <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          {/* We use onPointerDown to stop propagation so clicking delete doesn't drag */}
+          <div onPointerDown={(e) => e.stopPropagation()}>
+              <form
+              action={() => {
+                  if(onDelete) onDelete(image.id);
+              }}
+              >
+              <ConfirmSubmitButton size="sm" variant="destructive" message="Are you sure?" disabled={isPending}>
+                  Delete
+              </ConfirmSubmitButton>
+              </form>
+          </div>
+        </div>
+        
+        {/* Credit Button in Bottom Left */}
+        <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity z-20" onPointerDown={(e) => e.stopPropagation()}>
+           <Button 
+            size="sm" 
+            variant="secondary" 
+            className="h-7 text-xs"
+            onClick={() => setShowCreditDialog(true)}
+           >
+             {image.creditName ? 'Edit Credit' : 'Add Credit'}
+           </Button>
         </div>
       </div>
-    </div>
+      
+      <CreditDialog 
+        image={image} 
+        isOpen={showCreditDialog} 
+        onOpenChange={setShowCreditDialog} 
+      />
+    </>
   );
 }
 

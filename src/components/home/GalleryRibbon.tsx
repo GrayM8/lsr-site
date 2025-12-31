@@ -4,6 +4,7 @@ import SectionReveal from "./SectionReveal"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { galleryItems as staticGalleryItems, GalleryItem } from "@/lib/gallery"
 import { GalleryImage } from "@prisma/client"
+import { Camera } from "lucide-react"
 
 export default function GalleryRibbon({ index, galleryImages }: { index: number, galleryImages: GalleryImage[] }) {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
@@ -11,7 +12,11 @@ export default function GalleryRibbon({ index, galleryImages }: { index: number,
   const dbItems: GalleryItem[] = galleryImages.map(img => ({
     type: "image",
     src: `https://res.cloudinary.com/${cloudName}/image/upload/v1/${img.publicId}`,
-    alt: img.alt ?? "Gallery Image"
+    alt: img.alt ?? "Gallery Image",
+    credit: img.creditName ? {
+      name: img.creditName,
+      url: img.creditUrl ?? undefined
+    } : undefined
   }));
 
   const items = [...dbItems, ...staticGalleryItems];
@@ -33,15 +38,34 @@ export default function GalleryRibbon({ index, galleryImages }: { index: number,
           <CarouselContent>
             {items.map((item, index) => (
               <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                <div className="aspect-video rounded-lg border border-white/10 overflow-hidden">
+                <div className="aspect-video rounded-lg border border-white/10 overflow-hidden relative group">
                   {item.type === "image" ? (
-                    <Image
-                      src={item.src}
-                      alt={item.alt}
-                      width={800}
-                      height={600}
-                      className="object-cover w-full h-full"
-                    />
+                    <>
+                      <Image
+                        src={item.src}
+                        alt={item.alt}
+                        width={800}
+                        height={600}
+                        className="object-cover w-full h-full"
+                      />
+                      {item.credit && (
+                        <div className="absolute bottom-2 left-2 flex items-center gap-1.5 px-2 py-1 bg-black/40 backdrop-blur-sm rounded-md text-[10px] text-white/90">
+                          <Camera className="w-3 h-3 text-white/70" />
+                          {item.credit.url ? (
+                            <a 
+                              href={item.credit.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="hover:text-white hover:underline cursor-pointer"
+                            >
+                              {item.credit.name}
+                            </a>
+                          ) : (
+                            <span>{item.credit.name}</span>
+                          )}
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <iframe
                       width="100%"

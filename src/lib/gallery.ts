@@ -2,6 +2,10 @@ export type GalleryItem = {
   type: "image";
   src: string;
   alt: string;
+  credit?: {
+    name: string;
+    url?: string;
+  };
 } | {
   type: "youtube";
   src: string;
