@@ -15,90 +15,106 @@ export default async function AccountPage() {
   if (!user) redirect('/login');
 
   return (
-    <main className="bg-lsr-charcoal text-white min-h-screen">
-      <div className="mx-auto max-w-4xl px-6 md:px-8 py-10 space-y-8">
+    <main className="bg-lsr-charcoal text-white min-h-screen pt-20 pb-20">
+      <div className="mx-auto max-w-4xl px-6 md:px-8 space-y-12">
         <div>
-          <h1 className="font-display text-4xl md:text-5xl text-lsr-orange tracking-wide">Account Details</h1>
-          <p className="text-white/80 mt-2">Manage your account and profile information.</p>
+          <h1 className="font-display font-black italic text-4xl md:text-6xl text-white uppercase tracking-tighter">
+            Account <span className="text-lsr-orange">Details</span>
+          </h1>
+          <p className="font-sans font-medium text-white/60 mt-4 max-w-2xl leading-relaxed">
+            Manage your driver profile, preferences, and account settings.
+          </p>
         </div>
 
-        <Separator className="bg-white/10" />
+        <div className="w-full h-px bg-white/5" />
 
         {/* ACCOUNT DETAILS */}
-        <section className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-lsr-orange tracking-wide">Profile Information</h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="grid gap-1.5">
-              <Label>Email</Label>
-              <Input value={user.email ?? ''} readOnly className="bg-white/5 border-white/10" />
-            </div>
-            <div className="grid gap-1.5">
-              <Label>EID</Label>
-              <Input value={user.eid ?? ''} readOnly className="bg-white/5 border-white/10" />
-            </div>
-            <div className="grid gap-1.5">
-              <Label>Display Name</Label>
-              <Input value={user.displayName} readOnly className="bg-white/5 border-white/10" />
-            </div>
-            <div className="grid gap-1.5">
-              <Label>Handle</Label>
-              <Input value={`@${user.handle}`} readOnly className="bg-white/5 border-white/10" />
+        <section className="space-y-6">
+          <h2 className="font-sans font-bold text-xs text-lsr-orange uppercase tracking-[0.2em]">Profile Information</h2>
+          <div className="rounded-none border border-white/5 bg-white/[0.03] p-8">
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="grid gap-2">
+                <Label className="font-sans font-bold text-[10px] text-white/40 uppercase tracking-[0.2em] pl-1">Email</Label>
+                <Input value={user.email ?? ''} readOnly className="rounded-none bg-white/5 border-white/10 text-white h-12 font-medium" />
+              </div>
+              <div className="grid gap-2">
+                <Label className="font-sans font-bold text-[10px] text-white/40 uppercase tracking-[0.2em] pl-1">EID</Label>
+                <Input value={user.eid ?? ''} readOnly className="rounded-none bg-white/5 border-white/10 text-white h-12 font-medium" />
+              </div>
+              <div className="grid gap-2">
+                <Label className="font-sans font-bold text-[10px] text-white/40 uppercase tracking-[0.2em] pl-1">Display Name</Label>
+                <Input value={user.displayName} readOnly className="rounded-none bg-white/5 border-white/10 text-white h-12 font-medium" />
+              </div>
+              <div className="grid gap-2">
+                <Label className="font-sans font-bold text-[10px] text-white/40 uppercase tracking-[0.2em] pl-1">Handle</Label>
+                <Input value={`@${user.handle}`} readOnly className="rounded-none bg-white/5 border-white/10 text-white h-12 font-medium" />
+              </div>
             </div>
           </div>
         </section>
 
         {/* MARKETING TOGGLE */}
-        <form action={updateMarketingOptIn} className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <div className="flex items-center justify-between">
+        <section className="space-y-6">
+          <h2 className="font-sans font-bold text-xs text-lsr-orange uppercase tracking-[0.2em]">Preferences</h2>
+          <form action={updateMarketingOptIn} className="rounded-none border border-white/5 bg-white/[0.03] p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <h2 className="text-lg font-semibold text-lsr-orange tracking-wide">Marketing Opt-in</h2>
-              <p className="text-sm text-white/70 mt-1">
+              <h3 className="font-display font-bold italic text-xl text-white uppercase tracking-tight">Marketing Opt-in</h3>
+              <p className="font-sans text-sm text-white/50 mt-2 max-w-md">
                 Receive news and event updates. You can change this anytime.
               </p>
             </div>
-            <MarketingToggle
-              name="marketingOptIn"
-              defaultChecked={user.marketingOptIn}
-            />
-          </div>
-          <div className="pt-4">
-            <Button type="submit" size="sm" className="bg-lsr-orange text-lsr-charcoal hover:bg-lsr-orange/90">
-              Save Preferences
-            </Button>
-          </div>
-        </form>
-
-        <Separator className="bg-white/10" />
-
-        {/* RETIRE */}
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <h2 className="text-lg font-semibold text-lsr-orange tracking-wide">Retire Account</h2>
-          <p className="text-sm text-white/70 mt-1 mb-3">
-            You’ll be signed out and marked as <span className="font-medium text-white">retired</span>. Your driver
-            page
-            and stats remain visible, but you won’t be able to use the site while retired.
-          </p>
-          <form action={retireAccount} className="inline-block">
-            <Button type="submit" variant="secondary">Retire</Button>
+            <div className="flex items-center gap-6">
+              <MarketingToggle
+                name="marketingOptIn"
+                defaultChecked={user.marketingOptIn}
+              />
+              <Button type="submit" size="sm" className="rounded-none bg-lsr-orange text-white hover:bg-white hover:text-lsr-charcoal font-bold uppercase tracking-widest text-[10px] h-10 transition-all px-6">
+                Save
+              </Button>
+            </div>
           </form>
-        </div>
+        </section>
 
-        {/* DELETE */}
-        <div className="rounded-2xl border border-red-500/50 bg-red-500/10 p-6">
-          <h2 className="text-lg font-semibold text-red-400 tracking-wide">Permanently Delete Account</h2>
-          <p className="text-sm text-red-400/80 mt-1 mb-3">
-            This removes your profile and deletes your account. This action cannot be undone.
-          </p>
-          <form action={deleteAccount} className="inline-block">
-            <ConfirmSubmitButton
-              type="submit"
-              variant="destructive"
-              message="This will permanently delete your account. Are you sure?"
-            >
-              Permanently delete
-            </ConfirmSubmitButton>
-          </form>
-        </div>
+        <div className="w-full h-px bg-white/5" />
+
+        {/* DANGER ZONE */}
+        <section className="space-y-6">
+          <h2 className="font-sans font-bold text-xs text-red-500 uppercase tracking-[0.2em]">Danger Zone</h2>
+          
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* RETIRE */}
+            <div className="rounded-none border border-white/5 bg-white/[0.03] p-8 flex flex-col h-full">
+              <h3 className="font-display font-bold italic text-xl text-white uppercase tracking-tight">Retire Account</h3>
+              <p className="font-sans text-sm text-white/50 mt-4 mb-8 flex-grow leading-relaxed">
+                You’ll be signed out and marked as <span className="text-white font-bold">retired</span>. Your driver
+                page and stats remain visible, but you won’t be able to use the site.
+              </p>
+              <form action={retireAccount}>
+                <Button type="submit" variant="outline" className="w-full rounded-none border-white/10 text-white hover:bg-white hover:text-lsr-charcoal font-bold uppercase tracking-widest text-[10px] h-12">
+                  Retire
+                </Button>
+              </form>
+            </div>
+
+            {/* DELETE */}
+            <div className="rounded-none border border-red-500/20 bg-red-500/[0.05] p-8 flex flex-col h-full">
+              <h3 className="font-display font-bold italic text-xl text-red-500 uppercase tracking-tight">Delete Account</h3>
+              <p className="font-sans text-sm text-red-500/70 mt-4 mb-8 flex-grow leading-relaxed">
+                Permanently remove your profile and all associated data. This action cannot be undone.
+              </p>
+              <form action={deleteAccount}>
+                <ConfirmSubmitButton
+                  type="submit"
+                  variant="destructive"
+                  message="This will permanently delete your account. Are you sure?"
+                  className="w-full rounded-none bg-red-600 hover:bg-red-700 text-white font-bold uppercase tracking-widest text-[10px] h-12"
+                >
+                  Permanently Delete
+                </ConfirmSubmitButton>
+              </form>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
   );
