@@ -103,30 +103,32 @@ export function AuthDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" onClick={() => setTab("signup")} className="rounded-none bg-lsr-orange text-white hover:bg-white hover:text-lsr-charcoal font-bold uppercase tracking-widest text-[10px] h-9 px-6 transition-all">
-          Sign In / Create Account
+        <Button size="sm" onClick={() => setTab("signup")} className="rounded-none bg-lsr-orange text-white hover:bg-white hover:text-lsr-charcoal font-bold uppercase tracking-widest text-[10px] h-9 px-3 md:px-6 transition-all">
+          <span className="sm:hidden">Sign In</span>
+          <span className="hidden sm:inline">Sign In / Create Account</span>
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-md w-[90%] max-h-[90vh] overflow-y-auto rounded-none bg-lsr-charcoal border-white/10 p-0 overflow-hidden">
-        <DialogHeader className="p-8 pb-0">
-          <DialogTitle className="font-display font-black italic text-3xl text-white uppercase tracking-tighter">
-            {tab === "signup" ? "Join the" : "Welcome"} <span className="text-lsr-orange">{tab === "signup" ? "Grid" : "Back"}</span>
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-md w-[90%] h-full max-h-[95vh] md:max-h-[90vh] overflow-y-auto rounded-none bg-lsr-charcoal border-white/10 p-0 shadow-2xl">
+        <div className="flex flex-col min-h-full">
+          <DialogHeader className="p-8 pb-0 shrink-0">
+            <DialogTitle className="font-display font-black italic text-3xl text-white uppercase tracking-tighter">
+              {tab === "signup" ? "Join the" : "Welcome"} <span className="text-lsr-orange">{tab === "signup" ? "Grid" : "Back"}</span>
+            </DialogTitle>
+          </DialogHeader>
 
-        <Tabs
-          value={tab}
-          onValueChange={(v: string) => setTab((v as TabKey) ?? "signup")}
-          className="p-8 pt-6"
-        >
-          <TabsList className="grid w-full grid-cols-2 bg-white/5 rounded-none p-1 h-12">
-            <TabsTrigger value="signup" className="rounded-none font-sans font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-lsr-orange data-[state=active]:text-white transition-all">Create Account</TabsTrigger>
-            <TabsTrigger value="signin" className="rounded-none font-sans font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-lsr-orange data-[state=active]:text-white transition-all">Sign In</TabsTrigger>
-          </TabsList>
+          <Tabs
+            value={tab}
+            onValueChange={(v: string) => setTab((v as TabKey) ?? "signup")}
+            className="p-8 pt-6 flex-grow flex flex-col"
+          >
+            <TabsList className="grid w-full grid-cols-2 bg-white/5 rounded-none p-1 h-12 shrink-0">
+              <TabsTrigger value="signup" className="rounded-none font-sans font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-lsr-orange data-[state=active]:text-white transition-all">Create Account</TabsTrigger>
+              <TabsTrigger value="signin" className="rounded-none font-sans font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-lsr-orange data-[state=active]:text-white transition-all">Sign In</TabsTrigger>
+            </TabsList>
 
-          {/* ---------- SIGN UP ---------- */}
-          <TabsContent value="signup" className="mt-8 outline-none">
+            {/* ---------- SIGN UP ---------- */}
+            <TabsContent value="signup" className="mt-8 outline-none flex-grow">
             <div className="grid gap-6">
               {/* Google first */}
               <GoogleButton />
@@ -257,6 +259,7 @@ export function AuthDialog() {
             </div>
           </TabsContent>
         </Tabs>
+        </div>
       </DialogContent>
     </Dialog>
   )

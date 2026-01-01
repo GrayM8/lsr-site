@@ -1,6 +1,8 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
-import UserMenu from "@/components/user-menu"
+import { UserMenuClient } from "@/components/user-menu-client"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,27 +14,37 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { ChevronDown, Menu } from "lucide-react"
+import { usePathname } from "next/navigation"
+import { User } from "@prisma/client"
 
-export function SiteHeader() {
+export function SiteHeader({ user, roles }: { user: User | null, roles: string[] }) {
+  const pathname = usePathname()
+  const isHome = pathname === "/"
+
   return (
     <header className="sticky top-0 z-50 bg-lsr-charcoal/95 backdrop-blur-md border-b border-white/5">
       <nav className="mx-auto max-w-6xl flex h-20 items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-4 group">
-          <div className="relative">
-            <Image
-              src="/brand/logos/white_logo.webp"
-              alt="LSR logo"
-              width={36}
-              height={36}
-              className="rounded-none transition-transform group-hover:scale-110 duration-500"
-              priority
-            />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-display font-black italic text-2xl tracking-tighter leading-none uppercase text-white">
+          {/* Logo Image: Hidden on Home, Visible on Mobile (non-home), Visible on Desktop (non-home) */}
+          {!isHome && (
+            <div className="relative">
+              <Image
+                src="/brand/logos/white_logo.webp"
+                alt="LSR logo"
+                width={36}
+                height={36}
+                className="rounded-none transition-transform group-hover:scale-110 duration-500"
+                priority
+              />
+            </div>
+          )}
+          
+          {/* Brand Text: Visible on Home (all), Hidden on Mobile (non-home), Visible on Desktop (non-home) */}
+          <div className={`flex flex-col ${!isHome ? 'hidden sm:flex' : 'flex'}`}>
+            <span className="font-display font-black italic text-lg sm:text-2xl tracking-tighter leading-none uppercase text-white whitespace-nowrap">
               Longhorn Sim Racing
             </span>
-            <span className="font-sans font-bold text-[8px] uppercase tracking-[0.25em] text-white/50 leading-none mt-1">
+            <span className="font-sans font-bold text-[7px] sm:text-[8px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-white/50 leading-none mt-1 whitespace-nowrap">
               University of Texas at Austin
             </span>
           </div>
@@ -67,7 +79,7 @@ export function SiteHeader() {
 
           {/* User menu */}
           <div className="flex items-center gap-4">
-            <UserMenu />
+            <UserMenuClient user={user} roles={roles} />
             
             {/* Mobile hamburger menu */}
             <div className="md:hidden">
@@ -91,7 +103,7 @@ export function SiteHeader() {
                     <Link href="/news" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3">News</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
-                    <Link href="/series/lone-star-cup" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3 text-lsr-orange">Lone Star Cup</Link>
+                    <Link href="/series/lone-star-cup" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3 text-lsr-orange">LSC</Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

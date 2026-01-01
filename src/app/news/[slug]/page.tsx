@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
 import { getAllPosts, getPostContent } from "@/lib/news"
+import Link from "next/link"
 
 import { Separator } from "@/components/ui/separator"
 
@@ -24,6 +25,13 @@ export default async function NewsPostPage({
   return (
     <main className="bg-lsr-charcoal text-white min-h-screen">
       <div className="mx-auto max-w-4xl px-6 md:px-8 py-14 md:py-20">
+        <div className="mb-8">
+          <Link href="/news" className="group inline-flex items-center gap-3 text-[10px] font-sans font-bold uppercase tracking-[0.25em] text-white/50 hover:text-lsr-orange transition-colors">
+            <div className="h-px w-8 bg-lsr-orange/30 group-hover:bg-lsr-orange group-hover:w-12 transition-all" />
+            Back to News
+          </Link>
+        </div>
+
         <header className="mb-12 border-b border-white/10 pb-12">
           <div className="flex items-center gap-4 text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-lsr-orange mb-6">
             <time>{new Date(frontmatter.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</time>

@@ -7,6 +7,7 @@ import { Analytics } from "@vercel/analytics/react"
 import React from "react";
 import { SiteFooter } from "@/components/site-footer"
 import { LiveBanner } from "@/components/live-banner";
+import { getCachedSessionUser } from "@/server/auth/cached-session";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -62,7 +63,9 @@ export const metadata: Metadata = {
   }
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const { user, roles } = await getCachedSessionUser();
+
   return (
     <html
       lang="en"
@@ -73,7 +76,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <body className="min-h-dvh flex flex-col font-sans">
     <ThemeProvider>
       <LiveBanner />
-      <SiteHeader />
+      <SiteHeader user={user} roles={roles} />
         <main className="flex-1">{children}</main>
       <SiteFooter />
     </ThemeProvider>

@@ -29,11 +29,12 @@ export default async function EventPage({ params }: EventPageArgs) {
 
   return (
     <main className="bg-lsr-charcoal text-white min-h-screen">
-      <div className="mx-auto max-w-6xl px-6 md:px-8 py-10 md:py-14">
+      <div className="mx-auto max-w-6xl px-6 md:px-8 py-14 md:py-20">
         <div className="mb-8">
-          <Button asChild variant="ghost" className="pl-0 hover:bg-transparent hover:text-lsr-orange transition-colors font-sans font-bold uppercase tracking-widest text-[10px] text-white/50">
-            <Link href="/events">← Return to Calendar</Link>
-          </Button>
+          <Link href="/events" className="group inline-flex items-center gap-3 text-[10px] font-sans font-bold uppercase tracking-[0.25em] text-lsr-orange hover:text-white transition-colors">
+            <div className="h-px w-8 bg-lsr-orange/30 group-hover:bg-white group-hover:w-12 transition-all" />
+            Return to Calendar
+          </Link>
         </div>
 
         <div className="border border-white/10 bg-white/[0.02] p-8 md:p-12 mb-12 relative overflow-hidden">

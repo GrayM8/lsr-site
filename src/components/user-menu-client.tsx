@@ -58,12 +58,12 @@ export function UserMenuClient({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="h-10 gap-3 rounded-none border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold transition-all px-4">
+        <Button variant="outline" className="h-10 gap-2 sm:gap-3 rounded-none border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold transition-all px-2 sm:px-4">
           <Avatar className="h-6 w-6 rounded-none border border-white/20">
             <AvatarImage src={user.avatarUrl ?? undefined} alt={user.displayName ?? 'User avatar'} className="rounded-none" />
             <AvatarFallback className="text-[9px] font-black uppercase bg-lsr-orange text-white rounded-none">{initials || "U"}</AvatarFallback>
           </Avatar>
-          <span className="truncate max-w-[10rem] font-sans text-[10px] uppercase tracking-widest">{user.displayName}</span>
+          <span className="hidden sm:inline truncate max-w-[10rem] font-sans text-[10px] uppercase tracking-widest">{user.displayName}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64 bg-lsr-charcoal border-white/10 rounded-none p-2 shadow-2xl">

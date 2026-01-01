@@ -56,6 +56,13 @@ export default async function DriverProfilePage({
     <main className="bg-lsr-charcoal text-white min-h-screen">
       <div className="mx-auto max-w-6xl px-6 md:px-8 py-14 md:py-20">
         
+        <div className="mb-8">
+          <Link href="/drivers" className="group inline-flex items-center gap-3 text-[10px] font-sans font-bold uppercase tracking-[0.25em] text-lsr-orange hover:text-white transition-colors">
+            <div className="h-px w-8 bg-lsr-orange/30 group-hover:bg-white group-hover:w-12 transition-all" />
+            Back to Drivers
+          </Link>
+        </div>
+
         {/* Driver License Header */}
         <div className="border-t-4 border-lsr-orange bg-lsr-charcoal border-b border-l border-r border-white/10 p-8 md:p-12 mb-12 relative overflow-hidden">
           <div className="absolute top-4 right-4 flex gap-2">

@@ -56,15 +56,21 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Headline */}
+        {/* Headline / Logo */}
         <div className="relative block mx-auto isolate overflow-visible">
-          <h1
-            className="relative z-10 font-display font-black italic text-white text-2xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl leading-none tracking-tighter uppercase whitespace-nowrap">
-            LONGHORN SIM RACING
-          </h1>
+          <div className="relative z-10 flex justify-center">
+            <Image 
+              src="/brand/logos/white_logo.webp"
+              alt="Longhorn Sim Racing"
+              width={600}
+              height={600}
+              priority
+              className="w-full max-w-[180px] sm:max-w-[250px] md:max-w-[350px] lg:max-w-[450px] h-auto drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+            />
+          </div>
           
-          {/* Subtle glow behind headline */}
-          <div className="absolute inset-0 -z-10 bg-lsr-orange/10 blur-[100px] opacity-30 pointer-events-none" />
+          {/* Subtle glow behind logo */}
+          <div className="absolute inset-0 -z-10 bg-lsr-orange/20 blur-[120px] opacity-40 pointer-events-none scale-75" />
         </div>
 
         <p className="mt-8 md:mt-10 text-lg md:text-2xl text-white/90 font-sans font-medium max-w-3xl mx-auto leading-relaxed">

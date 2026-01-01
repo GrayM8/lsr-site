@@ -91,9 +91,10 @@ export default async function DriversIndexPage({
           </div>
 
           <div className="md:col-span-2">
-            <div className="border border-white/10 bg-lsr-charcoal">
-              <table className="w-full text-sm">
-                <thead className="bg-white/5 border-b border-white/10">
+            <div className="border border-white/10 bg-lsr-charcoal overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm min-w-[500px] md:min-w-full">
+                  <thead className="bg-white/5 border-b border-white/10">
                 <tr>
                   <th className="px-4 py-4 text-left font-sans font-black uppercase tracking-widest text-[9px] text-white/40 w-12">Pos</th>
                   <th className="px-4 py-4 text-left font-sans font-black uppercase tracking-widest text-[9px] text-white/40">Driver</th>
@@ -177,6 +178,7 @@ export default async function DriversIndexPage({
           </div>
         </div>
       </div>
-    </main>
+    </div>
+  </main>
   );
 }
