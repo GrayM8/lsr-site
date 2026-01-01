@@ -104,12 +104,40 @@ export function UserMenuClient({
               <Shield className="mr-2 h-3 w-3" />
               <span>Events</span>
             </DropdownMenuItem>
+             <DropdownMenuItem 
+              onSelect={() => router.push("/admin/series")}
+              className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
+            >
+              <Shield className="mr-2 h-3 w-3" />
+              <span>Series</span>
+            </DropdownMenuItem>
+             <DropdownMenuItem 
+              onSelect={() => router.push("/admin/venues")}
+              className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
+            >
+              <Shield className="mr-2 h-3 w-3" />
+              <span>Venues</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onSelect={() => router.push("/admin/gallery")}
+              className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
+            >
+              <Shield className="mr-2 h-3 w-3" />
+              <span>Gallery</span>
+            </DropdownMenuItem>
             <DropdownMenuItem 
               onSelect={() => router.push("/admin/news")}
               className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
             >
               <Shield className="mr-2 h-3 w-3" />
               <span>News</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onSelect={() => router.push("/admin/tools")}
+              className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
+            >
+              <Shield className="mr-2 h-3 w-3" />
+              <span>Misc. Tools</span>
             </DropdownMenuItem>
           </>
         )}
