@@ -65,8 +65,8 @@ export function SiteHeader({ user, roles }: { user: User | null, roles: string[]
               Drivers
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-lsr-orange transition-all group-hover/link:w-full" />
             </Link>
-            <Link href="/gallery" className="hover:text-lsr-orange transition-colors relative group/link">
-              Gallery
+            <Link href="/shop" className="hover:text-lsr-orange transition-colors relative group/link">
+              Merch
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-lsr-orange transition-all group-hover/link:w-full" />
             </Link>
             <Link href="/series/lone-star-cup" className="hover:text-lsr-orange transition-colors relative group/link text-lsr-orange/80">
@@ -81,6 +81,9 @@ export function SiteHeader({ user, roles }: { user: User | null, roles: string[]
               <DropdownMenuContent align="end" className="bg-lsr-charcoal border-white/10 rounded-none p-2 min-w-[160px]">
                 <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
                   <Link href="/about" className="font-sans font-bold text-[9px] uppercase tracking-widest py-2">About</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
+                  <Link href="/gallery" className="font-sans font-bold text-[9px] uppercase tracking-widest py-2">Gallery</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
                   <Link href="/sponsors" className="font-sans font-bold text-[9px] uppercase tracking-widest py-2">Sponsors</Link>
@@ -112,6 +115,9 @@ export function SiteHeader({ user, roles }: { user: User | null, roles: string[]
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
                     <Link href="/events" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3">Events</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
+                    <Link href="/shop" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3">Merch</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
                     <Link href="/gallery" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3">Gallery</Link>

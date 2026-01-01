@@ -36,6 +36,7 @@ export function SiteFooter() {
               <Link href="/news" className="text-white/60 hover:text-lsr-orange transition-colors">News</Link>
               <Link href="/events" className="text-white/60 hover:text-lsr-orange transition-colors">Events</Link>
               <Link href="/drivers" className="text-white/60 hover:text-lsr-orange transition-colors">Drivers</Link>
+              <Link href="/shop" className="text-white/60 hover:text-lsr-orange transition-colors">Merch</Link>
               <Link href="/gallery" className="text-white/60 hover:text-lsr-orange transition-colors">Gallery</Link>
               <Link href="/sponsors" className="text-white/60 hover:text-lsr-orange transition-colors">Sponsors</Link>
               <Link href="/series/lone-star-cup" className="text-white/60 hover:text-lsr-orange transition-colors">LSC</Link>
