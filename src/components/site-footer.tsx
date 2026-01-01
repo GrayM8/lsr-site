@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Mail, Rss, ExternalLink } from "lucide-react"
+import { Mail, Rss, ExternalLink, Linkedin } from "lucide-react"
 import { BrandIcon } from "@/components/brand-icon"
 import { siInstagram, siYoutube, siTwitch, siDiscord } from "simple-icons/icons"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -13,10 +13,17 @@ export function SiteFooter() {
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div className="space-y-6">
-            <Link href="/" className="font-display font-black italic text-2xl text-lsr-orange tracking-tighter uppercase block">
-              Longhorn<br/>Sim Racing
+            <Link href="/" className="flex flex-col gap-1 group">
+              <div className="flex flex-col">
+                <span className="font-display font-black italic text-xl tracking-tighter leading-none uppercase text-white group-hover:text-[#FF8000] transition-colors">
+                  Longhorn Sim Racing
+                </span>
+                <span className="font-sans font-bold text-[7px] uppercase tracking-[0.2em] text-white/40 leading-none mt-1">
+                  University of Texas at Austin
+                </span>
+              </div>
             </Link>
-            <p className="font-sans text-xs text-white/40 uppercase tracking-widest leading-loose max-w-[240px]">
+            <p className="font-sans text-xs text-white/30 uppercase tracking-widest leading-loose max-w-[240px]">
               UT Austin&apos;s premier simulation racing organization. Performance. Engineering. Community.
             </p>
           </div>
@@ -25,11 +32,13 @@ export function SiteFooter() {
           <div className="space-y-6">
             <h3 className="font-sans font-black text-[10px] uppercase tracking-[0.3em] text-white/20">The Grid</h3>
             <nav aria-label="Footer" className="flex flex-col gap-3 text-xs font-bold uppercase tracking-widest">
+              <Link href="/about" className="text-white/60 hover:text-lsr-orange transition-colors">About</Link>
               <Link href="/news" className="text-white/60 hover:text-lsr-orange transition-colors">News</Link>
               <Link href="/events" className="text-white/60 hover:text-lsr-orange transition-colors">Events</Link>
               <Link href="/drivers" className="text-white/60 hover:text-lsr-orange transition-colors">Drivers</Link>
               <Link href="/gallery" className="text-white/60 hover:text-lsr-orange transition-colors">Gallery</Link>
               <Link href="/sponsors" className="text-white/60 hover:text-lsr-orange transition-colors">Sponsors</Link>
+              <Link href="/series/lone-star-cup" className="text-white/60 hover:text-lsr-orange transition-colors">LSC</Link>
             </nav>
           </div>
 
@@ -40,10 +49,10 @@ export function SiteFooter() {
               <p className="text-white/60 font-bold uppercase tracking-widest">Austin, Texas</p>
               <a
                 href="mailto:info@longhornsimracing.org"
-                className="flex items-center gap-2 text-white/60 hover:text-lsr-orange transition-colors font-bold uppercase tracking-widest"
+                className="flex items-center gap-3 text-white/60 hover:text-lsr-orange transition-colors font-bold uppercase tracking-widest group"
               >
-                <Mail className="h-3 w-3" />
-                info@lsr.org
+                <Mail className="h-3.5 w-3.5 text-[#FF8000] group-hover:text-white transition-colors" />
+                info@longhornsimracing.org
               </a>
             </div>
           </div>
@@ -80,6 +89,16 @@ export function SiteFooter() {
                 >
                   <BrandIcon icon={siTwitch} className="h-3 w-3" />
                   Twitch
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.linkedin.com/company/longhorn-sim-racing"
+                  target="_blank" rel="noreferrer"
+                  className="flex items-center gap-2 text-white/60 hover:text-lsr-orange transition-colors font-bold uppercase tracking-widest"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  LinkedIn
                 </a>
               </li>
               <li>

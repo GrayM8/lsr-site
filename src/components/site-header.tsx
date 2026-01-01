@@ -53,26 +53,40 @@ export function SiteHeader({ user, roles }: { user: User | null, roles: string[]
         <div className="flex items-center gap-6">
           {/* Desktop navigation links */}
           <div className="hidden md:flex items-center gap-8 font-sans font-bold text-[10px] uppercase tracking-[0.25em] text-white/70">
-            <Link href="/drivers" className="hover:text-lsr-orange transition-colors relative group/link">
-              Drivers
+            <Link href="/news" className="hover:text-lsr-orange transition-colors relative group/link">
+              News
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-lsr-orange transition-all group-hover/link:w-full" />
             </Link>
             <Link href="/events" className="hover:text-lsr-orange transition-colors relative group/link">
               Events
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-lsr-orange transition-all group-hover/link:w-full" />
             </Link>
-            <Link href="/gallery" className="hover:text-lsr-orange transition-colors relative group/link">
-              Gallery
+            <Link href="/drivers" className="hover:text-lsr-orange transition-colors relative group/link">
+              Drivers
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-lsr-orange transition-all group-hover/link:w-full" />
             </Link>
-            <Link href="/news" className="hover:text-lsr-orange transition-colors relative group/link">
-              News
+            <Link href="/gallery" className="hover:text-lsr-orange transition-colors relative group/link">
+              Gallery
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-lsr-orange transition-all group-hover/link:w-full" />
             </Link>
             <Link href="/series/lone-star-cup" className="hover:text-lsr-orange transition-colors relative group/link text-lsr-orange/80">
               LSC
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-lsr-orange transition-all group-hover/link:w-full" />
             </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1.5 hover:text-lsr-orange transition-colors outline-none group/more">
+                <span>More</span>
+                <ChevronDown className="h-3 w-3 opacity-50 group-hover/more:opacity-100 transition-opacity" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-lsr-charcoal border-white/10 rounded-none p-2 min-w-[160px]">
+                <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
+                  <Link href="/about" className="font-sans font-bold text-[9px] uppercase tracking-widest py-2">About</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
+                  <Link href="/sponsors" className="font-sans font-bold text-[9px] uppercase tracking-widest py-2">Sponsors</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           <div className="h-6 w-px bg-white/10 hidden md:block" />
@@ -91,6 +105,9 @@ export function SiteHeader({ user, roles }: { user: User | null, roles: string[]
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-lsr-charcoal border-white/10 rounded-none w-56 p-2">
                   <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
+                    <Link href="/about" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3">About</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
                     <Link href="/drivers" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3">Drivers</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
@@ -101,6 +118,9 @@ export function SiteHeader({ user, roles }: { user: User | null, roles: string[]
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
                     <Link href="/news" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3">News</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
+                    <Link href="/sponsors" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3">Sponsors</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
                     <Link href="/series/lone-star-cup" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3 text-lsr-orange">LSC</Link>
