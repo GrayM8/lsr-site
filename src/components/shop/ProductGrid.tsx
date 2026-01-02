@@ -2,10 +2,10 @@
 
 import { Product } from "@/lib/shopify/types";
 import { ProductCard } from "./ProductCard";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 
 export function ProductGrid({ products }: { products: Product[] }) {
-  const container = {
+  const container: Variants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -15,7 +15,7 @@ export function ProductGrid({ products }: { products: Product[] }) {
     }
   };
 
-  const item = {
+  const item: Variants = {
     hidden: { opacity: 0, scale: 0.9, y: 20 },
     show: { 
       opacity: 1, 
