@@ -4,7 +4,6 @@ import { ProductGallery } from "@/components/shop/ProductGallery";
 import { VariantSelector } from "@/components/shop/VariantSelector";
 import { Price } from "@/components/shop/Price";
 import { AddToCartButton } from "@/components/shop/AddToCartButton";
-import SectionReveal from "@/components/home/SectionReveal";
 import { Metadata } from "next";
 
 export async function generateMetadata({
@@ -85,7 +84,7 @@ export default async function ProductPage({
 
   return (
     <div className="px-6 md:px-8 pb-10 md:pb-14 pt-10">
-      <SectionReveal index={0} className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
             {/* Gallery */}
             <div>
@@ -126,7 +125,7 @@ export default async function ProductPage({
                 </div>
             </div>
         </div>
-      </SectionReveal>
+      </div>
     </div>
   );
 }

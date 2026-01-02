@@ -16,7 +16,7 @@ export default function SectionReveal({
                                         className = "",
                                         children,
                                         coverClass = "bg-lsr-charcoal",
-                                        clipClass = "rounded-2xl", // ← pass your tile radius here (e.g., "rounded-2xl")
+                                        clipClass = "rounded-none", // ← pass your tile radius here (e.g., "rounded-2xl")
                                       }: {
   id?: string
   index: number

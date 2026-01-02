@@ -38,15 +38,6 @@ export type Product = {
   };
 };
 
-export type Collection = {
-  id: string;
-  handle: string;
-  title: string;
-  description?: string;
-  image?: Image;
-  products: Product[];
-};
-
 export type CartLine = {
   id: string;
   quantity: number;

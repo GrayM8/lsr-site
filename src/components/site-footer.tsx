@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Mail, Rss, ExternalLink, Linkedin } from "lucide-react"
+import { Rss, ExternalLink, Linkedin } from "lucide-react"
 import { BrandIcon } from "@/components/brand-icon"
 import { siInstagram, siYoutube, siTwitch, siDiscord } from "simple-icons/icons"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -52,7 +52,6 @@ export function SiteFooter() {
                 href="mailto:info@longhornsimracing.org"
                 className="flex items-center gap-3 text-white/60 hover:text-lsr-orange transition-colors font-bold uppercase tracking-widest group"
               >
-                <Mail className="h-3.5 w-3.5 text-[#FF8000] group-hover:text-white transition-colors" />
                 info@longhornsimracing.org
               </a>
             </div>

@@ -1,4 +1,4 @@
-import { Collection, Product, Image, Money, ProductVariant, Cart, CartLine } from './types';
+import { Product, Image, Money, ProductVariant, Cart, CartLine } from './types';
 
 export const removeEdgesAndNodes = <T>(array: { edges: { node: T }[] } | { nodes: T[] } | undefined): T[] => {
   if (!array) return [];
@@ -43,15 +43,6 @@ export const mapProduct = (product: any): Product => ({
     minVariantPrice: mapMoney(product.priceRange?.minVariantPrice),
     maxVariantPrice: mapMoney(product.priceRange?.maxVariantPrice),
   },
-});
-
-export const mapCollection = (collection: any): Collection => ({
-  id: collection.id,
-  handle: collection.handle,
-  title: collection.title,
-  description: collection.description,
-  image: collection.image ? mapImage(collection.image) : undefined,
-  products: removeEdgesAndNodes(collection.products).map(mapProduct),
 });
 
 export const mapCartLine = (line: any): CartLine => ({

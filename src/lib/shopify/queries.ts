@@ -59,35 +59,12 @@ const productFragment = `
   }
 `;
 
-export const COLLECTIONS_QUERY = `
-  query getCollections {
-    collections(first: 100, sortKey: TITLE) {
+export const PRODUCTS_QUERY = `
+  query getProducts {
+    products(first: 100, sortKey: TITLE) {
       edges {
         node {
-          id
-          title
-          handle
-          description
-          ${imageFragment}
-        }
-      }
-    }
-  }
-`;
-
-export const COLLECTION_BY_HANDLE_QUERY = `
-  query getCollectionByHandle($handle: String!) {
-    collection(handle: $handle) {
-      id
-      handle
-      title
-      description
-      ${imageFragment}
-      products(first: 100, sortKey: TITLE) {
-        edges {
-          node {
-            ${productFragment}
-          }
+          ${productFragment}
         }
       }
     }

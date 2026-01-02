@@ -1,33 +1,15 @@
 import { shopifyFetch } from './client';
-import { COLLECTIONS_QUERY, COLLECTION_BY_HANDLE_QUERY, PRODUCT_BY_HANDLE_QUERY } from './queries';
-import { mapCollection, mapProduct, removeEdgesAndNodes } from './mappers';
-import { Collection, Product } from './types';
+import { PRODUCTS_QUERY, PRODUCT_BY_HANDLE_QUERY } from './queries';
+import { mapProduct, removeEdgesAndNodes } from './mappers';
+import { Product } from './types';
 
-export async function getCollections(): Promise<Collection[]> {
+export async function getProducts(): Promise<Product[]> {
   const { body } = await shopifyFetch<any>({
-    query: COLLECTIONS_QUERY,
+    query: PRODUCTS_QUERY,
     revalidate: 900,
   });
 
-  return removeEdgesAndNodes(body.collections).map((node: any) => ({
-    ...node,
-    products: [], // Basic list doesn't include products usually, or mapped differently
-    image: node.image ? { ...node.image } : undefined,
-  }));
-}
-
-export async function getCollectionByHandle(handle: string): Promise<Collection | null> {
-  const { body } = await shopifyFetch<any>({
-    query: COLLECTION_BY_HANDLE_QUERY,
-    variables: { handle },
-    revalidate: 900,
-  });
-
-  if (!body.collection) {
-    return null;
-  }
-
-  return mapCollection(body.collection);
+  return removeEdgesAndNodes(body.products).map(mapProduct);
 }
 
 export async function getProductByHandle(handle: string): Promise<Product | null> {
