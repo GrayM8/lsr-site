@@ -32,7 +32,7 @@ export default function FinalCta({ index }: { index: number }) {
         <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-lsr-orange/5 rounded-full blur-[100px]" />
         
         <div className="relative z-10 text-center mb-12">
-          <h2 className="font-display font-black italic text-4xl md:text-6xl text-white uppercase tracking-tighter">
+          <h2 className="font-display font-black italic text-4xl md:text-6xl text-white uppercase tracking-normal">
             Join the <span className="text-lsr-orange">Grid</span>
           </h2>
           <p className="font-sans font-bold text-white/50 uppercase tracking-[0.3em] text-[11px] mt-4">Start your first session this week</p>

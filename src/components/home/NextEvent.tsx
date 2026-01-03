@@ -35,7 +35,7 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
       <div className="rounded-none border-l-4 border-lsr-orange bg-white/[0.03] p-6 md:p-10">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between mb-8">
           <div>
-            <h2 className="font-sans font-black italic text-4xl md:text-5xl text-white uppercase tracking-tighter">
+            <h2 className="font-sans font-black italic text-4xl md:text-5xl text-white uppercase tracking-normal">
               The <span className="text-lsr-orange text-outline-sm">Schedule</span>
             </h2>
             {featuredEvent ? (

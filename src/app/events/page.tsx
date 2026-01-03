@@ -45,7 +45,7 @@ function FeaturedEventCard({ event }: { event: Event & { series: EventSeries | n
           {live && <span className="bg-red-600 text-white px-2 py-0.5 text-[10px] font-black uppercase tracking-widest animate-pulse">Live Now</span>}
           {event.series && <span className="border border-lsr-orange text-lsr-orange px-2 py-0.5 text-[10px] font-black uppercase tracking-widest">{event.series.title}</span>}
         </div>
-        <h3 className="font-display font-black italic text-3xl md:text-4xl text-white uppercase tracking-tighter leading-none mb-4">
+        <h3 className="font-display font-black italic text-3xl md:text-4xl text-white uppercase tracking-normal leading-none mb-4">
           <Link href={`/events/${event.slug}`} className="hover:text-lsr-orange transition-colors">{event.title}</Link>
         </h3>
         <p className="font-sans text-sm text-white/60 leading-relaxed mb-8 line-clamp-3">{event.summary || event.description}</p>
@@ -187,7 +187,7 @@ export default async function EventsIndexPage({
       <div className="mx-auto max-w-6xl px-6 md:px-8 py-14 md:py-20">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
           <div>
-            <h1 className="font-display font-black italic text-5xl md:text-6xl text-white uppercase tracking-tighter">
+            <h1 className="font-display font-black italic text-5xl md:text-6xl text-white uppercase tracking-normal">
               Race <span className="text-lsr-orange">Schedule</span>
             </h1>
             <p className="font-sans font-bold text-white/40 uppercase tracking-[0.3em] text-[10px] mt-2">Official Event Calendar</p>
@@ -201,7 +201,7 @@ export default async function EventsIndexPage({
         {featuredEvent && (
           <>
             <div className="flex items-end justify-between mb-6 border-b border-white/10 pb-4">
-              <h2 className="font-display font-black italic text-2xl md:text-3xl text-white uppercase tracking-tighter">Next <span className="text-lsr-orange">Green Flag</span></h2>
+              <h2 className="font-display font-black italic text-2xl md:text-3xl text-white uppercase tracking-normal">Next <span className="text-lsr-orange">Green Flag</span></h2>
             </div>
             <FeaturedEventCard event={featuredEvent} />
             <div className="h-12" />
@@ -211,7 +211,7 @@ export default async function EventsIndexPage({
         {otherUpcomingEvents.length > 0 && (
           <>
             <div className="flex items-end justify-between mb-6 border-b border-white/10 pb-4">
-              <h2 className="font-display font-black italic text-2xl md:text-3xl text-white uppercase tracking-tighter">Upcoming <span className="text-lsr-orange">Sessions</span></h2>
+              <h2 className="font-display font-black italic text-2xl md:text-3xl text-white uppercase tracking-normal">Upcoming <span className="text-lsr-orange">Sessions</span></h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {otherUpcomingEvents.map((e) => (
@@ -225,7 +225,7 @@ export default async function EventsIndexPage({
         {pastEvents.length > 0 && (
           <>
             <div className="flex items-end justify-between mb-6 border-b border-white/10 pb-4">
-              <h2 className="font-display font-black italic text-2xl md:text-3xl text-white/40 uppercase tracking-tighter">Past <span className="text-lsr-orange/40">Results</span></h2>
+              <h2 className="font-display font-black italic text-2xl md:text-3xl text-white/40 uppercase tracking-normal">Past <span className="text-lsr-orange/40">Results</span></h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-60 hover:opacity-100 transition-opacity duration-500">
               {pastEvents.map((e) => (

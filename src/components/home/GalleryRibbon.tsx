@@ -26,7 +26,7 @@ export default function GalleryRibbon({ index, galleryImages }: { index: number,
       <div className="bg-lsr-charcoal border border-white/5 p-6 md:p-10">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10">
           <div>
-            <h2 className="font-display font-black italic text-4xl md:text-5xl text-white uppercase tracking-tighter">
+            <h2 className="font-display font-black italic text-4xl md:text-5xl text-white uppercase tracking-normal">
               The <span className="text-lsr-orange">Gallery</span>
             </h2>
             <p className="font-sans font-bold text-white/40 uppercase tracking-[0.3em] text-[10px] mt-2">Moments from the track</p>

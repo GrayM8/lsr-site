@@ -18,7 +18,7 @@ export default async function AccountPage() {
     <main className="bg-lsr-charcoal text-white min-h-screen pt-20 pb-20">
       <div className="mx-auto max-w-4xl px-6 md:px-8 space-y-12">
         <div>
-          <h1 className="font-display font-black italic text-4xl md:text-6xl text-white uppercase tracking-tighter">
+          <h1 className="font-display font-black italic text-4xl md:text-6xl text-white uppercase tracking-normal">
             Account <span className="text-lsr-orange">Details</span>
           </h1>
           <p className="font-sans font-medium text-white/60 mt-4 max-w-2xl leading-relaxed">

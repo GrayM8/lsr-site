@@ -54,7 +54,7 @@ export default async function EventPage({ params }: EventPageArgs) {
                 </span>
               </div>
               
-              <h1 className="font-display font-black italic text-4xl md:text-6xl text-white uppercase tracking-tighter leading-[0.9] mb-6">
+              <h1 className="font-display font-black italic text-4xl md:text-6xl text-white uppercase tracking-normal leading-[0.9] mb-6">
                 {event.title}
               </h1>
               

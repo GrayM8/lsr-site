@@ -92,7 +92,7 @@ export default async function DriverProfilePage({
                 )}
               </div>
               
-              <h1 className="font-display font-black italic text-5xl md:text-7xl text-white uppercase tracking-tighter leading-[0.85] mb-2">
+              <h1 className="font-display font-black italic text-5xl md:text-7xl text-white uppercase tracking-normal leading-[0.85] mb-2">
                 {user.displayName}
               </h1>
               <p className="font-mono text-lsr-orange text-sm md:text-base tracking-widest">@{user.handle}</p>
@@ -128,7 +128,7 @@ export default async function DriverProfilePage({
           {/* Left Column: Stats & Socials */}
           <div className="lg:col-span-1 space-y-12">
             <div>
-              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-tighter mb-6 border-b border-white/10 pb-4">
+              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-6 border-b border-white/10 pb-4">
                 Driver <span className="text-lsr-orange">Stats</span>
               </h3>
               <div className="grid grid-cols-2 gap-4">
@@ -141,7 +141,7 @@ export default async function DriverProfilePage({
             </div>
 
             <div>
-              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-tighter mb-6 border-b border-white/10 pb-4">
+              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-6 border-b border-white/10 pb-4">
                 Comms <span className="text-lsr-orange">Links</span>
               </h3>
               <div className="grid grid-cols-4 gap-4">
@@ -179,7 +179,7 @@ export default async function DriverProfilePage({
           {/* Right Column: Bio & History */}
           <div className="lg:col-span-2 space-y-12">
             <div>
-              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-tighter mb-6 border-b border-white/10 pb-4">
+              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-6 border-b border-white/10 pb-4">
                 Driver <span className="text-lsr-orange">Biography</span>
               </h3>
               <div className="prose prose-invert prose-p:font-sans prose-p:text-white/70 prose-p:leading-relaxed max-w-none">
@@ -188,7 +188,7 @@ export default async function DriverProfilePage({
             </div>
 
             <div>
-              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-tighter mb-6 border-b border-white/10 pb-4">
+              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-6 border-b border-white/10 pb-4">
                 Recent <span className="text-lsr-orange">Activity</span>
               </h3>
               <div className="border border-white/10 bg-white/[0.02] p-8 text-center">

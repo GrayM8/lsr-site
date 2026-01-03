@@ -112,7 +112,7 @@ export function AuthDialog() {
       <DialogContent className="max-w-md w-[90%] h-full max-h-[95vh] md:max-h-[90vh] overflow-y-auto rounded-none bg-lsr-charcoal border-white/10 p-0 shadow-2xl">
         <div className="flex flex-col min-h-full">
           <DialogHeader className="p-8 pb-0 shrink-0">
-            <DialogTitle className="font-display font-black italic text-3xl text-white uppercase tracking-tighter">
+            <DialogTitle className="font-display font-black italic text-3xl text-white uppercase tracking-normal">
               {tab === "signup" ? "Join the" : "Welcome"} <span className="text-lsr-orange">{tab === "signup" ? "Grid" : "Back"}</span>
             </DialogTitle>
           </DialogHeader>

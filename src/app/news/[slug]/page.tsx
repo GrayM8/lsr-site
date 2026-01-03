@@ -39,7 +39,7 @@ export default async function NewsPostPage({
             <span>{frontmatter.author || "Official Team Report"}</span>
           </div>
           
-          <h1 className="font-display font-black italic text-4xl md:text-6xl lg:text-7xl text-white uppercase tracking-tighter leading-[0.9] mb-8">
+          <h1 className="font-display font-black italic text-4xl md:text-6xl lg:text-7xl text-white uppercase tracking-normal leading-[0.9] mb-8">
             {frontmatter.title}
           </h1>
           
@@ -55,7 +55,7 @@ export default async function NewsPostPage({
         </header>
 
         <article className="prose prose-invert prose-lg max-w-none 
-                            prose-headings:font-display prose-headings:font-black prose-headings:italic prose-headings:uppercase prose-headings:tracking-tighter
+                            prose-headings:font-display prose-headings:font-black prose-headings:italic prose-headings:uppercase prose-headings:tracking-normal
                             prose-p:font-sans prose-p:text-white/80 prose-p:leading-relaxed
                             prose-a:text-lsr-orange prose-a:no-underline hover:prose-a:underline
                             prose-strong:text-white prose-strong:font-bold

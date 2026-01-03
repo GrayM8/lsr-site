@@ -46,7 +46,7 @@ export default function SubscribePage() {
           <Rss className="h-3 w-3" />
           Subscribe
         </div>
-        <h1 className="font-display font-black italic text-4xl md:text-6xl text-white uppercase tracking-tighter leading-none">
+        <h1 className="font-display font-black italic text-4xl md:text-6xl text-white uppercase tracking-normal leading-none">
           Follow <span className="text-lsr-orange">LSR</span>
         </h1>
         <p className="mt-6 text-white/50 font-sans text-lg max-w-xl mx-auto leading-relaxed">

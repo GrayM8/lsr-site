@@ -47,7 +47,7 @@ export default async function DriversIndexPage({
       <div className="mx-auto max-w-6xl px-6 md:px-8 py-14 md:py-20">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
           <div>
-            <h1 className="font-display font-black italic text-5xl md:text-6xl text-white uppercase tracking-tighter">
+            <h1 className="font-display font-black italic text-5xl md:text-6xl text-white uppercase tracking-normal">
               Driver <span className="text-lsr-orange">Roster</span>
             </h1>
             <p className="font-sans font-bold text-white/40 uppercase tracking-[0.3em] text-[10px] mt-2">Official Entry List</p>
@@ -62,7 +62,7 @@ export default async function DriversIndexPage({
           <div className="md:col-span-1">
             <div className="border border-white/10 bg-white/[0.02] p-6 sticky top-24">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="font-display font-black italic text-2xl text-white uppercase tracking-tighter">Latest <span className="text-lsr-orange">Results</span></h2>
+                <h2 className="font-display font-black italic text-2xl text-white uppercase tracking-normal">Latest <span className="text-lsr-orange">Results</span></h2>
                 <div className="h-px flex-1 bg-white/10 ml-4" />
               </div>
               

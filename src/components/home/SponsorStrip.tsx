@@ -10,7 +10,7 @@ export default function SponsorStrip({ index }: { index: number }) {
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
-            <h2 className="font-display font-black italic text-4xl md:text-5xl text-white uppercase tracking-tighter">
+            <h2 className="font-display font-black italic text-4xl md:text-5xl text-white uppercase tracking-normal">
               The <span className="text-lsr-orange">Partners</span>
             </h2>
             <p className="font-sans font-bold text-white/40 uppercase tracking-[0.3em] text-[10px] mt-2">Support from the industry</p>

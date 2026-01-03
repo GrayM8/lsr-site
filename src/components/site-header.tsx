@@ -25,23 +25,21 @@ export function SiteHeader({ user, roles }: { user: User | null, roles: string[]
     <header className="sticky top-0 z-50 bg-lsr-charcoal/95 backdrop-blur-md border-b border-white/5">
       <nav className="mx-auto max-w-6xl flex h-20 items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-4 group">
-          {/* Logo Image: Hidden on Home, Visible on Mobile (non-home), Visible on Desktop (non-home) */}
-          {!isHome && (
-            <div className="relative">
-              <Image
-                src="/brand/logos/white_logo.webp"
-                alt="LSR logo"
-                width={36}
-                height={36}
-                className="rounded-none transition-transform group-hover:scale-110 duration-500"
-                priority
-              />
-            </div>
-          )}
+          {/* Logo Image: Always visible */}
+          <div className="relative">
+            <Image
+              src="/brand/logos/white_logo2.png"
+              alt="LSR logo"
+              width={64}
+              height={64}
+              className="rounded-none transition-transform group-hover:scale-110 duration-500"
+              priority
+            />
+          </div>
           
-          {/* Brand Text: Visible on Home (all), Hidden on Mobile (non-home), Visible on Desktop (non-home) */}
-          <div className={`flex flex-col ${!isHome ? 'hidden sm:flex' : 'flex'}`}>
-            <span className="font-display font-black italic text-lg sm:text-2xl tracking-tighter leading-none uppercase text-white whitespace-nowrap">
+          {/* Brand Text: Hidden on Home, Hidden on Mobile (non-home), Visible on Desktop (non-home) */}
+          <div className={`flex flex-col ${isHome ? 'hidden' : 'hidden sm:flex'}`}>
+            <span className="font-display font-black italic text-lg sm:text-2xl tracking-normal leading-none uppercase text-white whitespace-nowrap">
               Longhorn Sim Racing
             </span>
             <span className="font-sans font-bold text-[7px] sm:text-[8px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-white/50 leading-none mt-1 whitespace-nowrap">

@@ -20,7 +20,7 @@ export default function Leaderboard({ index, drivers }: Props) {
         <div className="p-6 md:p-10">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
             <div>
-              <h2 className="font-display font-black italic text-4xl md:text-5xl text-white uppercase tracking-tighter">
+              <h2 className="font-display font-black italic text-4xl md:text-5xl text-white uppercase tracking-normal">
                 Driver <span className="text-lsr-orange">Standings</span>
               </h2>
               <p className="font-sans font-bold text-white/40 uppercase tracking-[0.3em] text-[10px] mt-2">Current Semester Leaders</p>
@@ -77,7 +77,7 @@ export default function Leaderboard({ index, drivers }: Props) {
                             )}
                           </div>
                           <div className="flex flex-col">
-                            <span className="font-sans font-bold text-white text-base group-hover/driver:text-lsr-orange transition-colors uppercase tracking-tight">
+                            <span className="font-sans font-bold text-white text-base group-hover/driver:text-lsr-orange transition-colors uppercase tracking-[0.1em]">
                               {driver.displayName}
                             </span>
                             <span className="text-[9px] font-bold text-white/30 uppercase tracking-[0.2em]">Active Member</span>
@@ -86,7 +86,7 @@ export default function Leaderboard({ index, drivers }: Props) {
                       </td>
                       <td className="py-5 px-4 text-right">
                         <div className="inline-flex flex-col items-end">
-                          <span className="font-sans font-black text-white text-lg tracking-tighter">{driver.iRating}</span>
+                          <span className="font-sans font-black text-white text-lg tracking-widest">{driver.iRating}</span>
                           <div className={cn(
                             "h-1 w-full mt-1 bg-white/5 overflow-hidden",
                             i < 3 && "bg-lsr-orange/10"

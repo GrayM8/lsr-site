@@ -32,7 +32,7 @@ export function ProductCard({ product }: { product: Product }) {
       </div>
       
       <div className="p-4">
-        <h3 className="font-display font-black italic text-xl text-white uppercase tracking-tighter truncate mb-1">
+        <h3 className="font-display font-black italic text-xl text-white uppercase tracking-normal truncate mb-1">
           {title}
         </h3>
         <Price 

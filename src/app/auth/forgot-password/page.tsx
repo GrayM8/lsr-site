@@ -41,7 +41,7 @@ export default function ForgotPasswordPage() {
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-lsr-orange to-transparent opacity-50" />
         
         <div className="flex flex-col space-y-4 text-center">
-          <h1 className="font-display font-black italic text-3xl text-white uppercase tracking-tighter">
+          <h1 className="font-display font-black italic text-3xl text-white uppercase tracking-normal">
             Forgot <span className="text-lsr-orange">Password?</span>
           </h1>
           <p className="font-sans text-sm text-white/50 leading-relaxed px-4">

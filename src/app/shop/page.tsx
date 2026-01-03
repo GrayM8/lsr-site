@@ -34,7 +34,7 @@ export default async function ShopPage() {
 
         {/* Centered Content */}
         <div className="relative z-10 container mx-auto px-6 text-center">
-          <h1 className="font-display font-black italic text-6xl md:text-9xl uppercase tracking-tighter mb-6 leading-none">
+          <h1 className="font-display font-black italic text-6xl md:text-9xl uppercase tracking-normal mb-6 leading-none">
             Merch Drop <br className="md:hidden" /><span className="text-lsr-orange">Closed</span>
           </h1>
           <p className="font-sans text-lg md:text-xl text-white/60 mb-12 max-w-2xl mx-auto uppercase tracking-[0.2em] font-bold">
@@ -54,7 +54,7 @@ export default async function ShopPage() {
   if (!allProducts.length) {
     return (
       <div className="container mx-auto px-6 py-24 text-center">
-         <h1 className="font-display font-black italic text-4xl uppercase tracking-tighter mb-4">
+         <h1 className="font-display font-black italic text-4xl uppercase tracking-normal mb-4">
           Coming Soon
         </h1>
         <p className="text-white/60">No products found.</p>
@@ -79,7 +79,7 @@ export default async function ShopPage() {
             </div>
 
             <div className="relative z-10 max-w-6xl mx-auto px-6 text-center mt-20">
-                 <h1 className="font-display font-black italic text-5xl md:text-8xl uppercase tracking-tighter mb-6 leading-none">
+                 <h1 className="font-display font-black italic text-5xl md:text-8xl uppercase tracking-normal mb-6 leading-none">
                   LSR <span className="text-lsr-orange">Shop</span>
                 </h1>
                 <p className="font-sans text-lg md:text-xl text-white/60 max-w-2xl mx-auto uppercase tracking-[0.2em] font-bold">

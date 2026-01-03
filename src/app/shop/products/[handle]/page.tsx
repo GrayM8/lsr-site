@@ -93,7 +93,7 @@ export default async function ProductPage({
 
             {/* Details */}
             <div className="flex flex-col">
-                 <h1 className="font-display font-black italic text-4xl md:text-5xl uppercase tracking-tighter mb-4 leading-none">
+                 <h1 className="font-display font-black italic text-4xl md:text-5xl uppercase tracking-normal mb-4 leading-none">
                     {product.title}
                 </h1>
                 

@@ -100,7 +100,7 @@ export function CartView() {
   if (!cart || cart.lines.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <h2 className="font-display font-black italic text-3xl uppercase tracking-tighter mb-4">Your cart is empty</h2>
+        <h2 className="font-display font-black italic text-3xl uppercase tracking-normal mb-4">Your cart is empty</h2>
         <p className="text-white/60 mb-8 font-sans">Looks like you haven't added any gear yet.</p>
         <Link 
             href="/shop"
@@ -174,7 +174,7 @@ export function CartView() {
 
       <div className="lg:col-span-1">
          <div className="border border-white/10 bg-white/[0.03] p-6 sticky top-24">
-            <h2 className="font-display font-black italic text-xl uppercase tracking-tighter mb-6">Summary</h2>
+            <h2 className="font-display font-black italic text-xl uppercase tracking-normal mb-6">Summary</h2>
             
             <div className="space-y-4 mb-8">
                 <div className="flex justify-between text-sm">

@@ -15,7 +15,7 @@ export function SiteFooter() {
           <div className="space-y-6">
             <Link href="/" className="flex flex-col gap-1 group">
               <div className="flex flex-col">
-                <span className="font-display font-black italic text-xl tracking-tighter leading-none uppercase text-white group-hover:text-[#FF8000] transition-colors">
+                <span className="font-display font-black italic text-xl tracking-normal leading-none uppercase text-white group-hover:text-[#FF8000] transition-colors">
                   Longhorn Sim Racing
                 </span>
                 <span className="font-sans font-bold text-[7px] uppercase tracking-[0.2em] text-white/40 leading-none mt-1">

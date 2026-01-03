@@ -13,7 +13,7 @@ export default async function GalleryPage() {
     <main className="bg-lsr-charcoal text-white min-h-screen">
       <div className="mx-auto max-w-6xl px-6 md:px-8 py-14 md:py-20">
         <div className="mb-10">
-          <h1 className="font-display font-black italic text-5xl md:text-6xl text-white uppercase tracking-tighter">
+          <h1 className="font-display font-black italic text-5xl md:text-6xl text-white uppercase tracking-normal">
             The <span className="text-lsr-orange">Gallery</span>
           </h1>
           <p className="font-sans font-bold text-white/40 uppercase tracking-[0.3em] text-[10px] mt-2">Captured Moments from the Track</p>
@@ -23,7 +23,7 @@ export default async function GalleryPage() {
 
         <div className="mt-10">
           <div className="flex items-end justify-between mb-6 border-b border-white/10 pb-4">
-            <h2 className="font-display font-black italic text-2xl md:text-3xl text-white uppercase tracking-tighter">Feature <span className="text-lsr-orange">Reels</span></h2>
+            <h2 className="font-display font-black italic text-2xl md:text-3xl text-white uppercase tracking-normal">Feature <span className="text-lsr-orange">Reels</span></h2>
           </div>
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             {videos.map((video, index) => (
@@ -48,7 +48,7 @@ export default async function GalleryPage() {
 
         <div className="mt-16">
           <div className="flex items-end justify-between mb-6 border-b border-white/10 pb-4">
-            <h2 className="font-display font-black italic text-2xl md:text-3xl text-white uppercase tracking-tighter">Photo <span className="text-lsr-orange">Archive</span></h2>
+            <h2 className="font-display font-black italic text-2xl md:text-3xl text-white uppercase tracking-normal">Photo <span className="text-lsr-orange">Archive</span></h2>
           </div>
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {images.map((image) => (

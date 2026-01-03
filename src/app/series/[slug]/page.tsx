@@ -33,7 +33,7 @@ export default async function SeriesPage({ params }: SeriesPageArgs) {
       <div className="mx-auto max-w-6xl px-6 md:px-8 py-14 md:py-20">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
           <div>
-            <h1 className="font-display font-black italic text-5xl md:text-7xl text-white uppercase tracking-tighter leading-[0.9]">
+            <h1 className="font-display font-black italic text-5xl md:text-7xl text-white uppercase tracking-normal leading-[0.9]">
               {series.title}
             </h1>
             <p className="font-sans font-bold text-white/40 uppercase tracking-[0.3em] text-[10px] mt-4">Official Championship Series</p>
@@ -47,7 +47,7 @@ export default async function SeriesPage({ params }: SeriesPageArgs) {
         <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
           <div className="lg:col-span-2 space-y-12">
             <section>
-              <h2 className="font-display font-black italic text-3xl text-white uppercase tracking-tighter mb-6 border-b border-white/10 pb-4">
+              <h2 className="font-display font-black italic text-3xl text-white uppercase tracking-normal mb-6 border-b border-white/10 pb-4">
                 Series <span className="text-lsr-orange">Manifesto</span>
               </h2>
               <div className="prose prose-invert prose-p:font-sans prose-p:text-white/70 prose-p:leading-relaxed max-w-none">
@@ -110,7 +110,7 @@ export default async function SeriesPage({ params }: SeriesPageArgs) {
                 </div>
 
                 <section>
-                  <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-tighter mb-6">
+                  <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-6">
                     Race <span className="text-lsr-orange">Calendar</span>
                   </h3>
                   <Carousel className="w-full">
@@ -157,7 +157,7 @@ export default async function SeriesPage({ params }: SeriesPageArgs) {
                 </section>
 
                 <section>
-                  <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-tighter mb-6">
+                  <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-6">
                     Championship <span className="text-lsr-orange">Standings</span>
                   </h3>
                   <div className="overflow-x-auto border border-white/10">
@@ -201,7 +201,7 @@ export default async function SeriesPage({ params }: SeriesPageArgs) {
 
           <div className="lg:col-span-1 space-y-12">
             <section>
-              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-tighter mb-6 border-b border-white/10 pb-4">
+              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-6 border-b border-white/10 pb-4">
                 Series <span className="text-lsr-orange">Directors</span>
               </h3>
               <div className="space-y-8">
@@ -209,7 +209,7 @@ export default async function SeriesPage({ params }: SeriesPageArgs) {
                   <div className="relative aspect-square border border-white/10 bg-black overflow-hidden mb-4">
                     <Image src="/images/bryan.jpg" alt="Bryan" fill style={{ objectFit: "cover" }} className="opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
                   </div>
-                  <h4 className="font-display font-black italic text-xl text-white uppercase tracking-tighter">Bryan Reyes</h4>
+                  <h4 className="font-display font-black italic text-xl text-white uppercase tracking-normal">Bryan Reyes</h4>
                   <p className="font-sans font-bold text-[9px] uppercase tracking-widest text-lsr-orange mb-3">Competitive Lead</p>
                   <p className="font-sans text-xs text-white/60 leading-relaxed">
                     Ever since I was little, I’ve been fascinated with racing. I still remember watching Cars for the first time and instantly wanting to be Lightning McQueen. After gaining 5 years of racing experience, I have found that I enjoy coaching and teaching others about racing as much as being on the track.
@@ -220,7 +220,7 @@ export default async function SeriesPage({ params }: SeriesPageArgs) {
                   <div className="relative aspect-square border border-white/10 bg-black overflow-hidden mb-4">
                     <Image src="/images/armando.jpg" alt="Armando" fill style={{ objectFit: "cover" }} className="opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
                   </div>
-                  <h4 className="font-display font-black italic text-xl text-white uppercase tracking-tighter">Armando Martinez</h4>
+                  <h4 className="font-display font-black italic text-xl text-white uppercase tracking-normal">Armando Martinez</h4>
                   <p className="font-sans font-bold text-[9px] uppercase tracking-widest text-lsr-orange mb-3">Competitive Officer</p>
                   <p className="font-sans text-xs text-white/60 leading-relaxed">
                     I've spent most of my life racing on a controller and in all honesty am probably better on the controller than on a wheel. Recently getting a wheel has been amazing since the immersion of sim-racing is important. My goal is to teach people about racing and its tricky parts.

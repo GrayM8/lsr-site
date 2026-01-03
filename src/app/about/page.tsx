@@ -20,7 +20,7 @@ export default function AboutPage() {
         
         <div className="relative z-10 mx-auto max-w-6xl px-6 md:px-8 py-20 md:py-28">
           <div className="max-w-4xl">
-            <h1 className="font-display font-black italic text-5xl md:text-7xl text-white uppercase tracking-tighter leading-[0.9] mb-8">
+            <h1 className="font-display font-black italic text-5xl md:text-7xl text-white uppercase tracking-normal leading-[0.9] mb-8">
               Who We <span className="text-lsr-orange">Are</span>
             </h1>
             <p className="font-sans text-lg md:text-2xl font-bold text-white/90 leading-relaxed">
@@ -35,7 +35,7 @@ export default function AboutPage() {
         {/* Purpose & Vision */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
           <div>
-            <h2 className="font-display font-black italic text-3xl md:text-4xl text-white uppercase tracking-tighter mb-6">
+            <h2 className="font-display font-black italic text-3xl md:text-4xl text-white uppercase tracking-normal mb-6">
               Purpose & <span className="text-lsr-orange">Vision</span>
             </h2>
             <div className="h-1 w-20 bg-lsr-orange mb-8" />
@@ -61,7 +61,7 @@ export default function AboutPage() {
 
         {/* Officer Team */}
         <section>
-          <h2 className="font-display font-black italic text-3xl md:text-5xl text-white uppercase tracking-tighter mb-10 border-b border-white/10 pb-6">
+          <h2 className="font-display font-black italic text-3xl md:text-5xl text-white uppercase tracking-normal mb-10 border-b border-white/10 pb-6">
             Officer <span className="text-lsr-orange">Team</span>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -75,7 +75,7 @@ export default function AboutPage() {
                 <Image src="/images/dylan.jpg" alt="Dylan Foley" fill className="object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 */}
               </div>
-              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-tighter">Dylan Foley</h3>
+              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal">Dylan Foley</h3>
               <p className="font-sans font-bold text-xs uppercase tracking-[0.2em] text-lsr-orange mb-4">President</p>
               <p className="font-sans text-sm text-white/60 leading-relaxed">
                 Leading the strategic vision and organizational growth of LSR. Dedicated to building partnerships and fostering a competitive spirit within the team.
@@ -92,7 +92,7 @@ export default function AboutPage() {
                 <Image src="/images/cooper.jpg" alt="Cooper Tomlin" fill className="object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 */}
               </div>
-              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-tighter">Cooper Tomlin</h3>
+              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal">Cooper Tomlin</h3>
               <p className="font-sans font-bold text-xs uppercase tracking-[0.2em] text-lsr-orange mb-4">Chief Financial Officer</p>
               <p className="font-sans text-sm text-white/60 leading-relaxed">
                 Managing financial operations and sponsorship acquisitions. Focused on ensuring sustainable growth and resource allocation for all team initiatives.
@@ -109,7 +109,7 @@ export default function AboutPage() {
                 <Image src="/images/gray.jpg" alt="Gray Marshall" fill className="object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 */}
               </div>
-              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-tighter">Gray Marshall</h3>
+              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal">Gray Marshall</h3>
               <p className="font-sans font-bold text-xs uppercase tracking-[0.2em] text-lsr-orange mb-4">Chief Technology Officer</p>
               <p className="font-sans text-sm text-white/60 leading-relaxed">
                 Overseeing technical infrastructure and digital presence. Driving innovation in simulation hardware and software integration for the team.
@@ -166,7 +166,7 @@ export default function AboutPage() {
         <section className="border border-white/10 bg-white/[0.02] p-8 md:p-12 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-lsr-orange/5 rounded-full blur-[100px] pointer-events-none" />
           
-          <h2 className="font-display font-black italic text-3xl md:text-4xl text-white uppercase tracking-tighter mb-8 relative z-10">
+          <h2 className="font-display font-black italic text-3xl md:text-4xl text-white uppercase tracking-normal mb-8 relative z-10">
             Collaboration <span className="text-lsr-orange">Strategy</span>
           </h2>
           
@@ -224,7 +224,7 @@ export default function AboutPage() {
         {/* Roadmap */}
         <section>
           <div className="flex items-end justify-between mb-10 border-b border-white/10 pb-6">
-            <h2 className="font-display font-black italic text-3xl md:text-5xl text-white uppercase tracking-tighter">
+            <h2 className="font-display font-black italic text-3xl md:text-5xl text-white uppercase tracking-normal">
               Development <span className="text-lsr-orange">Phases</span>
             </h2>
             <span className="hidden md:block font-sans font-bold text-xs uppercase tracking-[0.2em] text-white/40">2025 — 2027+</span>

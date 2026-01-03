@@ -22,7 +22,7 @@ export default function Hotlap({ index }: { index: number }) {
         
         <div className="p-8 md:p-10 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-gradient-to-r from-lsr-charcoal to-black/40">
           <div>
-            <h2 className="font-display font-black italic text-4xl text-white uppercase tracking-tighter mb-2">
+            <h2 className="font-display font-black italic text-4xl text-white uppercase tracking-normal mb-2">
               Hotlap <span className="text-lsr-orange">of the week</span>
             </h2>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
@@ -32,7 +32,7 @@ export default function Hotlap({ index }: { index: number }) {
               <span className="text-white/20 text-xs">•</span>
               <span className="font-sans font-bold text-xs uppercase tracking-[0.1em] text-white/50">Daytona International</span>
               <span className="text-white/20 text-xs md:hidden">•</span>
-              <span className="font-display font-black italic text-lsr-orange text-xl md:ml-4 tracking-tighter">1:46.043</span>
+              <span className="font-display font-black italic text-lsr-orange text-xl md:ml-4 tracking-normal">1:46.043</span>
             </div>
           </div>
           
