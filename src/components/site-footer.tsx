@@ -39,7 +39,7 @@ export function SiteFooter() {
               <Link href="/shop" className="text-white/60 hover:text-lsr-orange transition-colors">Merch</Link>
               <Link href="/gallery" className="text-white/60 hover:text-lsr-orange transition-colors">Gallery</Link>
               <Link href="/sponsors" className="text-white/60 hover:text-lsr-orange transition-colors">Sponsors</Link>
-              <Link href="/series/lone-star-cup" className="text-white/60 hover:text-lsr-orange transition-colors">LSC</Link>
+              <Link href="/lone-star-cup" className="text-white/60 hover:text-lsr-orange transition-colors">LSC</Link>
             </nav>
           </div>
 

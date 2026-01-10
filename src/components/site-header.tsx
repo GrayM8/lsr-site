@@ -67,7 +67,7 @@ export function SiteHeader({ user, roles }: { user: User | null, roles: string[]
               Merch
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-lsr-orange transition-all group-hover/link:w-full" />
             </Link>
-            <Link href="/series/lone-star-cup" className="hover:text-lsr-orange transition-colors relative group/link text-lsr-orange/80">
+            <Link href="/lone-star-cup" className="hover:text-lsr-orange transition-colors relative group/link text-lsr-orange/80">
               LSC
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-lsr-orange transition-all group-hover/link:w-full" />
             </Link>
@@ -127,7 +127,7 @@ export function SiteHeader({ user, roles }: { user: User | null, roles: string[]
                     <Link href="/sponsors" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3">Sponsors</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
-                    <Link href="/series/lone-star-cup" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3 text-lsr-orange">LSC</Link>
+                    <Link href="/lone-star-cup" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3 text-lsr-orange">LSC</Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
