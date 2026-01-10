@@ -1,5 +1,5 @@
 import "./globals.css"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Montserrat, Kanit } from "next/font/google"
 import { SiteHeader } from "@/components/site-header"
@@ -23,18 +23,21 @@ const kanit = Kanit({
   display: "swap",
 })
 
+export const viewport: Viewport = {
+  colorScheme: "dark",
+  themeColor: "#262626",
+}
+
 export const metadata: Metadata = {
   title: { default: "Longhorn Sim Racing", template: "%s · LSR" },
   description: "UT Austin Longhorn Sim Racing Club",
   metadataBase: new URL(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000"),
-  colorScheme: "dark",
-  themeColor: "#262626", // lsr-charcoal
   openGraph: {
     type: "website",
     siteName: "Longhorn Sim Racing",
     images: [
       {
-        url: "/brand/og.jpeg",
+        url: "/api/og",
         width: 1200,
         height: 630,
         alt: "Longhorn Sim Racing",
@@ -45,7 +48,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     images: [
       {
-        url: "/brand/og.jpeg",
+        url: "/api/og",
         width: 1200,
         height: 630,
         alt: "Longhorn Sim Racing",
