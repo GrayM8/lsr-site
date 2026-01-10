@@ -59,11 +59,11 @@ export async function GET(request: Request) {
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              opacity: 0.5,
+              opacity: 0.7,
             }}
           />
 
-          {/* 2. Overlay (Solid color with opacity) */}
+          {/* 2. Vignette (Radial Gradient) */}
           <div
             style={{
               position: 'absolute',
@@ -71,7 +71,19 @@ export async function GET(request: Request) {
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: 'rgba(27, 27, 27, 0.4)', // lsr-charcoal / 40
+              background: 'radial-gradient(circle at 50% 50%, transparent 0%, rgba(0,0,0,0.5) 100%)',
+            }}
+          />
+
+          {/* 3. Vertical Gradient Fade */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'linear-gradient(to bottom, rgba(27,27,27,0.4), transparent, rgba(27,27,27,0.8))',
             }}
           />
 
@@ -128,7 +140,7 @@ export async function GET(request: Request) {
                           backgroundColor: 'rgba(255, 128, 0, 0.2)',
                           filter: 'blur(60px)',
                           zIndex: -1,
-                          opacity: 0.6,
+                          opacity: 0.4,
                           marginLeft: '-300px',
                           marginTop: '-150px',
                       }}
