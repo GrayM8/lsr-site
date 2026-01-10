@@ -9,6 +9,7 @@ import { BrandIcon, type SimpleIcon } from '@/components/brand-icon';
 import { siInstagram, siYoutube, siTwitch } from 'simple-icons/icons';
 import { Globe, type LucideIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 export const revalidate = 60;
 
@@ -115,9 +116,12 @@ export default async function DriverProfilePage({
                 <Button
                   asChild
                   variant="outline"
-                  className="rounded-none border-white/20 hover:bg-white hover:text-lsr-charcoal font-bold uppercase tracking-widest text-[10px]"
+                  className={cn(
+                    "rounded-none border-white/20 hover:bg-white hover:text-lsr-charcoal font-bold uppercase tracking-widest text-[10px]",
+                    !user.bio && "border-lsr-orange/50 shadow-[0_0_15px_rgba(255,128,0,0.3)] animate-pulse"
+                  )}
                 >
-                  <Link href={`/drivers/${handle}/edit`}>Update Telemetry</Link>
+                  <Link href={`/drivers/${handle}/edit`}>Edit Profile</Link>
                 </Button>
               </div>
             )}
