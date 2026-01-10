@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -27,6 +27,13 @@ export function CreditDialog({ image, isOpen, onOpenChange }: CreditDialogProps)
   const [creditName, setCreditName] = useState(image.creditName ?? '');
   const [creditUrl, setCreditUrl] = useState(image.creditUrl ?? '');
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (isOpen) {
+      setCreditName(image.creditName ?? '');
+      setCreditUrl(image.creditUrl ?? '');
+    }
+  }, [isOpen, image]);
 
   const handleSave = () => {
     startTransition(async () => {
