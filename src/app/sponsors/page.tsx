@@ -124,9 +124,9 @@ export default function SponsorsPage() {
         <section id="partnership-options" className="mb-20">
           <div className="text-center mb-12">
             <h2 className="font-display font-black italic text-4xl md:text-5xl text-white uppercase tracking-normal">
-              Ways to Partner with <span className="text-lsr-orange">Longhorn Sim Racing</span>
+              Sponsor <span className="text-lsr-orange">Benefits</span>
             </h2>
-            <p className="font-sans font-bold text-white/40 uppercase tracking-[0.3em] text-xs mt-4">Fiscal Year 2025-2026</p>
+            <p className="font-sans font-bold text-white/40 uppercase tracking-[0.3em] text-xs mt-4">Sponsorship at any level includes all items up through that level</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
@@ -135,17 +135,13 @@ export default function SponsorsPage() {
             <div className="border border-white/10 bg-white/[0.02] p-6 flex flex-col h-full hover:border-white/20 transition-colors">
               <div className="mb-4">
                 <h3 className="font-sans font-black text-lg text-white uppercase tracking-tight">Friend of LSR</h3>
-                <div className="mt-2 text-xl font-mono text-white/60">$0 – $250</div>
+                <div className="mt-2 text-xl font-mono text-white/60">$100 – $250</div>
               </div>
-              <p className="text-xs text-white/50 mb-6 leading-relaxed min-h-[40px]">
-                For individuals and small businesses wishing to support student engineering.
-              </p>
               <ul className="space-y-4 mb-8 flex-grow">
                 <li className="flex items-start gap-3 text-xs text-white/70">
                   <span className="h-1.5 w-1.5 rounded-full bg-white/20 mt-1.5 shrink-0" />
                   <span>
-                    <strong className="block text-white/90">Social Media Acknowledgment</strong>
-                    <span className="block text-white/50 mt-1">Recognized on our social channels.</span>
+                    <strong className="block text-white/90">Business “Shout-out” on social media</strong>
                   </span>
                 </li>
               </ul>
@@ -158,24 +154,19 @@ export default function SponsorsPage() {
             <div className="border border-white/10 bg-white/[0.02] p-6 flex flex-col h-full hover:border-white/20 transition-colors">
               <div className="mb-4">
                 <h3 className="font-sans font-black text-lg text-white uppercase tracking-tight">Silver Partner</h3>
-                <div className="mt-2 text-xl font-mono text-white/80">$250+</div>
+                <div className="mt-2 text-xl font-mono text-white/80">$250 – $1000</div>
               </div>
-              <p className="text-xs text-white/50 mb-6 leading-relaxed min-h-[40px]">
-                Establish a visible presence with our team and community.
-              </p>
               <ul className="space-y-4 mb-8 flex-grow">
                 <li className="flex items-start gap-3 text-xs text-white/70">
                   <span className="h-1.5 w-1.5 rounded-full bg-white/40 mt-1.5 shrink-0" />
                   <span>
-                    <strong className="block text-white/90">Team Banner Listing</strong>
-                    <span className="block text-white/50 mt-1">Business name displayed at events.</span>
+                    <strong className="block text-white/90">Business name on website sponsorship page</strong>
                   </span>
                 </li>
                 <li className="flex items-start gap-3 text-xs text-white/70">
                   <span className="h-1.5 w-1.5 rounded-full bg-white/40 mt-1.5 shrink-0" />
                   <span>
-                    <strong className="block text-white/90">All Previous Benefits</strong>
-                    <span className="block text-white/50 mt-1">Includes social media acknowledgment.</span>
+                    <strong className="block text-white/90">Business logo on Longhorn Sim Racing’s Livery</strong>
                   </span>
                 </li>
               </ul>
@@ -188,31 +179,19 @@ export default function SponsorsPage() {
             <div className="border border-white/10 bg-white/[0.02] p-6 flex flex-col h-full hover:border-white/20 transition-colors">
               <div className="mb-4">
                 <h3 className="font-sans font-black text-lg text-white uppercase tracking-tight">Gold Partner</h3>
-                <div className="mt-2 text-xl font-mono text-white">$1,000+</div>
+                <div className="mt-2 text-xl font-mono text-white">$1000 – $2,500</div>
               </div>
-              <p className="text-xs text-white/50 mb-6 leading-relaxed min-h-[40px]">
-                Deepen your engagement with direct branding links and team apparel.
-              </p>
               <ul className="space-y-4 mb-8 flex-grow">
                 <li className="flex items-start gap-3 text-xs text-white/70">
                   <span className="h-1.5 w-1.5 rounded-full bg-lsr-orange mt-1.5 shrink-0" />
                   <span>
-                    <strong className="block text-white/90">Team Banner Logo</strong>
-                    <span className="block text-white/50 mt-1">Medium logo displayed at UT events.</span>
+                    <strong className="block text-white/90">Logo (medium-sized) on website’s main page with a clickable link to sponsor</strong>
                   </span>
                 </li>
                 <li className="flex items-start gap-3 text-xs text-white/70">
                   <span className="h-1.5 w-1.5 rounded-full bg-lsr-orange mt-1.5 shrink-0" />
                   <span>
-                    <strong className="block text-white/90">Website Logo & Link</strong>
-                    <span className="block text-white/50 mt-1">Visible to students and recruiters.</span>
-                  </span>
-                </li>
-                <li className="flex items-start gap-3 text-xs text-white/70">
-                  <span className="h-1.5 w-1.5 rounded-full bg-lsr-orange mt-1.5 shrink-0" />
-                  <span>
-                    <strong className="block text-white/90">Team Shirt</strong>
-                    <span className="block text-white/50 mt-1">One (1) official team shirt.</span>
+                    <strong className="block text-white/90">One team shirt</strong>
                   </span>
                 </li>
               </ul>
@@ -227,29 +206,23 @@ export default function SponsorsPage() {
                 <h3 className="font-sans font-black text-lg text-white uppercase tracking-tight">Platinum Partner</h3>
                 <div className="mt-2 text-xl font-mono text-white">$2,500+</div>
               </div>
-              <p className="text-xs text-white/50 mb-6 leading-relaxed min-h-[40px]">
-                Maximum visibility and strategic partnership for industry leaders.
-              </p>
               <ul className="space-y-4 mb-8 flex-grow">
                 <li className="flex items-start gap-3 text-xs text-white/70">
                   <span className="h-1.5 w-1.5 rounded-full bg-white/60 mt-1.5 shrink-0" />
                   <span>
-                    <strong className="block text-white/90">Premium Banner Placement</strong>
-                    <span className="block text-white/50 mt-1">Largest logo on team banner.</span>
+                    <strong className="block text-white/90">Largest logo featured on the team banner displayed at tabling and press events</strong>
                   </span>
                 </li>
                 <li className="flex items-start gap-3 text-xs text-white/70">
                   <span className="h-1.5 w-1.5 rounded-full bg-white/60 mt-1.5 shrink-0" />
                   <span>
-                    <strong className="block text-white/90">Pit Display</strong>
-                    <span className="block text-white/50 mt-1">Banner displayed in our pit area.</span>
+                    <strong className="block text-white/90">Team merchandise package</strong>
                   </span>
                 </li>
                 <li className="flex items-start gap-3 text-xs text-white/70">
                   <span className="h-1.5 w-1.5 rounded-full bg-white/60 mt-1.5 shrink-0" />
                   <span>
-                    <strong className="block text-white/90">Team Shirts</strong>
-                    <span className="block text-white/50 mt-1">Two (2) official team shirts.</span>
+                    <strong className="block text-white/90">Scheduled campus visit with the team</strong>
                   </span>
                 </li>
               </ul>
@@ -278,13 +251,6 @@ export default function SponsorsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 font-sans text-white/80">
-                 <tr className="hover:bg-white/[0.02]">
-                  <td className="p-4 font-bold">Tax-Deductible Contribution</td>
-                  <td className="p-4 text-center text-lsr-orange"><Check className="h-4 w-4 mx-auto" /></td>
-                  <td className="p-4 text-center text-lsr-orange"><Check className="h-4 w-4 mx-auto" /></td>
-                  <td className="p-4 text-center text-lsr-orange"><Check className="h-4 w-4 mx-auto" /></td>
-                  <td className="p-4 text-center text-lsr-orange"><Check className="h-4 w-4 mx-auto" /></td>
-                </tr>
                 <tr className="hover:bg-white/[0.02]">
                   <td className="p-4 font-bold">Social Media Shout-out</td>
                   <td className="p-4 text-center text-lsr-orange"><Check className="h-4 w-4 mx-auto" /></td>
@@ -293,32 +259,46 @@ export default function SponsorsPage() {
                   <td className="p-4 text-center text-lsr-orange"><Check className="h-4 w-4 mx-auto" /></td>
                 </tr>
                 <tr className="hover:bg-white/[0.02]">
-                  <td className="p-4 font-bold">Team Banner Listing</td>
-                  <td className="p-4 text-center text-white/20">-</td>
-                  <td className="p-4 text-center text-white">Name Only</td>
-                  <td className="p-4 text-center text-white">Medium Logo</td>
-                  <td className="p-4 text-center text-white">Large Logo</td>
-                </tr>
-                <tr className="hover:bg-white/[0.02]">
-                  <td className="p-4 font-bold">Website Logo & Link</td>
-                  <td className="p-4 text-center text-white/20">-</td>
+                  <td className="p-4 font-bold">Name on website sponsorship page</td>
                   <td className="p-4 text-center text-white/20">-</td>
                   <td className="p-4 text-center text-lsr-orange"><Check className="h-4 w-4 mx-auto" /></td>
                   <td className="p-4 text-center text-lsr-orange"><Check className="h-4 w-4 mx-auto" /></td>
-                </tr>
-                 <tr className="hover:bg-white/[0.02]">
-                  <td className="p-4 font-bold">Physical Banner in Pit</td>
-                  <td className="p-4 text-center text-white/20">-</td>
-                  <td className="p-4 text-center text-white/20">-</td>
-                  <td className="p-4 text-center text-white/20">-</td>
                   <td className="p-4 text-center text-lsr-orange"><Check className="h-4 w-4 mx-auto" /></td>
                 </tr>
                 <tr className="hover:bg-white/[0.02]">
-                  <td className="p-4 font-bold">Team Shirts</td>
+                  <td className="p-4 font-bold">Logo on Team Livery</td>
+                  <td className="p-4 text-center text-white/20">-</td>
+                  <td className="p-4 text-center text-lsr-orange"><Check className="h-4 w-4 mx-auto" /></td>
+                  <td className="p-4 text-center text-lsr-orange"><Check className="h-4 w-4 mx-auto" /></td>
+                  <td className="p-4 text-center text-lsr-orange"><Check className="h-4 w-4 mx-auto" /></td>
+                </tr>
+                <tr className="hover:bg-white/[0.02]">
+                  <td className="p-4 font-bold">Website Main Page Logo & Link</td>
+                  <td className="p-4 text-center text-white/20">-</td>
+                  <td className="p-4 text-center text-white/20">-</td>
+                  <td className="p-4 text-center text-lsr-orange"><Check className="h-4 w-4 mx-auto" /></td>
+                  <td className="p-4 text-center text-lsr-orange"><Check className="h-4 w-4 mx-auto" /></td>
+                </tr>
+                <tr className="hover:bg-white/[0.02]">
+                  <td className="p-4 font-bold">Team Shirt / Merchandise</td>
                   <td className="p-4 text-center text-white/20">-</td>
                   <td className="p-4 text-center text-white/20">-</td>
                   <td className="p-4 text-center text-white">1 Shirt</td>
-                  <td className="p-4 text-center text-white">2 Shirts</td>
+                  <td className="p-4 text-center text-white">Merch Pkg</td>
+                </tr>
+                 <tr className="hover:bg-white/[0.02]">
+                  <td className="p-4 font-bold">Team Banner Logo (Events)</td>
+                  <td className="p-4 text-center text-white/20">-</td>
+                  <td className="p-4 text-center text-white/20">-</td>
+                  <td className="p-4 text-center text-white">Medium Logo</td>
+                  <td className="p-4 text-center text-white">Largest Logo</td>
+                </tr>
+                <tr className="hover:bg-white/[0.02]">
+                  <td className="p-4 font-bold">Scheduled Campus Visit</td>
+                  <td className="p-4 text-center text-white/20">-</td>
+                  <td className="p-4 text-center text-white/20">-</td>
+                  <td className="p-4 text-center text-white/20">-</td>
+                  <td className="p-4 text-center text-lsr-orange"><Check className="h-4 w-4 mx-auto" /></td>
                 </tr>
               </tbody>
             </table>
@@ -329,25 +309,19 @@ export default function SponsorsPage() {
         <section className="grid md:grid-cols-2 gap-12 mb-20">
           <div className="border border-white/10 bg-white/[0.02] p-8 md:p-10">
               <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-6 border-b border-white/10 pb-4">
-                501(c)(3) <span className="text-lsr-orange">Nonprofit</span>
+                Tax <span className="text-lsr-orange">Exemption</span>
               </h3>
               <p className="font-sans text-sm text-white/70 mb-6 leading-relaxed">
-                Longhorn Sim Racing is a registered 501(c)(3) nonprofit organization. Your contributions are tax-deductible to the extent allowed by law.
+                W-9 available upon request. All donors will receive a receipt for tax exemption as we are a 501(c)3 nonprofit organization.
               </p>
-              <p className="font-sans text-sm text-white/70 mb-6 leading-relaxed">
-                Funds are strictly allocated towards:
+              <p className="font-sans text-sm text-white/70 mb-6 leading-relaxed italic">
+                A partnership with Longhorn Sim Racing provides many business opportunities from helping with the company’s community awareness to raising future employees.
               </p>
-              <ul className="space-y-2 font-sans text-sm text-white/70 mb-8 list-disc list-inside">
-                <li>Competition registration fees</li>
-                <li>Simulation hardware & infrastructure</li>
-                <li>Engineering software platforms</li>
-                <li>Student professional development</li>
-              </ul>
               <div className="flex flex-col gap-2">
                 <Button asChild variant="outline" className="justify-start w-fit rounded-none border-white/10 hover:border-lsr-orange hover:text-lsr-orange font-bold uppercase tracking-widest text-[10px]">
                   <Link href={`mailto:${outreachEmail}?subject=W-9 Request`}>
                     <Download className="mr-2 h-3 w-3" />
-                    Request W-9 / EIN
+                    Request W-9
                   </Link>
                 </Button>
               </div>
@@ -359,17 +333,18 @@ export default function SponsorsPage() {
             </h3>
             <div className="space-y-6 font-sans text-sm">
               <div className="flex gap-4">
-                <div className="font-bold text-lsr-orange uppercase tracking-widest text-xs min-w-[80px]">Aug 31</div>
-                <div className="text-white/70">Pledge deadline for inclusion on printed team banner.</div>
+                <div className="font-bold text-lsr-orange uppercase tracking-widest text-xs min-w-[80px]">July 31st</div>
+                <div className="text-white/70">To meet printing deadlines, please pledge by this date.</div>
               </div>
               <div className="flex gap-4">
                 <div className="font-bold text-lsr-orange uppercase tracking-widest text-xs min-w-[80px]">Format</div>
-                <div className="text-white/70">Logos must be high-resolution <span className="text-white font-bold">PNG</span> or <span className="text-white font-bold">JPG</span>.</div>
+                <div className="text-white/70">Logos must be submitted in <span className="text-white font-bold">PNG</span> or <span className="text-white font-bold">JPG</span> format and be a high resolution image.</div>
               </div>
               <div className="flex gap-4">
-                <div className="font-bold text-lsr-orange uppercase tracking-widest text-xs min-w-[80px]">Process</div>
-                <div className="text-white/70">Upon agreement, we will provide a secure link for donation and request necessary assets.</div>
+                <div className="font-bold text-lsr-orange uppercase tracking-widest text-xs min-w-[80px]">Email</div>
+                <div className="text-white/70">Submit logos to <span className="text-white font-bold">{outreachEmail}</span>.</div>
               </div>
+              <p className="text-[10px] text-white/40 italic">If we can’t work with your logo, we may not be able to include it.</p>
             </div>
           </div>
         </section>
@@ -377,13 +352,13 @@ export default function SponsorsPage() {
         {/* Final relational CTA */}
         <div className="text-center py-12 border border-white/5 bg-white/[0.01]">
           <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-4">
-            Not sure where you fit?
+            To Donate
           </h3>
           <p className="font-sans text-white/60 mb-8 max-w-md mx-auto">
-            We are happy to discuss custom partnership arrangements that align with your business goals.
+            Please make a donation through Venmo or make a check payable to: <span className="text-white font-bold">Longhorn Sim Racing</span>
           </p>
           <Button asChild className="rounded-none bg-lsr-orange text-white hover:bg-white hover:text-lsr-charcoal font-black uppercase tracking-[0.2em] text-[10px] h-12 px-8 transition-all">
-            <Link href={`mailto:${outreachEmail}?subject=Partnership Discussion`}>Let&apos;s Talk</Link>
+            <Link href="https://www.paypal.com/qrcodes/venmocs/e3fd69ab-c345-4b53-add6-4f8037a4760d?created=1767404952.8381681&printed=1" target="_blank" rel="noopener noreferrer">Donate via Venmo</Link>
           </Button>
         </div>
 

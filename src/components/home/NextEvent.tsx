@@ -109,7 +109,7 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
               </div>
               
               <Button asChild className="bg-lsr-orange text-white hover:bg-white hover:text-lsr-charcoal rounded-none font-bold uppercase tracking-widest w-fit px-8">
-                <Link href={`/events/${featuredEvent.slug}`}>Race Details</Link>
+                <Link href={`/events/${featuredEvent.slug}`}>Event Details</Link>
               </Button>
             </div>
             
@@ -135,7 +135,7 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
         )}
 
         <div className="mt-12 pt-12 border-t border-white/5">
-          <h4 className="font-sans font-bold text-xs text-lsr-orange uppercase tracking-[0.3em] mb-6">Upcoming Grid</h4>
+          <h4 className="font-sans font-bold text-xs text-lsr-orange uppercase tracking-[0.3em] mb-6">Upcoming Events</h4>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {upcomingEvents.length > 0 ? upcomingEvents.slice(0, 4).map((event) => {
               const eventDate = new Date(event.startsAtUtc)

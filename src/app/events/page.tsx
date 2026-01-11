@@ -84,7 +84,7 @@ function FeaturedEventCard({ event }: { event: Event & { series: EventSeries | n
         </div>
         
         <Link href={`/events/${event.slug}`} className="inline-flex items-center gap-2 text-lsr-orange hover:text-white transition-colors font-sans font-black text-[10px] uppercase tracking-[0.2em]">
-          Race Details <span className="text-lg leading-none">→</span>
+          Event Details <span className="text-lg leading-none">→</span>
         </Link>
       </div>
     </div>
@@ -201,7 +201,7 @@ export default async function EventsIndexPage({
         {featuredEvent && (
           <>
             <div className="flex items-end justify-between mb-6 border-b border-white/10 pb-4">
-              <h2 className="font-display font-black italic text-2xl md:text-3xl text-white uppercase tracking-normal">Next <span className="text-lsr-orange">Green Flag</span></h2>
+              <h2 className="font-display font-black italic text-2xl md:text-3xl text-white uppercase tracking-normal">Next <span className="text-lsr-orange">Event</span></h2>
             </div>
             <FeaturedEventCard event={featuredEvent} />
             <div className="h-12" />
