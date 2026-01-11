@@ -21,14 +21,12 @@ export default function SponsorStrip({ index }: { index: number }) {
           </Link>
         </div>
 
-        <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-20 border border-white/5 bg-white/[0.02] flex items-center justify-center group grayscale hover:grayscale-0 transition-all duration-500">
-              <div className="font-sans font-black text-[10px] uppercase tracking-[0.4em] text-white/10 group-hover:text-lsr-orange/40 transition-colors">
-                Partner_Slot_{i + 1}
-              </div>
-            </div>
-          ))}
+        <div className="relative z-10">
+          <div className="border border-white/5 bg-white/[0.01] p-8 text-center">
+            <p className="font-sans font-bold text-white/20 uppercase tracking-[0.4em] text-[10px]">
+              Sponsorship Opportunities Available for 2025-2026
+            </p>
+          </div>
         </div>
       </div>
     </SectionReveal>
