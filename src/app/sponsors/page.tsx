@@ -25,7 +25,7 @@ export default function SponsorsPage() {
         
         <div className="relative z-10 mx-auto max-w-6xl px-6 md:px-8 py-20 md:py-32 text-center">
           <h1 className="font-display font-black italic text-5xl md:text-7xl text-white uppercase tracking-normal leading-[0.9] mb-6">
-            Partner <span className="text-lsr-orange">With Us</span>
+            Sponsor <span className="text-lsr-orange">our Organization</span>
           </h1>
           <p className="font-sans text-lg md:text-xl font-bold text-white/70 max-w-2xl mx-auto leading-relaxed">
             Collaborate with UT Austin&apos;s premier collegiate motorsport organization to drive innovation and engineering excellence.
@@ -45,40 +45,47 @@ export default function SponsorsPage() {
         
         {/* Why Partner With LSR? - Credibility Section */}
         <section className="mb-20">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid md:grid-cols-2 gap-12 items-start">
             <div>
-              <h2 className="font-display font-black italic text-3xl md:text-4xl text-white uppercase tracking-normal mb-6">
-                Why Partner With <span className="text-lsr-orange">LSR?</span>
+              <h2 className="font-display font-black italic text-3xl md:text-4xl text-white uppercase tracking-normal mb-8">
+                LSR is worth <span className="text-lsr-orange">your investment</span>
               </h2>
-              <div className="prose prose-invert max-w-none text-white/70">
-                <p className="mb-4 leading-relaxed">
-                  Longhorn Sim Racing is more than a competitive team; we are a student-run, engineering-focused organization at the University of Texas at Austin. Our members come from diverse disciplines including Computer Science, Electrical & Computer Engineering, and Mechanical Engineering.
-                </p>
-                <p className="leading-relaxed">
-                  We blend technical depth in simulation, telemetry, and software systems with real-world engineering management. Partnering with LSR aligns your brand with a passionate talent pipeline and supports the practical application of engineering principles.
-                </p>
+              <div className="space-y-8">
+                <div>
+                  <h3 className="font-sans font-black text-lg text-white uppercase tracking-tight mb-3">Ethos</h3>
+                  <p className="font-sans text-white/70 leading-relaxed">
+                    Longhorn Sim Racing is more than a competitive team; we are a professional, student-run, non-profit dedicated to creating opportunities for career engagement for every one of our members. By drawing talent from our disparate campus community - engineering, business, media, graphic design, and communications - our members apply classroom lectures to the demanding reality of motorsports. By contributing to LSR, you align your brand with a passionate talent pipeline while supporting the practical application of creative, technical, and entrepreneurial principles.
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-sans font-black text-lg text-white uppercase tracking-tight mb-3">Our Promise</h3>
+                  <p className="font-sans text-white/70 leading-relaxed">
+                    We deliver through action and we measure our success through the achievements of our students. As a student organization, LSR’s success is a function of how well we can help our members develop their major-specific skillset and pursue meaningful opportunities. If we were at any other school, this would seem a lofty task, but we’re at the University of Texas at Austin, and the Circuit of the Americas is in our back yard. Both directly and indirectly through our industry connections, students have achieved internships, sat in pitlane at international competitions, driven at autocross events, and competed against other university sim racing drivers.
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white/[0.02] border border-white/10 p-6 flex flex-col items-center text-center hover:border-white/20 transition-colors">
-                <Cpu className="h-8 w-8 text-lsr-orange mb-4" />
-                <h3 className="font-sans font-black text-xs uppercase tracking-widest text-white mb-2">Technical Depth</h3>
-                <p className="text-[10px] text-white/50 leading-relaxed">Advanced simulation & telemetry analysis.</p>
+            <div className="grid gap-6">
+              <div className="bg-white/[0.02] border border-white/10 p-8 flex flex-col h-full hover:border-white/20 transition-colors">
+                <Trophy className="h-10 w-10 text-lsr-orange mb-6" />
+                <h3 className="font-sans font-black text-xl uppercase tracking-widest text-white mb-4">Return on Investment</h3>
+                <p className="text-sm text-white/60 leading-relaxed">
+                  LSR sponsors should expect to be able to see the impact of their contribution, so our board of directors takes care that your impact is well documented.
+                </p>
               </div>
-              <div className="bg-white/[0.02] border border-white/10 p-6 flex flex-col items-center text-center hover:border-white/20 transition-colors">
-                <Users className="h-8 w-8 text-lsr-orange mb-4" />
-                <h3 className="font-sans font-black text-xs uppercase tracking-widest text-white mb-2">Talent Pipeline</h3>
-                <p className="text-[10px] text-white/50 leading-relaxed">Access to motivated engineering students.</p>
+              <div className="bg-white/[0.02] border border-white/10 p-8 flex flex-col h-full hover:border-white/20 transition-colors">
+                <Building2 className="h-10 w-10 text-lsr-orange mb-6" />
+                <h3 className="font-sans font-black text-xl uppercase tracking-widest text-white mb-4">University of Texas Excellence</h3>
+                <p className="text-sm text-white/60 leading-relaxed">
+                  As students at UT, we strive to be the best and the brightest. By sponsoring LSR, you’re empowering students who are dedicated to greatness.
+                </p>
               </div>
-              <div className="bg-white/[0.02] border border-white/10 p-6 flex flex-col items-center text-center hover:border-white/20 transition-colors">
-                <Building2 className="h-8 w-8 text-lsr-orange mb-4" />
-                <h3 className="font-sans font-black text-xs uppercase tracking-widest text-white mb-2">UT Austin</h3>
-                <p className="text-[10px] text-white/50 leading-relaxed">Representing a world-class university.</p>
-              </div>
-              <div className="bg-white/[0.02] border border-white/10 p-6 flex flex-col items-center text-center hover:border-white/20 transition-colors">
-                <Trophy className="h-8 w-8 text-lsr-orange mb-4" />
-                <h3 className="font-sans font-black text-xs uppercase tracking-widest text-white mb-2">Excellence</h3>
-                <p className="text-[10px] text-white/50 leading-relaxed">High performance on and off the track.</p>
+              <div className="bg-white/[0.02] border border-white/10 p-8 flex flex-col h-full hover:border-white/20 transition-colors">
+                <Users className="h-10 w-10 text-lsr-orange mb-6" />
+                <h3 className="font-sans font-black text-xl uppercase tracking-widest text-white mb-4">Motorsports Democratization</h3>
+                <p className="text-sm text-white/60 leading-relaxed">
+                  Since its inception, racing has never been an affordable endeavor; however, the excessive price of entry and enjoyment has fragmented the enthusiast community. Sponsoring LSR reduces the gap between the audience and the track through meaningful volunteering and industry exposure.
+                </p>
               </div>
             </div>
           </div>
@@ -88,7 +95,7 @@ export default function SponsorsPage() {
         <section className="mb-20 border-t border-b border-white/5 py-12">
           <div className="max-w-4xl mx-auto">
             <h2 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-10 text-center">
-              How Partnerships <span className="text-lsr-orange">Work</span>
+              How to <span className="text-lsr-orange">sponsor us</span>
             </h2>
             <div className="grid md:grid-cols-4 gap-8 relative">
               <div className="hidden md:block absolute top-4 left-0 w-full h-px bg-white/10 -z-10" />
@@ -102,19 +109,19 @@ export default function SponsorsPage() {
               <div className="relative flex flex-col items-center text-center">
                 <div className="w-8 h-8 rounded-full bg-lsr-charcoal border border-white/20 text-white/40 font-mono font-bold flex items-center justify-center text-sm mb-4 z-10">2</div>
                 <h3 className="font-sans font-bold text-xs uppercase tracking-widest text-white mb-2">Selection</h3>
-                <p className="text-[10px] text-white/50 leading-relaxed">Choose a partnership level or customize one.</p>
+                <p className="text-[10px] text-white/50 leading-relaxed">Choose a partnership level.</p>
               </div>
 
               <div className="relative flex flex-col items-center text-center">
                 <div className="w-8 h-8 rounded-full bg-lsr-charcoal border border-white/20 text-white/40 font-mono font-bold flex items-center justify-center text-sm mb-4 z-10">3</div>
                 <h3 className="font-sans font-bold text-xs uppercase tracking-widest text-white mb-2">Agreement</h3>
-                <p className="text-[10px] text-white/50 leading-relaxed">Tax documentation and formal agreement.</p>
+                <p className="text-[10px] text-white/50 leading-relaxed">Tax documentation and formal contract.</p>
               </div>
 
               <div className="relative flex flex-col items-center text-center">
                 <div className="w-8 h-8 rounded-full bg-lsr-charcoal border border-white/20 text-white/40 font-mono font-bold flex items-center justify-center text-sm mb-4 z-10">4</div>
                 <h3 className="font-sans font-bold text-xs uppercase tracking-widest text-white mb-2">Engagement</h3>
-                <p className="text-[10px] text-white/50 leading-relaxed">Branding integration and partnership activation.</p>
+                <p className="text-[10px] text-white/50 leading-relaxed">Branding integration and sponsorship activation.</p>
               </div>
             </div>
           </div>
@@ -124,7 +131,7 @@ export default function SponsorsPage() {
         <section id="partnership-options" className="mb-20">
           <div className="text-center mb-12">
             <h2 className="font-display font-black italic text-4xl md:text-5xl text-white uppercase tracking-normal">
-              Sponsor <span className="text-lsr-orange">Benefits</span>
+              Sponsorship <span className="text-lsr-orange">Packages</span>
             </h2>
             <p className="font-sans font-bold text-white/40 uppercase tracking-[0.3em] text-xs mt-4">Sponsorship at any level includes all items up through that level</p>
           </div>
@@ -252,6 +259,13 @@ export default function SponsorsPage() {
               </thead>
               <tbody className="divide-y divide-white/5 font-sans text-white/80">
                 <tr className="hover:bg-white/[0.02]">
+                  <td className="p-4 font-bold">Tax-Deductible Contribution</td>
+                  <td className="p-4 text-center text-lsr-orange"><Check className="h-4 w-4 mx-auto" /></td>
+                  <td className="p-4 text-center text-lsr-orange"><Check className="h-4 w-4 mx-auto" /></td>
+                  <td className="p-4 text-center text-lsr-orange"><Check className="h-4 w-4 mx-auto" /></td>
+                  <td className="p-4 text-center text-lsr-orange"><Check className="h-4 w-4 mx-auto" /></td>
+                </tr>
+                <tr className="hover:bg-white/[0.02]">
                   <td className="p-4 font-bold">Social Media Shout-out</td>
                   <td className="p-4 text-center text-lsr-orange"><Check className="h-4 w-4 mx-auto" /></td>
                   <td className="p-4 text-center text-lsr-orange"><Check className="h-4 w-4 mx-auto" /></td>
@@ -306,8 +320,8 @@ export default function SponsorsPage() {
         </section>
 
         {/* 501c3 & Logistics */}
-        <section className="grid md:grid-cols-2 gap-12 mb-20">
-          <div className="border border-white/10 bg-white/[0.02] p-8 md:p-10">
+        <section className="grid md:grid-cols-2 gap-6 md:gap-12 mb-20">
+          <div className="border border-white/10 bg-white/[0.02] p-6 md:p-10 overflow-hidden">
               <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-6 border-b border-white/10 pb-4">
                 Tax <span className="text-lsr-orange">Exemption</span>
               </h3>
@@ -327,22 +341,22 @@ export default function SponsorsPage() {
               </div>
           </div>
 
-          <div className="border border-white/10 bg-white/[0.02] p-8 md:p-10">
+          <div className="border border-white/10 bg-white/[0.02] p-6 md:p-10 overflow-hidden">
             <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-6 border-b border-white/10 pb-4">
               Deadlines & <span className="text-lsr-orange">Specs</span>
             </h3>
             <div className="space-y-6 font-sans text-sm">
-              <div className="flex gap-4">
-                <div className="font-bold text-lsr-orange uppercase tracking-widest text-xs min-w-[80px]">July 31st</div>
+              <div className="flex items-start gap-4">
+                <div className="font-bold text-lsr-orange uppercase tracking-widest text-xs min-w-[80px] pt-0.5 shrink-0">July 31st</div>
                 <div className="text-white/70">To meet printing deadlines, please pledge by this date.</div>
               </div>
-              <div className="flex gap-4">
-                <div className="font-bold text-lsr-orange uppercase tracking-widest text-xs min-w-[80px]">Format</div>
+              <div className="flex items-start gap-4">
+                <div className="font-bold text-lsr-orange uppercase tracking-widest text-xs min-w-[80px] pt-0.5 shrink-0">Format</div>
                 <div className="text-white/70">Logos must be submitted in <span className="text-white font-bold">PNG</span> or <span className="text-white font-bold">JPG</span> format and be a high resolution image.</div>
               </div>
-              <div className="flex gap-4">
-                <div className="font-bold text-lsr-orange uppercase tracking-widest text-xs min-w-[80px]">Email</div>
-                <div className="text-white/70">Submit logos to <span className="text-white font-bold">{outreachEmail}</span>.</div>
+              <div className="flex items-start gap-4">
+                <div className="font-bold text-lsr-orange uppercase tracking-widest text-xs min-w-[80px] pt-0.5 shrink-0">Email</div>
+                <div className="text-white/70">Submit logos to <span className="text-white font-bold break-all">{outreachEmail}</span>.</div>
               </div>
               <p className="text-[10px] text-white/40 italic">If we can’t work with your logo, we may not be able to include it.</p>
             </div>
@@ -362,6 +376,16 @@ export default function SponsorsPage() {
           </Button>
         </div>
 
+      </div>
+
+      {/* Floating Download Button */}
+      <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-1000 fill-mode-both">
+        <Button asChild className="rounded-full shadow-2xl bg-lsr-orange hover:bg-white text-white hover:text-lsr-charcoal font-black uppercase tracking-widest text-[10px] h-12 px-6 border-2 border-transparent hover:border-lsr-orange transition-all">
+          <Link href="/LSR_SPONSOR_BENEFITS.pdf" target="_blank" download>
+            <Download className="mr-2 h-4 w-4" />
+            Download Packet
+          </Link>
+        </Button>
       </div>
     </main>
   )

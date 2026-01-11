@@ -151,7 +151,7 @@ export function UserMenuClient({
           }}
           className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-red-600 focus:text-white cursor-pointer"
         >
-          Terminate Session
+          Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

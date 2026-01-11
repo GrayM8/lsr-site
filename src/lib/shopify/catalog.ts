@@ -6,7 +6,7 @@ import { Product } from './types';
 export async function getProducts(): Promise<Product[]> {
   const { body } = await shopifyFetch<any>({
     query: PRODUCTS_QUERY,
-    revalidate: 900,
+    revalidate: 1,
   });
 
   return removeEdgesAndNodes(body.products).map(mapProduct);
@@ -16,7 +16,7 @@ export async function getProductByHandle(handle: string): Promise<Product | null
   const { body } = await shopifyFetch<any>({
     query: PRODUCT_BY_HANDLE_QUERY,
     variables: { handle },
-    revalidate: 900,
+    revalidate: 1,
   });
 
   if (!body.product) {
