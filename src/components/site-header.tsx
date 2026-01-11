@@ -1,6 +1,8 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
-import UserMenu from "@/components/user-menu"
+import { UserMenuClient } from "@/components/user-menu-client"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,80 +14,124 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { ChevronDown, Menu } from "lucide-react"
+import { usePathname } from "next/navigation"
+import { User } from "@prisma/client"
 
-export function SiteHeader() {
+export function SiteHeader({ user, roles }: { user: User | null, roles: string[] }) {
+  const pathname = usePathname()
+  const isHome = pathname === "/"
+
   return (
-    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur border-b">
-      <nav className="mx-auto max-w-6xl flex h-14 items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2">
-          <Image
-            src="/brand/lsr-mark.webp"
-            alt="LSR logo"
-            width={28}
-            height={28}
-            className="rounded-sm"
-            priority
-          />
-          <span className="hidden sm:inline font-display text-xl leading-none">Longhorn Sim Racing</span>
+    <header className="sticky top-0 z-50 bg-lsr-charcoal/95 backdrop-blur-md border-b border-white/5">
+      <nav className="mx-auto max-w-6xl flex h-20 items-center justify-between px-6">
+        <Link href="/" className="flex items-center gap-4 group">
+          {/* Logo Image: Always visible */}
+          <div className="relative">
+            <Image
+              src="/brand/logos/white_logo2.png"
+              alt="LSR logo"
+              width={64}
+              height={64}
+              className="rounded-none transition-transform group-hover:scale-110 duration-500"
+              priority
+            />
+          </div>
+          
+          {/* Brand Text: Hidden on Home, Hidden on Mobile (non-home), Visible on Desktop (non-home) */}
+          <div className={`flex flex-col ${isHome ? 'hidden' : 'hidden sm:flex'}`}>
+            <span className="font-display font-black italic text-lg sm:text-2xl tracking-normal leading-none uppercase text-white whitespace-nowrap">
+              Longhorn Sim Racing
+            </span>
+            <span className="font-sans font-bold text-[7px] sm:text-[8px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-white/50 leading-none mt-1 whitespace-nowrap">
+              University of Texas at Austin
+            </span>
+          </div>
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-6">
           {/* Desktop navigation links */}
-          <div className="hidden md:flex items-center gap-4 text-sm">
+          <div className="hidden md:flex items-center gap-8 font-sans font-bold text-[10px] uppercase tracking-[0.25em] text-white/70">
+            <Link href="/news" className="hover:text-lsr-orange transition-colors relative group/link">
+              News
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-lsr-orange transition-all group-hover/link:w-full" />
+            </Link>
+            <Link href="/events" className="hover:text-lsr-orange transition-colors relative group/link">
+              Events
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-lsr-orange transition-all group-hover/link:w-full" />
+            </Link>
+            <Link href="/drivers" className="hover:text-lsr-orange transition-colors relative group/link">
+              Drivers
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-lsr-orange transition-all group-hover/link:w-full" />
+            </Link>
+            <Link href="/shop" className="hover:text-lsr-orange transition-colors relative group/link">
+              Merch
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-lsr-orange transition-all group-hover/link:w-full" />
+            </Link>
+            <Link href="/lone-star-cup" className="hover:text-lsr-orange transition-colors relative group/link text-lsr-orange/80">
+              LSC
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-lsr-orange transition-all group-hover/link:w-full" />
+            </Link>
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-1">
-                <span>Drivers</span>
-                <ChevronDown className="h-4 w-4" />
+              <DropdownMenuTrigger className="flex items-center gap-1.5 hover:text-lsr-orange transition-colors outline-none group/more">
+                <span>More</span>
+                <ChevronDown className="h-3 w-3 opacity-50 group-hover/more:opacity-100 transition-opacity" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem asChild>
-                  <Link href="/drivers">All drivers</Link>
+              <DropdownMenuContent align="end" className="bg-lsr-charcoal border-white/10 rounded-none p-2 min-w-[160px]">
+                <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
+                  <Link href="/about" className="font-sans font-bold text-[9px] uppercase tracking-widest py-2">About</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/series/lone-star-cup">Lone Star Cup</Link>
+                <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
+                  <Link href="/gallery" className="font-sans font-bold text-[9px] uppercase tracking-widest py-2">Gallery</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
+                  <Link href="/sponsors" className="font-sans font-bold text-[9px] uppercase tracking-widest py-2">Sponsors</Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Link href="/events">Events</Link>
-            <Link href="/gallery">Gallery</Link>
-            <Link href="/news">News</Link>
           </div>
 
-          {/* User menu is always visible */}
-          <div className="ml-2">
-            <UserMenu />
-          </div>
+          <div className="h-6 w-px bg-white/10 hidden md:block" />
 
-          {/* Mobile hamburger menu */}
-          <div className="md:hidden">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-6 w-6" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger>Drivers</DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent>
-                    <DropdownMenuItem asChild>
-                      <Link href="/drivers">All drivers</Link>
-                    </DropdownMenuItem>
-                                        <DropdownMenuItem asChild>
-                                          <Link href="/series/lone-star-cup">Lone Star Cup</Link>
-                                        </DropdownMenuItem>                  </DropdownMenuSubContent>
-                </DropdownMenuSub>
-                <DropdownMenuItem asChild>
-                  <Link href="/events">Events</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/gallery">Gallery</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/news">News</Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          {/* User menu */}
+          <div className="flex items-center gap-4">
+            <UserMenuClient user={user} roles={roles} />
+            
+            {/* Mobile hamburger menu */}
+            <div className="md:hidden">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="hover:bg-white/5 rounded-none">
+                    <Menu className="h-6 w-6" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-lsr-charcoal border-white/10 rounded-none w-56 p-2">
+                  <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
+                    <Link href="/about" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3">About</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
+                    <Link href="/drivers" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3">Drivers</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
+                    <Link href="/events" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3">Events</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
+                    <Link href="/shop" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3">Merch</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
+                    <Link href="/gallery" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3">Gallery</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
+                    <Link href="/news" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3">News</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
+                    <Link href="/sponsors" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3">Sponsors</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
+                    <Link href="/lone-star-cup" className="font-sans font-bold text-[10px] uppercase tracking-widest py-3 text-lsr-orange">LSC</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
       </nav>

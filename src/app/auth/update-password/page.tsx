@@ -101,20 +101,23 @@ export default function UpdatePasswordPage() {
   }
 
   return (
-    <div className="container flex h-screen w-screen flex-col items-center justify-center">
-      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-        <div className="flex flex-col space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Reset Password
+    <div className="flex h-screen w-screen flex-col items-center justify-center bg-lsr-charcoal text-white">
+      <div className="mx-auto flex w-full flex-col justify-center space-y-8 sm:w-[450px] border border-white/5 bg-white/[0.03] p-10 rounded-none shadow-2xl relative overflow-hidden">
+        {/* Top accent line */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-lsr-orange to-transparent opacity-50" />
+
+        <div className="flex flex-col space-y-4 text-center">
+          <h1 className="font-display font-black italic text-3xl text-white uppercase tracking-normal">
+            Reset <span className="text-lsr-orange">Password</span>
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Enter your new password below.
+          <p className="font-sans text-sm text-white/50 leading-relaxed px-4">
+            Enter your new password below. Make it secure.
           </p>
         </div>
 
-        <form onSubmit={onSubmit} className="grid gap-4">
+        <form onSubmit={onSubmit} className="grid gap-6">
           <div className="grid gap-2">
-            <Label htmlFor="password">New Password</Label>
+            <Label htmlFor="password" className="font-sans font-bold text-[10px] text-white/40 uppercase tracking-[0.2em] pl-1">New Password</Label>
             <Input
               id="password"
               type="password"
@@ -122,14 +125,15 @@ export default function UpdatePasswordPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              className="rounded-none bg-white/5 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-1 focus-visible:ring-lsr-orange focus-visible:border-lsr-orange h-12"
             />
           </div>
           {error && (
-            <div className="text-sm text-red-500">
+            <div className="text-sm text-red-500 font-bold uppercase tracking-wide">
               {error}
             </div>
           )}
-          <Button disabled={pending}>
+          <Button disabled={pending} className="rounded-none bg-lsr-orange text-white hover:bg-white hover:text-lsr-charcoal font-bold uppercase tracking-widest h-12 transition-all">
             {pending ? "Updating..." : "Update Password"}
           </Button>
         </form>

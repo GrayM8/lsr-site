@@ -1,39 +1,43 @@
 import "./globals.css"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { ThemeProvider } from "@/components/theme-provider"
-import { Inter, Bebas_Neue } from "next/font/google"
+import { Montserrat, Kanit } from "next/font/google"
 import { SiteHeader } from "@/components/site-header"
 import { Analytics } from "@vercel/analytics/react"
 import React from "react";
 import { SiteFooter } from "@/components/site-footer"
 import { LiveBanner } from "@/components/live-banner";
-import ReimaginedGlobalBanner from "@/components/reimagined-global-banner";
+import { getCachedSessionUser } from "@/server/auth/cached-session";
 
-const inter = Inter({
+const montserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-sans", // for body text
   display: "swap",
 })
 
-const bebas = Bebas_Neue({
+const kanit = Kanit({
   subsets: ["latin"],
-  weight: "400",
+  weight: ["400", "500", "600", "700", "800", "900"],
+  style: ["normal", "italic"],
   variable: "--font-display", // for headings
   display: "swap",
 })
+
+export const viewport: Viewport = {
+  colorScheme: "dark",
+  themeColor: "#262626",
+}
 
 export const metadata: Metadata = {
   title: { default: "Longhorn Sim Racing", template: "%s · LSR" },
   description: "UT Austin Longhorn Sim Racing Club",
   metadataBase: new URL(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000"),
-  colorScheme: "dark",
-  themeColor: "#262626", // lsr-charcoal
   openGraph: {
     type: "website",
     siteName: "Longhorn Sim Racing",
     images: [
       {
-        url: "/brand/og.jpeg",
+        url: "/api/og",
         width: 1200,
         height: 630,
         alt: "Longhorn Sim Racing",
@@ -44,16 +48,12 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     images: [
       {
-        url: "/brand/og.jpeg",
+        url: "/api/og",
         width: 1200,
         height: 630,
         alt: "Longhorn Sim Racing",
       },
     ],
-  },
-  icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-icon.png",
   },
   alternates: {
     types: {
@@ -62,19 +62,20 @@ export const metadata: Metadata = {
   }
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const { user, roles } = await getCachedSessionUser();
+
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${bebas.variable} h-full dark`}
+      className={`${montserrat.variable} ${kanit.variable} h-full dark`}
       style={{ colorScheme: "dark" }}
       suppressHydrationWarning
     >
     <body className="min-h-dvh flex flex-col font-sans">
     <ThemeProvider>
-      <ReimaginedGlobalBanner />
       <LiveBanner />
-      <SiteHeader />
+      <SiteHeader user={user} roles={roles} />
         <main className="flex-1">{children}</main>
       <SiteFooter />
     </ThemeProvider>

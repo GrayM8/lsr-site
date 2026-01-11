@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useTransition } from 'react';
+import { useRef, useState, useTransition, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { createImage, deleteImage, updateImageOrder } from '@/app/admin/gallery/actions';
 import { GalleryImage } from '@prisma/client';
@@ -144,6 +144,12 @@ function SortableGalleryItem({
 // --- Main Client Component ---
 export function GalleryAdminClient({ images: initialImages }: { images: GalleryImage[] }) {
   const [images, setImages] = useState(initialImages);
+  
+  // Sync state when props change (e.g. after server action revalidation)
+  useEffect(() => {
+    setImages(initialImages);
+  }, [initialImages]);
+
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);

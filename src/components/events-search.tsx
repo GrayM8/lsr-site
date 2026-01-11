@@ -22,8 +22,8 @@ export function EventsSearch({ q }: { q: string }) {
   return (
     <Input
       type="search"
-      placeholder="Search events..."
-      className="md:w-[250px] bg-white/5 border-white/10 placeholder:text-white/60"
+      placeholder="SEARCH EVENTS..."
+      className="md:w-[250px] rounded-none border-white/10 bg-white/5 font-sans font-bold text-[10px] uppercase tracking-widest focus:border-lsr-orange focus:ring-lsr-orange placeholder:text-white/30 transition-all"
       defaultValue={q}
       onChange={(e) => handleSearch(e.target.value)}
     />
