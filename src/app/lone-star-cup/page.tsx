@@ -49,7 +49,7 @@ export default async function LoneStarCupPage() {
         </div>
 
         <div className="border border-white/10 bg-white/[0.02] p-1">
-          <Image src="/images/LSC26Header.png" alt="LSC Landscape Banner" width={1200} height={400} className="w-full h-auto object-cover" />
+          <Image src="/images/LSC26Header2.png" alt="LSC Landscape Banner" width={1200} height={400} className="w-full h-auto object-cover" />
         </div>
 
         <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
@@ -60,7 +60,11 @@ export default async function LoneStarCupPage() {
               </h2>
               <div className="prose prose-invert prose-p:font-sans prose-p:text-white/70 prose-p:leading-relaxed max-w-none">
                 <p>
-                  The Lone Star Cup is meant as an introduction to the exciting, competitive world of Sim Racing. Designed as a welcoming seed for aspiring racers, this league brings together members of all experience levels, from seasoned veterans to those taking their very first turn on a track. Participation in the league involves an entry fee of $20 with our primary goal being to foster a community built on sportsmanship and shared passion for the art of racing. You’ll find an environment where learning is encouraged and experienced drivers are willing to help newcomers grow. This is more than just a race; it’s a friendly, yet competitive, foundation for your sim racing journey.
+                  The Lone Star Cup, not only an introduction to the competitive world of Sim Racing but also a platform to show your skills. This league brings together members of all experience levels, from season veterans to those taking their first turns on a track. Participation in this league involves an entry fee of $10 ($5 if returning league participant) and is meant to help build a community built on sportsmanship and shared passion for the art of racing. You will go head to head in an environment that is built on encouragement and willingness to help newcomers.
+                </p>
+                <p>&nbsp;</p>
+                <p>
+                  This season we will take you around 10 tracks, with the final racing being at the Nurburgring or for many The Green Hell. This season we are doing something new with a "Mystery Race" where the track won't be revealed until the DAY OF the race (4/04). Good luck and happy racing.
                 </p>
               </div>
             </section>
