@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { DriversFilters } from '@/components/drivers-filters';
 import { DriversSearch } from '@/components/drivers-search';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +24,8 @@ export default async function DriversIndexPage({
     .map(r => r.toString().toLowerCase())
     .filter((r): r is RoleCode => ALL_ROLES.includes(r as RoleCode));
 
-  const drivers = await prisma.user.findMany({
+  // Fetch all matching drivers first
+  const rawDrivers = await prisma.user.findMany({
     where: {
       status: { not: 'deleted' },
       ...(q
@@ -38,8 +40,26 @@ export default async function DriversIndexPage({
         ? { roles: { some: { role: { key: { in: selectedRoles } } } } }
         : {}),
     },
-    orderBy: [{ iRating: { sort: 'desc', nulls: 'last' } }, { displayName: 'asc' }],
     include: { roles: { include: { role: true } } },
+  });
+
+  // Calculate All Time Points
+  const driverIds = rawDrivers.map(d => d.id);
+  const pointsData = await prisma.entry.groupBy({
+      by: ['userId'],
+      _sum: { totalPoints: true },
+      where: { userId: { in: driverIds } }
+  });
+  
+  const pointsMap = new Map(pointsData.map(p => [p.userId, p._sum.totalPoints || 0]));
+  
+  // Sort by All Time Points Descending
+  const drivers = rawDrivers.map(d => ({
+      ...d,
+      allTimePoints: pointsMap.get(d.id) || 0
+  })).sort((a, b) => {
+      if (b.allTimePoints !== a.allTimePoints) return b.allTimePoints - a.allTimePoints;
+      return a.displayName.localeCompare(b.displayName);
   });
 
   return (
@@ -93,15 +113,23 @@ export default async function DriversIndexPage({
           <div className="md:col-span-2">
             <div className="border border-white/10 bg-lsr-charcoal overflow-hidden">
               <div className="overflow-x-auto">
+                <TooltipProvider>
                 <table className="w-full text-sm min-w-[500px] md:min-w-full">
                   <thead className="bg-white/5 border-b border-white/10">
                 <tr>
                   <th className="px-4 py-4 text-left font-sans font-black uppercase tracking-widest text-[9px] text-white/40 w-12">Pos</th>
                   <th className="px-4 py-4 text-left font-sans font-black uppercase tracking-widest text-[9px] text-white/40">Driver</th>
-                  <th className="px-4 py-4 text-center font-sans font-black uppercase tracking-widest text-[9px] text-white/40 w-24 md:w-32 hidden sm:table-cell">
-                    Pts
+                  <th className="px-4 py-4 text-center font-sans font-black uppercase tracking-widest text-[9px] text-white/40 w-24 md:w-32">
+                    Points
                   </th>
-                  <th className="px-4 py-4 text-center font-sans font-black uppercase tracking-widest text-[9px] text-white/40 w-24 md:w-32">iRating</th>
+                  <th className="px-4 py-4 text-center font-sans font-black uppercase tracking-widest text-[9px] text-white/40 w-24 md:w-32 hidden sm:table-cell">
+                      <Tooltip>
+                          <TooltipTrigger className="cursor-help decoration-dashed underline underline-offset-2">Events</TooltipTrigger>
+                          <TooltipContent>
+                              <p>Event attendance tracking coming soon</p>
+                          </TooltipContent>
+                      </Tooltip>
+                  </th>
                 </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
@@ -163,10 +191,12 @@ export default async function DriversIndexPage({
                           </div>
                         </Link>
                       </td>
-                      <td className="px-4 py-3 text-center font-display font-bold text-white/30 text-lg hidden sm:table-cell">{'—'}</td>
-                      <td className="px-4 py-3 text-center">
-                        <span className="font-display font-bold italic text-white text-lg tracking-tight">
-                          {d.iRating ?? '—'}
+                      <td className="px-4 py-3 text-center font-display font-bold text-white text-lg sm:text-xl">
+                          {d.allTimePoints > 0 ? d.allTimePoints : <span className="text-white/20">—</span>}
+                      </td>
+                      <td className="px-4 py-3 text-center hidden sm:table-cell">
+                        <span className="font-display font-bold italic text-white/20 text-lg tracking-tight">
+                          —
                         </span>
                       </td>
                     </tr>
@@ -174,6 +204,7 @@ export default async function DriversIndexPage({
                 })}
                 </tbody>
               </table>
+              </TooltipProvider>
             </div>
           </div>
         </div>
