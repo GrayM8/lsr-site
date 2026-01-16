@@ -343,6 +343,7 @@ export async function ingestUpload(uploadId: string) {
                     totalTime: res.TotalTime,
                     lapsCompleted: res.LapCount ?? 0, 
                     status: res.Disqualified ? "DSQ" : "FINISHED",
+                    gap: res.Gap,
                     
                     points: points, // Calculated Points
                     penaltyTime: res.PenaltyTime,

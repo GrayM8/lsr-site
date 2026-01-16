@@ -1,15 +1,14 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { prisma } from '@/server/db';
 import { getOwnerStatus } from '@/lib/owner';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { BrandIcon, type SimpleIcon } from '@/components/brand-icon';
 import { siInstagram, siYoutube, siTwitch } from 'simple-icons/icons';
 import { Globe, type LucideIcon } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { getDriverStats } from "@/server/queries/drivers";
+import { DriverHistoryTable } from "@/components/driver-history-table";
 
 export const revalidate = 60;
 
@@ -27,11 +26,11 @@ export default async function DriverProfilePage({
 }: { params: Promise<{ handle: string }> }) {
   const { handle } = await params;
 
-  const user = await prisma.user.findUnique({
-    where: { handle },
-    include: { roles: { include: { role: true } } },
-  });
-  if (!user || user.status === 'deleted') return notFound();
+  const stats = await getDriverStats(handle);
+  if (!stats) return notFound();
+
+  const { user, currentSeason, allTime, history, eventHistory } = stats;
+  if (user.status === 'deleted') return notFound();
 
   const { isOwner } = await getOwnerStatus(user.id);
 
@@ -52,6 +51,8 @@ export default async function DriverProfilePage({
   const componentIconSocials: Record<string, LucideIcon> = {
     website: Globe,
   };
+
+  const validSocials = Object.entries(socials).filter(([_, val]) => !!val);
 
   return (
     <main className="bg-lsr-charcoal text-white min-h-screen">
@@ -131,26 +132,15 @@ export default async function DriverProfilePage({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Left Column: Stats & Socials */}
           <div className="lg:col-span-1 space-y-12">
-            <div>
-              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-6 border-b border-white/10 pb-4">
-                Driver <span className="text-lsr-orange">Stats</span>
-              </h3>
-              <div className="grid grid-cols-2 gap-4">
-                <StatCard label="iRating" value={user.iRating ?? 'N/A'} />
-                <StatCard label="Class" value={user.gradYear ? `'${user.gradYear.toString().slice(-2)}` : 'N/A'} />
-                <div className="col-span-2">
-                  <StatCard label="Major" value={<span className="text-lg not-italic font-sans font-bold uppercase tracking-tight">{user.major ?? 'Undeclared'}</span>} />
-                </div>
-              </div>
-            </div>
-
+            
+            {/* 1. Comms Links (Top) */}
             <div>
               <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-6 border-b border-white/10 pb-4">
                 Comms <span className="text-lsr-orange">Links</span>
               </h3>
               <div className="grid grid-cols-4 gap-4">
-                {Object.entries(socials).length > 0 ? (
-                  Object.entries(socials).map(([key, value]) => {
+                {validSocials.length > 0 ? (
+                  validSocials.map(([key, value]) => {
                     if (!value) return null;
                     const IconData = simpleIconSocials[key];
                     const IconComponent = componentIconSocials[key];
@@ -172,12 +162,60 @@ export default async function DriverProfilePage({
                     );
                   })
                 ) : (
-                  <div className="col-span-4 border border-white/10 bg-white/[0.02] p-4 text-center">
-                    <span className="font-sans font-bold text-[10px] uppercase tracking-widest text-white/30">No frequencies established</span>
+                  <div className="col-span-4 border border-white/10 bg-white/[0.02] p-8 text-center">
+                    <span className="font-sans font-bold text-[10px] uppercase tracking-widest text-white/30 block mb-1">No Links Yet</span>
+                    <p className="font-sans text-[8px] text-white/10 uppercase tracking-widest">Communications silence</p>
                   </div>
                 )}
               </div>
             </div>
+
+            {/* 2. Driver Info (Below Comms) */}
+            <div>
+              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-6 border-b border-white/10 pb-4">
+                Driver <span className="text-lsr-orange">Info</span>
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                <StatCard label="iRating" value={user.iRating ?? 'N/A'} />
+                <StatCard label="Class" value={user.gradYear ? `'${user.gradYear.toString().slice(-2)}` : 'N/A'} />
+                <div className="col-span-2">
+                  <StatCard label="Major" value={<span className="text-lg not-italic font-sans font-bold uppercase tracking-tight">{user.major ?? 'Undeclared'}</span>} />
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Stats (Current & Career) */}
+            <div className="space-y-12">
+                {/* Current Season Stats (if active) */}
+                {currentSeason && (
+                <div>
+                    <h3 className="font-display font-black italic text-xl text-white uppercase tracking-normal mb-6 border-b border-white/10 pb-4">
+                    {currentSeason.name} <span className="text-lsr-orange">Stats</span>
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                    <StatCard label="Points" value={currentSeason.points} />
+                    <StatCard label="Top 10s" value={currentSeason.top10} />
+                    </div>
+                </div>
+                )}
+
+                {/* Career Stats */}
+                <div>
+                <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-6 border-b border-white/10 pb-4">
+                    Career <span className="text-lsr-orange">Stats</span>
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                    <StatCard label="Starts" value={allTime.starts} />
+                    <StatCard label="Wins" value={allTime.wins} />
+                    <StatCard label="Podiums" value={allTime.podiums} />
+                    <StatCard label="Top 10s" value={allTime.top10} />
+                    <div className="col-span-2">
+                        <StatCard label="Total Points" value={allTime.points} />
+                    </div>
+                </div>
+                </div>
+            </div>
+
           </div>
 
           {/* Right Column: Bio & History */}
@@ -193,17 +231,54 @@ export default async function DriverProfilePage({
 
             <div>
               <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-6 border-b border-white/10 pb-4">
-                Recent <span className="text-lsr-orange">Activity</span>
+                Race <span className="text-lsr-orange">History</span>
               </h3>
-              <div className="border border-white/10 bg-white/[0.02] p-8 text-center">
-                <p className="font-sans font-bold text-white/40 uppercase tracking-widest text-xs mb-2">Telemetry Offline</p>
-                <p className="font-sans text-[10px] text-white/20 uppercase tracking-widest">Event history integration pending</p>
-              </div>
+              {history.length > 0 ? (
+                  <DriverHistoryTable history={history} />
+              ) : (
+                  <div className="border border-white/10 bg-white/[0.02] p-8 text-center">
+                    <p className="font-sans font-bold text-white/40 uppercase tracking-widest text-xs">No race history available</p>
+                  </div>
+              )}
             </div>
+
+            {/* Event History */}
+            <div>
+              <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-6 border-b border-white/10 pb-4">
+                Event <span className="text-lsr-orange">History</span>
+              </h3>
+              {eventHistory.length > 0 ? (
+                  <div className="border border-white/10 bg-white/[0.02]">
+                      {eventHistory.map((attendance) => (
+                          <div key={attendance.id} className="flex items-center justify-between p-4 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
+                              <div>
+                                  <div className="font-sans font-bold text-sm text-white uppercase tracking-tight">{attendance.event.title}</div>
+                                  <div className="font-mono text-[10px] text-white/40">{new Date(attendance.event.startsAtUtc).toLocaleDateString()}</div>
+                              </div>
+                              <div className="text-right">
+                                  <span className="inline-block border border-white/10 px-2 py-1 text-[9px] font-bold uppercase tracking-widest text-white/60">
+                                      Attended
+                                  </span>
+                              </div>
+                          </div>
+                      ))}
+                  </div>
+              ) : (
+                  <div className="border border-white/10 bg-white/[0.02] p-8 text-center">
+                    <p className="font-sans font-bold text-white/40 uppercase tracking-widest text-xs">No event attendance recorded</p>
+                  </div>
+              )}
+            </div>
+
+            {/* Coming Soon */}
+            <div className="border border-dashed border-white/10 bg-white/[0.01] p-12 text-center opacity-50 hover:opacity-100 transition-opacity">
+                <h4 className="font-display font-black italic text-xl text-white/40 uppercase tracking-normal mb-2">More Stats Coming Soon</h4>
+                <p className="font-sans text-[10px] text-white/20 uppercase tracking-widest">Analysis modules under development</p>
+            </div>
+
           </div>
         </div>
       </div>
     </main>
   );
 }
-
