@@ -817,6 +817,7 @@ model RaceResult {
   
   // New fields from "Result"
   points         Int?
+  totalCuts      Int?
   penaltyTime    Int?
   lapPenalty     Int?
   isDisqualified Boolean @default(false)

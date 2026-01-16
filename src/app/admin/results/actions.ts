@@ -395,10 +395,20 @@ export async function ingestUpload(uploadId: string) {
             });
         }
         
+        // Backfill lapsCompleted and totalCuts in RaceResult if needed
+        const driverCuts = new Map<string, number>();
+        for (const lap of lapsToCreate) {
+            const currentCuts = driverCuts.get(lap.participantId) || 0;
+            driverCuts.set(lap.participantId, currentCuts + (lap.cuts || 0));
+        }
+
         for (const [pid, count] of driverLapCounts) {
             await tx.raceResult.updateMany({
                 where: { sessionId: session.id, participantId: pid },
-                data: { lapsCompleted: count }
+                data: { 
+                    lapsCompleted: count,
+                    totalCuts: driverCuts.get(pid) || 0
+                }
             });
         }
     }

@@ -28,17 +28,16 @@ export function ResultsTable({ results }: { results: ResultWithParticipant[] }) 
   };
 
   const winnerTime = results[0]?.totalTime ?? 0;
+  const winnerLaps = results[0]?.lapsCompleted ?? 0;
 
-  const formatGap = (totalTime: number | null, lapsCompleted: number, winnerLaps: number) => {
+  const formatGap = (totalTime: number | null, lapsCompleted: number) => {
       if (!totalTime) return "-";
       if (lapsCompleted < winnerLaps) {
           return `+${winnerLaps - lapsCompleted} Laps`;
       }
       const gap = totalTime - winnerTime;
-      return gap === 0 ? "-" : `+${(gap / 1000).toFixed(3)}s`;
+      return gap === 0 ? "Winner" : `+${(gap / 1000).toFixed(3)}s`;
   }
-
-  const winnerLaps = results[0]?.lapsCompleted ?? 0;
 
   return (
     <div className="border border-white/10 bg-black/40">
@@ -48,9 +47,11 @@ export function ResultsTable({ results }: { results: ResultWithParticipant[] }) 
             <TableHead className="w-12 text-center text-[10px] font-black uppercase tracking-widest text-white/50">Pos</TableHead>
             <TableHead className="text-[10px] font-black uppercase tracking-widest text-white/50">Driver</TableHead>
             <TableHead className="text-center text-[10px] font-black uppercase tracking-widest text-white/50 hidden md:table-cell">Car</TableHead>
-            <TableHead className="text-right text-[10px] font-black uppercase tracking-widest text-white/50">Best Lap</TableHead>
-            <TableHead className="text-right text-[10px] font-black uppercase tracking-widest text-white/50">Gap</TableHead>
             <TableHead className="text-center text-[10px] font-black uppercase tracking-widest text-white/50">Laps</TableHead>
+            <TableHead className="text-right text-[10px] font-black uppercase tracking-widest text-white/50">Total Time</TableHead>
+            <TableHead className="text-right text-[10px] font-black uppercase tracking-widest text-white/50">Gap</TableHead>
+            <TableHead className="text-right text-[10px] font-black uppercase tracking-widest text-white/50">Best Lap</TableHead>
+            <TableHead className="text-center text-[10px] font-black uppercase tracking-widest text-white/50">Cuts</TableHead>
             <TableHead className="text-center text-[10px] font-black uppercase tracking-widest text-white/50">Pts</TableHead>
           </TableRow>
         </TableHeader>
@@ -104,11 +105,15 @@ export function ResultsTable({ results }: { results: ResultWithParticipant[] }) 
                         </div>
                     )}
                 </TableCell>
-                <TableCell className="text-right font-mono text-xs text-lsr-orange">{formatTime(result.bestLapTime)}</TableCell>
-                <TableCell className="text-right font-mono text-xs text-white/60">
-                    {formatGap(result.totalTime, result.lapsCompleted, winnerLaps)}
-                </TableCell>
                 <TableCell className="text-center font-mono text-xs text-white/60">{result.lapsCompleted}</TableCell>
+                <TableCell className="text-right font-mono text-xs text-white/80">{formatTime(result.totalTime)}</TableCell>
+                <TableCell className="text-right font-mono text-xs text-white/40 italic">
+                    {formatGap(result.totalTime, result.lapsCompleted)}
+                </TableCell>
+                <TableCell className="text-right font-mono text-xs text-lsr-orange">{formatTime(result.bestLapTime)}</TableCell>
+                <TableCell className={`text-center font-mono text-xs ${result.totalCuts && result.totalCuts > 0 ? 'text-red-400' : 'text-white/40'}`}>
+                    {result.totalCuts ?? 0}
+                </TableCell>
                 <TableCell className="text-center font-sans font-black text-sm text-lsr-orange">
                     {result.points !== null && result.points > 0 ? result.points : "-"}
                 </TableCell>
