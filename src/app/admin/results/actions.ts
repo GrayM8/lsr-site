@@ -209,7 +209,7 @@ export async function ingestUpload(uploadId: string) {
   const data = upload.rawJson as any;
 
   // Basic validation
-  if (!data.Result || !data.Laps) throw new Error("Invalid JSON data for ingestion");
+  if (!data.Result) throw new Error("Invalid JSON data: Missing Result array");
 
   await prisma.$transaction(async (tx) => {
     // 1. Create RaceSession
@@ -224,99 +224,234 @@ export async function ingestUpload(uploadId: string) {
       },
     });
 
-    // 2. Map Drivers and Create Participants
-    const participantsMap = new Map<string, string>(); // driverGuid -> participantId
+    // 2. Process Participants (Cars) & Map Identity
+    // Map: CarId (int) -> ParticipantId (UUID)
+    const carIdToParticipantId = new Map<number, string>();
+    // Map: DriverGuid (string) -> ParticipantId (UUID) - useful for Laps/Results
+    const guidToParticipantId = new Map<string, string>();
 
-    // Pre-fetch identities to get userIds
-    const driverGuids = (data.Result as any[]).map((r: any) => r.DriverGuid).filter(Boolean);
+    // Pre-fetch identities
+    const cars = Array.isArray(data.Cars) ? data.Cars : [];
+    const driverGuids = cars.map((c: any) => c.Driver?.Guid).filter(Boolean);
+    
+    // Also fetch guids from Result array if Cars is missing or incomplete
+    if (Array.isArray(data.Result)) {
+        data.Result.forEach((r: any) => {
+            if (r.DriverGuid) driverGuids.push(r.DriverGuid);
+        });
+    }
+    
+    const uniqueGuids = Array.from(new Set(driverGuids)) as string[];
     const identities = await tx.driverIdentity.findMany({
-      where: { driverGuid: { in: driverGuids } },
+      where: { driverGuid: { in: uniqueGuids } },
     });
     const identityMap = new Map(identities.map((i) => [i.driverGuid, i.userId]));
 
-    for (const res of data.Result) {
-      if (!res.DriverGuid) continue;
-      
-      const userId = identityMap.get(res.DriverGuid);
-
-      const participant = await tx.raceParticipant.create({
-        data: {
-          sessionId: session.id,
-          driverGuid: res.DriverGuid,
-          displayName: res.DriverName,
-          carName: res.CarModel,
-          carClass: "UNKNOWN", // In AC JSON, sometimes stored differently or implicit
-          teamName: res.TeamName,
-          userId: userId,
-        },
-      });
-      participantsMap.set(res.DriverGuid, participant.id);
-
-      // 3. Create Result for this participant
-      await tx.raceResult.create({
-        data: {
-          sessionId: session.id,
-          participantId: participant.id,
-          position: res.Position || 999,
-          classPosition: 0, // Placeholder
-          bestLapTime: res.BestLap,
-          totalTime: res.TotalTime,
-          lapsCompleted: res.Laps ?? 0,
-          status: "FINISHED", // Simplify for now
-        },
-      });
-    }
-
-    // 4. Create Laps
-    // We need to order laps by timestamp if available to assign lap numbers correctly per driver
-    const laps = (data.Laps as any[]).slice();
-    // Assuming Laps have Timestamp. If not, we might trust the order.
-    // Group by driver
-    const lapsByDriver = new Map<string, any[]>();
-    for (const lap of laps) {
-      if (!lap.DriverGuid) continue;
-      if (!lapsByDriver.has(lap.DriverGuid)) {
-        lapsByDriver.set(lap.DriverGuid, []);
-      }
-      lapsByDriver.get(lap.DriverGuid)!.push(lap);
-    }
-
-    const lapsToCreate: any[] = [];
-    for (const [driverGuid, driverLaps] of lapsByDriver) {
-      const participantId = participantsMap.get(driverGuid);
-      if (!participantId) continue;
-
-      // Sort by timestamp if present
-      if (driverLaps[0]?.Timestamp) {
-        driverLaps.sort((a, b) => a.Timestamp - b.Timestamp);
-      }
-
-      let lapNum = 1;
-      for (const lap of driverLaps) {
-         lapsToCreate.push({
-             sessionId: session.id,
-             participantId,
-             lapNumber: lapNum++,
-             lapTime: lap.LapTime,
-             sector1: lap.Sector1,
-             sector2: lap.Sector2,
-             sector3: lap.Sector3,
-             valid: lap.Cuts === 0,
-         });
-      }
-    }
+    // Create Participants from Cars array
+    const processedGuids = new Set<string>();
     
-    if (lapsToCreate.length > 0) {
-        await tx.raceLap.createMany({
-            data: lapsToCreate
+    for (const car of cars) {
+        const driver = car.Driver;
+        const guid = driver?.Guid || `UNKNOWN_GUID_${car.CarId}`;
+        
+        if (processedGuids.has(guid)) {
+            // Already created a participant for this GUID in this session. 
+            // This happens if same driver is listed multiple times (e.g. driver swaps or data anomaly)
+            // Just update mapping and skip creation.
+            const existingId = guidToParticipantId.get(guid);
+            if (existingId && car.CarId !== undefined) {
+                carIdToParticipantId.set(car.CarId, existingId);
+            }
+            continue;
+        }
+        processedGuids.add(guid);
+
+        const userId = identityMap.get(guid);
+
+        const participant = await tx.raceParticipant.create({
+            data: {
+                sessionId: session.id,
+                driverGuid: guid,
+                displayName: driver?.Name || "Unknown",
+                carName: car.Model,
+                carClass: driver?.ClassID || "UNKNOWN", // Or map from elsewhere
+                teamName: driver?.Team,
+                userId: userId,
+                // New Fields
+                carIdInSession: car.CarId,
+                nation: driver?.Nation,
+                skin: car.Skin,
+                ballastKg: car.BallastKG,
+                restrictor: car.Restrictor,
+            }
         });
+
+        if (car.CarId !== undefined) {
+            carIdToParticipantId.set(car.CarId, participant.id);
+        }
+        if (guid) {
+            guidToParticipantId.set(guid, participant.id);
+        }
     }
 
-    // 5. Update Upload Status
+    // 3. Process Results
+    // We iterate the Result array. Match to participant by Guid or CarId.
+    if (Array.isArray(data.Result)) {
+        let position = 1;
+        for (const res of data.Result) {
+            let participantId = guidToParticipantId.get(res.DriverGuid);
+            
+            // If not found by GUID, try CarId if available in Result object
+            if (!participantId && res.CarId !== undefined) {
+                participantId = carIdToParticipantId.get(res.CarId);
+            }
+
+            // If still not found (e.g. participant wasn't in Cars array?), create one?
+            // For now, skip or handle gracefully.
+            if (!participantId) {
+                console.warn(`Result entry for guid ${res.DriverGuid} / carId ${res.CarId} has no matching participant.`);
+                continue;
+            }
+
+            await tx.raceResult.create({
+                data: {
+                    sessionId: session.id,
+                    participantId: participantId,
+                    position: position++, // Implicit order in JSON usually
+                    classPosition: 0, // Not explicitly in JSON usually
+                    bestLapTime: res.BestLap,
+                    totalTime: res.TotalTime,
+                    lapsCompleted: res.LapCount ?? 0, // Result often has LapCount or similar? Or inferred from Laps? 
+                                                      // Wait, JSON sample has "Laps" array, but Result object has... 
+                                                      // JSON Sample Result object: BallastKG, BestLap, CarId, ... TotalTime.
+                                                      // It does NOT have "LapsCompleted". We might need to count them from Laps array or assume it matches.
+                                                      // Actually, let's check JSON again. Result array doesn't have "Laps" count.
+                                                      // We should count them from Laps array for this driver.
+                    status: res.Disqualified ? "DSQ" : "FINISHED",
+                    
+                    // New Fields
+                    penaltyTime: res.PenaltyTime,
+                    lapPenalty: res.LapPenalty,
+                    isDisqualified: res.Disqualified || false,
+                }
+            });
+        }
+    }
+
+    // 4. Process Laps
+    if (Array.isArray(data.Laps)) {
+        const lapsToCreate: any[] = [];
+        
+        // We need to count laps per driver to assign lap numbers if not provided
+        const driverLapCounts = new Map<string, number>();
+
+        // Sort laps by timestamp globally to be safe, though usually grouped by driver or chronological
+        const sortedLaps = [...data.Laps].sort((a, b) => (a.Timestamp || 0) - (b.Timestamp || 0));
+
+        for (const lap of sortedLaps) {
+            let participantId = guidToParticipantId.get(lap.DriverGuid);
+            if (!participantId && lap.CarId !== undefined) {
+                participantId = carIdToParticipantId.get(lap.CarId);
+            }
+            if (!participantId) continue;
+
+            const currentCount = driverLapCounts.get(participantId) || 0;
+            const lapNumber = currentCount + 1;
+            driverLapCounts.set(participantId, lapNumber);
+
+            // Handle sectors: JSON has "Sectors": [int, int, int]
+            const s1 = lap.Sectors?.[0] ?? null;
+            const s2 = lap.Sectors?.[1] ?? null;
+            const s3 = lap.Sectors?.[2] ?? null;
+
+            lapsToCreate.push({
+                sessionId: session.id,
+                participantId,
+                lapNumber,
+                lapTime: lap.LapTime,
+                sector1: s1,
+                sector2: s2,
+                sector3: s3,
+                valid: lap.Cuts === 0, // Assuming 0 cuts = valid
+                
+                // New Fields
+                cuts: lap.Cuts,
+                tyre: lap.Tyre,
+                timestamp: lap.Timestamp,
+            });
+        }
+
+        if (lapsToCreate.length > 0) {
+            await tx.raceLap.createMany({
+                data: lapsToCreate
+            });
+        }
+        
+        // Backfill lapsCompleted in RaceResult if needed
+        for (const [pid, count] of driverLapCounts) {
+            await tx.raceResult.updateMany({
+                where: { sessionId: session.id, participantId: pid },
+                data: { lapsCompleted: count }
+            });
+        }
+    }
+
+    // 5. Process Events
+    if (Array.isArray(data.Events)) {
+        const eventsToCreate: any[] = [];
+        for (const evt of data.Events) {
+            // Primary participant
+            let participantId = null;
+            if (evt.CarId !== undefined) participantId = carIdToParticipantId.get(evt.CarId);
+            if (!participantId && evt.Driver?.Guid) participantId = guidToParticipantId.get(evt.Driver.Guid);
+
+            // Other participant (can be -1 for ENV)
+            let otherParticipantId = null;
+            if (evt.OtherCarId !== undefined && evt.OtherCarId !== -1) {
+                otherParticipantId = carIdToParticipantId.get(evt.OtherCarId);
+            }
+            if (!otherParticipantId && evt.OtherDriver?.Guid) {
+                otherParticipantId = guidToParticipantId.get(evt.OtherDriver.Guid);
+            }
+
+            eventsToCreate.push({
+                sessionId: session.id,
+                type: evt.Type,
+                carId: evt.CarId,
+                driverGuid: evt.Driver?.Guid,
+                participantId: participantId, // Nullable
+                
+                otherCarId: evt.OtherCarId,
+                otherDriverGuid: evt.OtherDriver?.Guid,
+                otherParticipantId: otherParticipantId, // Nullable
+                
+                impactSpeed: evt.ImpactSpeed,
+                
+                worldPosX: evt.WorldPosition?.X,
+                worldPosY: evt.WorldPosition?.Y,
+                worldPosZ: evt.WorldPosition?.Z,
+                
+                relPosX: evt.RelPosition?.X,
+                relPosY: evt.RelPosition?.Y,
+                relPosZ: evt.RelPosition?.Z,
+            });
+        }
+
+        if (eventsToCreate.length > 0) {
+            await tx.raceEvent.createMany({
+                data: eventsToCreate
+            });
+        }
+    }
+
+    // 6. Update Upload Status
     await tx.rawResultUpload.update({
       where: { id: uploadId },
       data: { status: "INGESTED" },
     });
+  }, {
+    maxWait: 20000, // default: 2000
+    timeout: 20000, // default: 5000
   });
 
   revalidatePath(`/admin/results/${uploadId}`);

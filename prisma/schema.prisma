@@ -149,6 +149,7 @@ model User {
   mediaOwned             Media[]          @relation("MediaOwner")
   rawResultUploads       RawResultUpload[]
   driverIdentities       DriverIdentity[]
+  raceParticipants       RaceParticipant[]
 
 
   createdAt DateTime @default(now())
@@ -773,6 +774,7 @@ model RaceParticipant {
   
   session RaceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   userId        String?
+  user          User?           @relation(fields: [userId], references: [id])
   
   results RaceResult[]
   laps    RaceLap[]

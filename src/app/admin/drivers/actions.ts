@@ -8,8 +8,14 @@ export async function updateDriverMapping(id: string, userId: string | null) {
   const { ok } = await requireAdmin();
   if (!ok) throw new Error("Unauthorized");
 
-  await prisma.driverIdentity.update({
+  const identity = await prisma.driverIdentity.update({
     where: { id },
+    data: { userId },
+  });
+
+  // Cascade update to existing race participants for this driver
+  await prisma.raceParticipant.updateMany({
+    where: { driverGuid: identity.driverGuid },
     data: { userId },
   });
 

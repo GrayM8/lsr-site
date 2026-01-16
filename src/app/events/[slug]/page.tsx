@@ -1,11 +1,13 @@
 import { getEventBySlug } from "@/server/queries/events";
+import { getIngestedResultsByEventId } from "@/server/queries/results";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, Send } from "lucide-react";
+import { Calendar, Clock, MapPin, Send, Trophy } from "lucide-react";
 import Link from "next/link";
 import { GeoPoint } from "@/types";
 import { Button } from "@/components/ui/button";
+import { ResultsTable } from "@/components/results-table";
 
 type EventPageArgs = {
   params: Promise<{ slug: string }>;
@@ -19,6 +21,7 @@ export default async function EventPage({ params }: EventPageArgs) {
     return notFound();
   }
 
+  const raceSessions = await getIngestedResultsByEventId(event.id);
   const startsAt = new Date(event.startsAtUtc);
   const endsAt = new Date(event.endsAtUtc);
 
@@ -61,6 +64,26 @@ export default async function EventPage({ params }: EventPageArgs) {
               <div className="prose prose-invert prose-p:font-sans prose-p:text-white/70 prose-p:text-sm prose-p:leading-relaxed max-w-none">
                 <p>{event.summary || event.description}</p>
               </div>
+
+              {raceSessions.length > 0 && (
+                <div className="mt-12 pt-12 border-t border-white/10">
+                  <div className="flex items-center gap-3 mb-6">
+                    <Trophy className="h-5 w-5 text-lsr-orange" />
+                    <h2 className="font-sans font-black text-sm uppercase tracking-widest text-white">Official Results</h2>
+                  </div>
+                  
+                  <div className="space-y-8">
+                    {raceSessions.map(session => (
+                        <div key={session.id}>
+                            <h3 className="font-sans font-bold text-xs uppercase tracking-widest text-white/50 mb-4">
+                                {session.sessionType} {session.trackName && `- ${session.trackName}`}
+                            </h3>
+                            <ResultsTable results={session.results} />
+                        </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="lg:col-span-1">
