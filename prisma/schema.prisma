@@ -733,6 +733,18 @@ model DriverIdentity {
   user User? @relation(fields: [userId], references: [id])
 }
 
+model CarMapping {
+  id                   String   @id @default(uuid())
+  gameCarName          String   @unique
+  displayName          String
+  secondaryDisplayName String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  participants RaceParticipant[]
+}
+
 model RaceSession {
   id          String   @id @default(uuid())
   uploadId    String
@@ -775,6 +787,9 @@ model RaceParticipant {
   session RaceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   userId        String?
   user          User?           @relation(fields: [userId], references: [id])
+  
+  carMappingId  String?
+  carMapping    CarMapping?     @relation(fields: [carMappingId], references: [id])
   
   results RaceResult[]
   laps    RaceLap[]

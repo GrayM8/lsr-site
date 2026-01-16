@@ -7,13 +7,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { type RaceResult, type RaceParticipant, type User } from "@prisma/client";
+import { type RaceResult, type RaceParticipant, type User, type CarMapping } from "@prisma/client";
 import { UserIcon } from "lucide-react";
 import Link from "next/link";
 
 type ResultWithParticipant = RaceResult & {
   participant: RaceParticipant & {
     user: User | null;
+    carMapping: CarMapping | null;
   };
 };
 
@@ -46,7 +47,7 @@ export function ResultsTable({ results }: { results: ResultWithParticipant[] }) 
           <TableRow className="hover:bg-transparent">
             <TableHead className="w-12 text-center text-[10px] font-black uppercase tracking-widest text-white/50">Pos</TableHead>
             <TableHead className="text-[10px] font-black uppercase tracking-widest text-white/50">Driver</TableHead>
-            <TableHead className="text-[10px] font-black uppercase tracking-widest text-white/50 hidden md:table-cell">Car</TableHead>
+            <TableHead className="text-center text-[10px] font-black uppercase tracking-widest text-white/50 hidden md:table-cell">Car</TableHead>
             <TableHead className="text-right text-[10px] font-black uppercase tracking-widest text-white/50">Best Lap</TableHead>
             <TableHead className="text-right text-[10px] font-black uppercase tracking-widest text-white/50">Gap</TableHead>
             <TableHead className="text-center text-[10px] font-black uppercase tracking-widest text-white/50">Laps</TableHead>
@@ -55,6 +56,8 @@ export function ResultsTable({ results }: { results: ResultWithParticipant[] }) 
         <TableBody>
           {results.map((result) => {
             const user = result.participant.user;
+            const mapping = result.participant.carMapping;
+            
             return (
               <TableRow key={result.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                 <TableCell className="text-center font-sans font-bold text-white/80">{result.position}</TableCell>
@@ -86,7 +89,20 @@ export function ResultsTable({ results }: { results: ResultWithParticipant[] }) 
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="hidden md:table-cell font-sans text-xs text-white/60">{result.participant.carName}</TableCell>
+                <TableCell className="hidden md:table-cell font-sans text-xs">
+                    {mapping ? (
+                        <div className="flex flex-col items-center text-center">
+                            <span className="text-white/80 font-bold">{mapping.displayName}</span>
+                            {mapping.secondaryDisplayName && (
+                                <span className="text-white/40 text-[10px] italic">{mapping.secondaryDisplayName}</span>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="text-center">
+                            <span className="text-white/60">{result.participant.carName}</span>
+                        </div>
+                    )}
+                </TableCell>
                 <TableCell className="text-right font-mono text-xs text-lsr-orange">{formatTime(result.bestLapTime)}</TableCell>
                 <TableCell className="text-right font-mono text-xs text-white/60">
                     {formatGap(result.totalTime, result.lapsCompleted, winnerLaps)}

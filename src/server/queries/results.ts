@@ -16,6 +16,7 @@ export async function getIngestedResultsByEventId(eventId: string) {
           participant: {
             include: {
               user: true,
+              carMapping: true,
             },
           },
         },

@@ -41,6 +41,11 @@ const adminPages = [
     description: "Map driver GUIDs to Users.",
     href: "/admin/drivers",
   },
+  {
+    title: "Car Mappings",
+    description: "Map game car names to display names.",
+    href: "/admin/cars",
+  },
 ];
 
 export default function Page() {
