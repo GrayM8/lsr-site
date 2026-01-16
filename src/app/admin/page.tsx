@@ -31,6 +31,11 @@ const adminPages = [
     description: "Access miscellaneous administrative tools.",
     href: "/admin/tools",
   },
+  {
+    title: "Results",
+    description: "Upload and manage race results.",
+    href: "/admin/results",
+  },
 ];
 
 export default function Page() {

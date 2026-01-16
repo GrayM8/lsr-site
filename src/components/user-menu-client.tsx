@@ -139,6 +139,13 @@ export function UserMenuClient({
               <Shield className="mr-2 h-3 w-3" />
               <span>Misc. Tools</span>
             </DropdownMenuItem>
+            <DropdownMenuItem 
+              onSelect={() => router.push("/admin/results")}
+              className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
+            >
+              <Shield className="mr-2 h-3 w-3" />
+              <span>Results</span>
+            </DropdownMenuItem>
           </>
         )}
 

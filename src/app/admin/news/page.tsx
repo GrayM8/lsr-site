@@ -24,9 +24,14 @@ export default async function AdminNewsPage() {
     <main className="mx-auto max-w-6xl p-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">News Articles</h1>
-        <Button asChild>
-          <Link href="/admin/news/new">Create Article</Link>
-        </Button>
+        <div className="flex gap-4">
+          <Button asChild>
+            <Link href="/admin">Back to Admin Dashboard</Link>
+          </Button>
+          <Button asChild>
+            <Link href="/admin/news/new">Create Article</Link>
+          </Button>
+        </div>
       </div>
 
       <div className="rounded-md border">

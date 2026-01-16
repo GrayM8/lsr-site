@@ -147,6 +147,8 @@ model User {
   provenanceCreated      Provenance[]     @relation("ProvenanceCreatedBy")
   importArtifactsCreated ImportArtifact[] @relation("ImportArtifactCreatedBy")
   mediaOwned             Media[]          @relation("MediaOwner")
+  rawResultUploads       RawResultUpload[]
+
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -683,3 +685,42 @@ model GalleryImage {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+enum RawResultUploadStatus {
+  UPLOADED
+  PARSED
+  INGESTED
+  FAILED
+}
+
+
+model RawResultUpload {
+  id               String                  @id @default(uuid())
+  filename         String
+  filesize         Int
+  sha256           String
+  rawJson          Json
+  uploadedByUserId String
+  uploadedAt       DateTime                @default(now())
+  status           RawResultUploadStatus   @default(UPLOADED)
+  errorMessage     String?
+  parseReport      ParseReport?
+
+  uploadedBy       User                    @relation(fields: [uploadedByUserId], references: [id])
+
+  @@index([uploadedByUserId])
+}
+
+
+model ParseReport {
+  id              String          @id @default(uuid())
+  uploadId        String          @unique
+  drivers         Json
+  resultsCount    Int
+  lapsCount       Int
+  anomalies       String[]
+  createdAt       DateTime        @default(now())
+
+  upload          RawResultUpload @relation(fields: [uploadId], references: [id])
+}
+

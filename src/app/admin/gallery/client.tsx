@@ -26,6 +26,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { CreditDialog } from './_components/credit-dialog';
+import Link from "next/link";
 
 // --- Sortable Item Component ---
 function SortableGalleryItem({
@@ -238,10 +239,13 @@ export function GalleryAdminClient({ images: initialImages }: { images: GalleryI
 
   return (
     <div>
-      <div className="mb-4">
+      <div className="mb-4 flex gap-4">
         <input ref={inputRef} type="file" accept="image/*" hidden onChange={onFile} />
         <Button type="button" onClick={chooseFile} disabled={isPending}>
           Upload Image
+        </Button>
+        <Button asChild>
+          <Link href="/admin">Back to Admin Dashboard</Link>
         </Button>
       </div>
 
