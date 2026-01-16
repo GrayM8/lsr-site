@@ -51,6 +51,7 @@ export function ResultDetailClient({
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [selectedEventId, setSelectedEventId] = useState(result.eventId || "");
+  const [selectedPointsSystem, setSelectedPointsSystem] = useState(result.pointsSystem || "F1");
   const router = useRouter();
 
   const handleParse = async () => {
@@ -71,9 +72,13 @@ export function ResultDetailClient({
       setIsProcessing(true);
       setError(null);
       try {
-          await bindEventToUpload(result.id, selectedEventId);
+          await bindEventToUpload(result.id, selectedEventId, selectedPointsSystem);
           router.refresh();
-          setResult(prev => ({ ...prev, eventId: selectedEventId }));
+          setResult(prev => ({ 
+              ...prev, 
+              eventId: selectedEventId,
+              pointsSystem: selectedPointsSystem
+          }));
       } catch (e: any) {
           setError(e.message);
       } finally {
@@ -123,6 +128,8 @@ export function ResultDetailClient({
       }
   };
 
+  const hasChanges = selectedEventId !== result.eventId || selectedPointsSystem !== (result.pointsSystem || "F1");
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
@@ -151,28 +158,48 @@ export function ResultDetailClient({
           <p>Size: {result.filesize} bytes</p>
           <p>SHA256: {result.sha256}</p>
           
-          <div className="flex items-center gap-4 mt-4 p-4 border rounded bg-muted/50">
-             <label className="font-medium">Assigned Event:</label>
-             <select 
-                className="p-2 border rounded bg-background text-foreground"
-                value={selectedEventId} 
-                onChange={(e) => setSelectedEventId(e.target.value)}
-                disabled={isProcessing || result.status === 'INGESTED'}
-             >
-                 <option value="">-- Select Event --</option>
-                 {events.map(e => (
-                     <option key={e.id} value={e.id}>
-                         {new Date(e.startsAtUtc).toLocaleDateString()} - {e.title}
-                     </option>
-                 ))}
-             </select>
-             <Button 
-                onClick={handleBindEvent} 
-                disabled={isProcessing || result.status === 'INGESTED' || selectedEventId === result.eventId}
-                size="sm"
-             >
-                 Save
-             </Button>
+          <div className="mt-4 p-4 border rounded bg-muted/50 space-y-4">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div className="space-y-2">
+                     <label className="font-medium text-sm">Assigned Event</label>
+                     <select 
+                        className="w-full p-2 border rounded bg-background text-foreground"
+                        value={selectedEventId} 
+                        onChange={(e) => setSelectedEventId(e.target.value)}
+                        disabled={isProcessing || result.status === 'INGESTED'}
+                     >
+                         <option value="">-- Select Event --</option>
+                         {events.map(e => (
+                             <option key={e.id} value={e.id}>
+                                 {new Date(e.startsAtUtc).toLocaleDateString()} - {e.title}
+                             </option>
+                         ))}
+                     </select>
+                 </div>
+                 
+                 <div className="space-y-2">
+                     <label className="font-medium text-sm">Points Ruleset</label>
+                     <select 
+                        className="w-full p-2 border rounded bg-background text-foreground"
+                        value={selectedPointsSystem} 
+                        onChange={(e) => setSelectedPointsSystem(e.target.value)}
+                        disabled={isProcessing || result.status === 'INGESTED'}
+                     >
+                         <option value="F1">F1 (Default)</option>
+                         <option value="NONE">None</option>
+                     </select>
+                 </div>
+             </div>
+             
+             <div className="flex justify-end">
+                <Button 
+                    onClick={handleBindEvent} 
+                    disabled={isProcessing || result.status === 'INGESTED' || !hasChanges}
+                    size="sm"
+                >
+                    Save Changes
+                </Button>
+             </div>
           </div>
           
           {result.errorMessage && <p className="text-red-500 font-mono bg-red-50 p-2 rounded">Error: {result.errorMessage}</p>}

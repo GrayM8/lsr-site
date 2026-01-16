@@ -713,6 +713,7 @@ model RawResultUpload {
 
   uploadedBy       User                    @relation(fields: [uploadedByUserId], references: [id])
   eventId          String?
+  pointsSystem     String? // "F1", "NONE"
   event            Event?                  @relation(fields: [eventId], references: [id])
 
   ingestedSessions RaceSession[]
@@ -755,6 +756,7 @@ model RaceSession {
   trackName   String
   trackConfig String?
   startedAt   DateTime
+  pointsSystem String? // "F1", "NONE", etc.
   
   upload RawResultUpload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
   event  Event?          @relation(fields: [eventId], references: [id])
@@ -814,6 +816,7 @@ model RaceResult {
   gap           String? 
   
   // New fields from "Result"
+  points         Int?
   penaltyTime    Int?
   lapPenalty     Int?
   isDisqualified Boolean @default(false)

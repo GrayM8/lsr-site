@@ -51,6 +51,7 @@ export function ResultsTable({ results }: { results: ResultWithParticipant[] }) 
             <TableHead className="text-right text-[10px] font-black uppercase tracking-widest text-white/50">Best Lap</TableHead>
             <TableHead className="text-right text-[10px] font-black uppercase tracking-widest text-white/50">Gap</TableHead>
             <TableHead className="text-center text-[10px] font-black uppercase tracking-widest text-white/50">Laps</TableHead>
+            <TableHead className="text-center text-[10px] font-black uppercase tracking-widest text-white/50">Pts</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -108,6 +109,9 @@ export function ResultsTable({ results }: { results: ResultWithParticipant[] }) 
                     {formatGap(result.totalTime, result.lapsCompleted, winnerLaps)}
                 </TableCell>
                 <TableCell className="text-center font-mono text-xs text-white/60">{result.lapsCompleted}</TableCell>
+                <TableCell className="text-center font-sans font-black text-sm text-lsr-orange">
+                    {result.points !== null && result.points > 0 ? result.points : "-"}
+                </TableCell>
               </TableRow>
             );
           })}

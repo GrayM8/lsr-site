@@ -95,8 +95,6 @@ export async function previewParseResult(uploadId: string) {
           carModel: result.CarModel,
         });
       } else {
-        // Only report if actually missing, duplicates are expected in results if multi-class? 
-        // Actually usually one result entry per driver per session.
         if (!result.DriverGuid) {
              anomalies.push("Missing driver GUID in result entry");
         }
@@ -157,7 +155,7 @@ export async function previewParseResult(uploadId: string) {
   return updatedUpload;
 }
 
-export async function bindEventToUpload(uploadId: string, eventId: string) {
+export async function bindEventToUpload(uploadId: string, eventId: string, pointsSystem: string | null = null) {
   const { ok } = await requireAdmin();
   if (!ok) throw new Error("Unauthorized");
 
@@ -166,7 +164,7 @@ export async function bindEventToUpload(uploadId: string, eventId: string) {
 
   await prisma.rawResultUpload.update({
     where: { id: uploadId },
-    data: { eventId },
+    data: { eventId, pointsSystem },
   });
 
   revalidatePath(`/admin/results/${uploadId}`);
@@ -194,6 +192,17 @@ export async function deleteUpload(uploadId: string, force: boolean = false) {
   revalidatePath("/admin/results");
 }
 
+function calculatePoints(position: number, system: string | null): number {
+    if (system === 'F1') {
+        const pointsMap: Record<number, number> = {
+            1: 25, 2: 18, 3: 15, 4: 12, 5: 10,
+            6: 8, 7: 6, 8: 4, 9: 2, 10: 1
+        };
+        return pointsMap[position] || 0;
+    }
+    return 0;
+}
+
 export async function ingestUpload(uploadId: string) {
   const { ok } = await requireAdmin();
   if (!ok) throw new Error("Unauthorized");
@@ -207,6 +216,7 @@ export async function ingestUpload(uploadId: string) {
   if (upload.status === "INGESTED") throw new Error("Already ingested");
 
   const data = upload.rawJson as any;
+  const pointsSystem = upload.pointsSystem || "F1"; // Default if not set, though we should set it.
 
   // Basic validation
   if (!data.Result) throw new Error("Invalid JSON data: Missing Result array");
@@ -221,20 +231,18 @@ export async function ingestUpload(uploadId: string) {
         trackName: data.TrackName || "UNKNOWN",
         trackConfig: data.TrackConfig,
         startedAt: data.Date ? new Date(data.Date) : new Date(),
+        pointsSystem: pointsSystem,
       },
     });
 
     // 2. Process Participants (Cars) & Map Identity
-    // Map: CarId (int) -> ParticipantId (UUID)
     const carIdToParticipantId = new Map<number, string>();
-    // Map: DriverGuid (string) -> ParticipantId (UUID) - useful for Laps/Results
     const guidToParticipantId = new Map<string, string>();
+    const carIdToGameCarName = new Map<number, string>();
 
-    // Pre-fetch identities
     const cars = Array.isArray(data.Cars) ? data.Cars : [];
     const driverGuids = cars.map((c: any) => c.Driver?.Guid).filter(Boolean);
     
-    // Also fetch guids from Result array if Cars is missing or incomplete
     if (Array.isArray(data.Result)) {
         data.Result.forEach((r: any) => {
             if (r.DriverGuid) driverGuids.push(r.DriverGuid);
@@ -247,7 +255,17 @@ export async function ingestUpload(uploadId: string) {
     });
     const identityMap = new Map(identities.map((i) => [i.driverGuid, i.userId]));
 
-    // Create Participants from Cars array
+    // Pre-fetch Car Mappings
+    // We need to fetch mappings for all car names in the session
+    const carNames = new Set<string>();
+    cars.forEach((c: any) => {
+        if (c.Model) carNames.add(c.Model);
+    });
+    const carMappings = await tx.carMapping.findMany({
+        where: { gameCarName: { in: Array.from(carNames) } }
+    });
+    const carMappingMap = new Map(carMappings.map(m => [m.gameCarName, m.id]));
+
     const processedGuids = new Set<string>();
     
     for (const car of cars) {
@@ -255,9 +273,6 @@ export async function ingestUpload(uploadId: string) {
         const guid = driver?.Guid || `UNKNOWN_GUID_${car.CarId}`;
         
         if (processedGuids.has(guid)) {
-            // Already created a participant for this GUID in this session. 
-            // This happens if same driver is listed multiple times (e.g. driver swaps or data anomaly)
-            // Just update mapping and skip creation.
             const existingId = guidToParticipantId.get(guid);
             if (existingId && car.CarId !== undefined) {
                 carIdToParticipantId.set(car.CarId, existingId);
@@ -267,17 +282,19 @@ export async function ingestUpload(uploadId: string) {
         processedGuids.add(guid);
 
         const userId = identityMap.get(guid);
+        const carName = car.Model;
+        const carMappingId = carName ? carMappingMap.get(carName) : null;
 
         const participant = await tx.raceParticipant.create({
             data: {
                 sessionId: session.id,
                 driverGuid: guid,
                 displayName: driver?.Name || "Unknown",
-                carName: car.Model,
-                carClass: driver?.ClassID || "UNKNOWN", // Or map from elsewhere
+                carName: carName,
+                carMappingId: carMappingId, // Link mapping immediately if available
+                carClass: driver?.ClassID || "UNKNOWN",
                 teamName: driver?.Team,
                 userId: userId,
-                // New Fields
                 carIdInSession: car.CarId,
                 nation: driver?.Nation,
                 skin: car.Skin,
@@ -295,41 +312,39 @@ export async function ingestUpload(uploadId: string) {
     }
 
     // 3. Process Results
-    // We iterate the Result array. Match to participant by Guid or CarId.
     if (Array.isArray(data.Result)) {
         let position = 1;
+        
+        // Sorting: Ensure results are sorted by position just in case JSON isn't perfect, 
+        // though usually the array order IS the position.
+        // But we rely on 'position' loop variable, so assuming array is ordered.
+        
         for (const res of data.Result) {
             let participantId = guidToParticipantId.get(res.DriverGuid);
-            
-            // If not found by GUID, try CarId if available in Result object
             if (!participantId && res.CarId !== undefined) {
                 participantId = carIdToParticipantId.get(res.CarId);
             }
 
-            // If still not found (e.g. participant wasn't in Cars array?), create one?
-            // For now, skip or handle gracefully.
             if (!participantId) {
                 console.warn(`Result entry for guid ${res.DriverGuid} / carId ${res.CarId} has no matching participant.`);
                 continue;
             }
 
+            const currentPos = position++;
+            const points = calculatePoints(currentPos, pointsSystem);
+
             await tx.raceResult.create({
                 data: {
                     sessionId: session.id,
                     participantId: participantId,
-                    position: position++, // Implicit order in JSON usually
-                    classPosition: 0, // Not explicitly in JSON usually
+                    position: currentPos,
+                    classPosition: 0,
                     bestLapTime: res.BestLap,
                     totalTime: res.TotalTime,
-                    lapsCompleted: res.LapCount ?? 0, // Result often has LapCount or similar? Or inferred from Laps? 
-                                                      // Wait, JSON sample has "Laps" array, but Result object has... 
-                                                      // JSON Sample Result object: BallastKG, BestLap, CarId, ... TotalTime.
-                                                      // It does NOT have "LapsCompleted". We might need to count them from Laps array or assume it matches.
-                                                      // Actually, let's check JSON again. Result array doesn't have "Laps" count.
-                                                      // We should count them from Laps array for this driver.
+                    lapsCompleted: res.LapCount ?? 0, 
                     status: res.Disqualified ? "DSQ" : "FINISHED",
                     
-                    // New Fields
+                    points: points, // Calculated Points
                     penaltyTime: res.PenaltyTime,
                     lapPenalty: res.LapPenalty,
                     isDisqualified: res.Disqualified || false,
@@ -338,14 +353,10 @@ export async function ingestUpload(uploadId: string) {
         }
     }
 
-    // 4. Process Laps
+    // 4. Process Laps (Same as before)
     if (Array.isArray(data.Laps)) {
         const lapsToCreate: any[] = [];
-        
-        // We need to count laps per driver to assign lap numbers if not provided
         const driverLapCounts = new Map<string, number>();
-
-        // Sort laps by timestamp globally to be safe, though usually grouped by driver or chronological
         const sortedLaps = [...data.Laps].sort((a, b) => (a.Timestamp || 0) - (b.Timestamp || 0));
 
         for (const lap of sortedLaps) {
@@ -359,7 +370,6 @@ export async function ingestUpload(uploadId: string) {
             const lapNumber = currentCount + 1;
             driverLapCounts.set(participantId, lapNumber);
 
-            // Handle sectors: JSON has "Sectors": [int, int, int]
             const s1 = lap.Sectors?.[0] ?? null;
             const s2 = lap.Sectors?.[1] ?? null;
             const s3 = lap.Sectors?.[2] ?? null;
@@ -372,9 +382,7 @@ export async function ingestUpload(uploadId: string) {
                 sector1: s1,
                 sector2: s2,
                 sector3: s3,
-                valid: lap.Cuts === 0, // Assuming 0 cuts = valid
-                
-                // New Fields
+                valid: lap.Cuts === 0,
                 cuts: lap.Cuts,
                 tyre: lap.Tyre,
                 timestamp: lap.Timestamp,
@@ -387,7 +395,6 @@ export async function ingestUpload(uploadId: string) {
             });
         }
         
-        // Backfill lapsCompleted in RaceResult if needed
         for (const [pid, count] of driverLapCounts) {
             await tx.raceResult.updateMany({
                 where: { sessionId: session.id, participantId: pid },
@@ -396,16 +403,14 @@ export async function ingestUpload(uploadId: string) {
         }
     }
 
-    // 5. Process Events
+    // 5. Process Events (Same as before)
     if (Array.isArray(data.Events)) {
         const eventsToCreate: any[] = [];
         for (const evt of data.Events) {
-            // Primary participant
             let participantId = null;
             if (evt.CarId !== undefined) participantId = carIdToParticipantId.get(evt.CarId);
             if (!participantId && evt.Driver?.Guid) participantId = guidToParticipantId.get(evt.Driver.Guid);
 
-            // Other participant (can be -1 for ENV)
             let otherParticipantId = null;
             if (evt.OtherCarId !== undefined && evt.OtherCarId !== -1) {
                 otherParticipantId = carIdToParticipantId.get(evt.OtherCarId);
@@ -419,24 +424,19 @@ export async function ingestUpload(uploadId: string) {
                 type: evt.Type,
                 carId: evt.CarId,
                 driverGuid: evt.Driver?.Guid,
-                participantId: participantId, // Nullable
-                
+                participantId: participantId,
                 otherCarId: evt.OtherCarId,
                 otherDriverGuid: evt.OtherDriver?.Guid,
-                otherParticipantId: otherParticipantId, // Nullable
-                
+                otherParticipantId: otherParticipantId,
                 impactSpeed: evt.ImpactSpeed,
-                
                 worldPosX: evt.WorldPosition?.X,
                 worldPosY: evt.WorldPosition?.Y,
                 worldPosZ: evt.WorldPosition?.Z,
-                
                 relPosX: evt.RelPosition?.X,
                 relPosY: evt.RelPosition?.Y,
                 relPosZ: evt.RelPosition?.Z,
             });
         }
-
         if (eventsToCreate.length > 0) {
             await tx.raceEvent.createMany({
                 data: eventsToCreate
@@ -450,8 +450,8 @@ export async function ingestUpload(uploadId: string) {
       data: { status: "INGESTED" },
     });
   }, {
-    maxWait: 20000, // default: 2000
-    timeout: 20000, // default: 5000
+    maxWait: 20000,
+    timeout: 20000,
   });
 
   revalidatePath(`/admin/results/${uploadId}`);
