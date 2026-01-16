@@ -220,7 +220,7 @@ export function ResultDetailClient({
                 </div>
             </div>
 
-            <h3 className="font-bold mb-2">Drivers ({result.parseReport.drivers.length})</h3>
+            <h3 className="font-bold mb-2">Drivers ({(result.parseReport?.drivers as any[])?.length || 0})</h3>
             <div className="max-h-96 overflow-auto border rounded">
                 <Table>
                 <TableHeader>

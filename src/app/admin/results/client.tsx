@@ -58,7 +58,7 @@ export function ResultsAdminClient({
     try {
       const newResult = await uploadResult(formData);
       if (newResult) {
-        setResults([newResult, ...results]);
+        setResults([{ ...newResult, event: null }, ...results]);
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : "An unknown error occurred");
