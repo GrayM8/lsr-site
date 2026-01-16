@@ -41,7 +41,7 @@ export function DriverHistoryTable({ history }: { history: HistoryRow[] }) {
                     {history.map((row) => (
                         <tr key={row.id} className="hover:bg-white/5 transition-colors border-b border-white/5">
                             <td className="p-4 font-mono text-xs text-white/60">
-                                {new Date(row.session.startedAt).toLocaleDateString()}
+                                {new Date(row.session.event?.startsAtUtc ?? row.session.startedAt).toLocaleDateString()}
                             </td>
                             <td className="p-4">
                                 {row.session.event ? (

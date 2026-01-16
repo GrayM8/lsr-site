@@ -67,11 +67,20 @@ export async function getDriverStats(handle: string) {
         },
       },
     },
-    orderBy: {
-      session: {
-        startedAt: "desc",
+    orderBy: [
+      {
+        session: {
+          event: {
+            startsAtUtc: "desc",
+          },
+        },
       },
-    },
+      {
+        session: {
+          startedAt: "desc",
+        },
+      },
+    ],
   });
 
   // 4. Event History (Attendance)
