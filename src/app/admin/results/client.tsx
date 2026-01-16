@@ -25,10 +25,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { uploadResult } from "@/app/admin/results/actions";
-import { type RawResultUpload, type User } from "@prisma/client";
+import { type RawResultUpload, type User, type Event } from "@prisma/client";
 
 type ResultWithUser = RawResultUpload & {
   uploadedBy: User;
+  event: Event | null;
 };
 
 const formSchema = z.object({
@@ -120,6 +121,7 @@ export function ResultsAdminClient({
                 <TableRow>
                   <TableHead>Filename</TableHead>
                   <TableHead>Uploaded At</TableHead>
+                  <TableHead>Assigned Event</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
@@ -133,6 +135,13 @@ export function ResultsAdminClient({
                     </TableCell>
                     <TableCell>
                       {new Date(result.uploadedAt).toLocaleString()}
+                    </TableCell>
+                    <TableCell>
+                        {result.event ? (
+                            <span className="font-medium">{result.event.title}</span>
+                        ) : (
+                            <span className="text-muted-foreground italic">Unassigned</span>
+                        )}
                     </TableCell>
                     <TableCell>{result.status}</TableCell>
                   </TableRow>

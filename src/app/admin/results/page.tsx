@@ -8,6 +8,7 @@ export default async function ResultsAdminPage() {
     },
     include: {
       uploadedBy: true,
+      event: true,
     },
   });
 

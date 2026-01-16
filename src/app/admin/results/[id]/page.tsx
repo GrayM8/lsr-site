@@ -20,9 +20,15 @@ export default async function ResultDetailPage({
     notFound();
   }
 
+  const events = await prisma.event.findMany({
+    orderBy: { startsAtUtc: "desc" },
+    take: 50,
+    select: { id: true, title: true, startsAtUtc: true },
+  });
+
   return (
     <main className="mx-auto max-w-6xl p-8">
-      <ResultDetailClient result={result} />
+      <ResultDetailClient result={result} events={events} />
     </main>
   );
 }

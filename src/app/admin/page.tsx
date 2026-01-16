@@ -36,6 +36,11 @@ const adminPages = [
     description: "Upload and manage race results.",
     href: "/admin/results",
   },
+  {
+    title: "Driver Mappings",
+    description: "Map driver GUIDs to Users.",
+    href: "/admin/drivers",
+  },
 ];
 
 export default function Page() {
