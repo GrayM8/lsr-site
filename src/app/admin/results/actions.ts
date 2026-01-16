@@ -199,6 +199,13 @@ function calculatePoints(position: number, system: string | null): number {
             6: 8, 7: 6, 8: 4, 9: 2, 10: 1
         };
         return pointsMap[position] || 0;
+    } else if (system === 'HALF') {
+        const pointsMap: Record<number, number> = {
+            1: 25, 2: 18, 3: 15, 4: 12, 5: 10,
+            6: 8, 7: 6, 8: 4, 9: 2, 10: 1
+        };
+        const points = pointsMap[position] || 0;
+        return points / 2;
     }
     return 0;
 }

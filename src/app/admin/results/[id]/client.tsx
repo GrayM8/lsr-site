@@ -186,6 +186,7 @@ export function ResultDetailClient({
                         disabled={isProcessing || result.status === 'INGESTED'}
                      >
                          <option value="F1">F1 (Default)</option>
+                         <option value="HALF">Half Points</option>
                          <option value="NONE">None</option>
                      </select>
                  </div>
