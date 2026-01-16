@@ -147,6 +147,10 @@ model User {
   provenanceCreated      Provenance[]     @relation("ProvenanceCreatedBy")
   importArtifactsCreated ImportArtifact[] @relation("ImportArtifactCreatedBy")
   mediaOwned             Media[]          @relation("MediaOwner")
+  rawResultUploads       RawResultUpload[]
+  driverIdentities       DriverIdentity[]
+  raceParticipants       RaceParticipant[]
+
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -306,20 +310,23 @@ model League {
 
 model Season {
   id         String     @id @default(uuid())
-  leagueId   String
+  leagueId   String?
+  seriesId   String?
   name       String
   slug       String     @unique
   year       Int
   startAt    DateTime?
   endAt      DateTime?
-  pointsRule Json
+  pointsRule Json?
   visibility Visibility @default(public)
 
-  league  League  @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  league  League?  @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  series  EventSeries? @relation(fields: [seriesId], references: [id], onDelete: SetNull)
   rounds  Round[]
   entries Entry[]
 
   @@index([leagueId, year])
+  @@index([seriesId])
 }
 
 model Round {
@@ -385,16 +392,33 @@ model Entry {
   seasonId         String
   userId           String?
   teamId           String?
-  classId          String
+  classId          String?
   carId            String?
   number           Int?
   nickname         String?
   isEligiblePoints Boolean @default(true)
 
+  // Aggregated Stats (Computed)
+  totalPoints   Int     @default(0)
+  roundsCounted Int     @default(0)
+  totalCuts     Int     @default(0)
+  totalCollisions Int   @default(0)
+  starts        Int     @default(0)
+  wins          Int     @default(0)
+  podiums       Int     @default(0)
+  top5          Int     @default(0)
+  top10         Int     @default(0)
+  bestFinish    Int?
+  averageFinish Float?
+  dnfs          Int     @default(0)
+  rank          Int?
+
+  carDisplay    String?
+
   season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
   user   User?  @relation("EntryUser", fields: [userId], references: [id], onDelete: SetNull)
   team   Team?  @relation(fields: [teamId], references: [id], onDelete: SetNull)
-  class  Class  @relation(fields: [classId], references: [id], onDelete: Restrict)
+  class  Class?  @relation(fields: [classId], references: [id], onDelete: Restrict)
   car    Car?   @relation(fields: [carId], references: [id], onDelete: SetNull)
 
   results Result[]
@@ -488,6 +512,7 @@ model EventSeries {
   visibility Visibility @default(public)
 
   events    Event[]
+  seasons   Season[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -515,6 +540,7 @@ model Event {
   venueId      String?
   slug         String  @unique
   title        String
+  roundNumber  Int?
   summary      String?
   description  String?
   heroImageUrl String?
@@ -543,6 +569,9 @@ model Event {
   eligibility EventEligibility?
   rsvps       RSVP[]
   checkins    Attendance[]
+
+  rawResultUploads RawResultUpload[]
+  ingestedSessions RaceSession[]
 
   round Round? @relation("EventRound") // <-- match Round.event
 
@@ -683,3 +712,208 @@ model GalleryImage {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+enum RawResultUploadStatus {
+  UPLOADED
+  PARSED
+  INGESTED
+  FAILED
+}
+
+
+model RawResultUpload {
+  id               String                  @id @default(uuid())
+  filename         String
+  filesize         Int
+  sha256           String
+  rawJson          Json
+  uploadedByUserId String
+  uploadedAt       DateTime                @default(now())
+  status           RawResultUploadStatus   @default(UPLOADED)
+  errorMessage     String?
+  parseReport      ParseReport?
+
+  uploadedBy       User                    @relation(fields: [uploadedByUserId], references: [id])
+  eventId          String?
+  pointsSystem     String? // "F1", "NONE"
+  event            Event?                  @relation(fields: [eventId], references: [id])
+
+  ingestedSessions RaceSession[]
+
+  @@index([uploadedByUserId])
+  @@index([eventId])
+}
+
+
+model DriverIdentity {
+  id           String   @id @default(uuid())
+  driverGuid   String   @unique
+  lastSeenName String
+  userId       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User? @relation(fields: [userId], references: [id])
+}
+
+model CarMapping {
+  id                   String   @id @default(uuid())
+  gameCarName          String   @unique
+  displayName          String
+  secondaryDisplayName String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  participants RaceParticipant[]
+}
+
+model RaceSession {
+  id          String   @id @default(uuid())
+  uploadId    String
+  eventId     String?
+  
+  // Session details from JSON
+  sessionType String // "RACE", "QUALIFYING", "PRACTICE"
+  trackName   String
+  trackConfig String?
+  startedAt   DateTime
+  pointsSystem String? // "F1", "NONE", etc.
+  
+  upload RawResultUpload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+  event  Event?          @relation(fields: [eventId], references: [id])
+
+  participants RaceParticipant[]
+  results      RaceResult[]
+  laps         RaceLap[]
+  events       RaceEvent[]
+  
+  @@index([uploadId])
+  @@index([eventId])
+}
+
+model RaceParticipant {
+  id            String @id @default(uuid())
+  sessionId     String
+  driverGuid    String
+  displayName   String
+  carName       String
+  carClass      String
+  teamName      String?
+  
+  // New fields from "Cars"
+  carIdInSession Int?    // The "CarId" (0, 1, 2...)
+  nation         String?
+  skin           String?
+  ballastKg      Int?
+  restrictor     Int?
+  
+  session RaceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  userId        String?
+  user          User?           @relation(fields: [userId], references: [id])
+  
+  carMappingId  String?
+  carMapping    CarMapping?     @relation(fields: [carMappingId], references: [id])
+  
+  results RaceResult[]
+  laps    RaceLap[]
+  
+  eventsAsPrimary RaceEvent[] @relation("EventPrimary")
+  eventsAsOther   RaceEvent[] @relation("EventOther")
+
+  @@unique([sessionId, driverGuid])
+}
+
+model RaceResult {
+  id            String @id @default(uuid())
+  sessionId     String
+  participantId String
+  
+  position      Int
+  classPosition Int
+  bestLapTime   Int? // ms
+  totalTime     Int? // ms
+  lapsCompleted Int
+  status        String // "Finished", "DNF", etc.
+  gap           String? 
+  
+  // New fields from "Result"
+  points         Int?
+  totalCuts      Int?
+  collisionCount Int?
+  penaltyTime    Int?
+  lapPenalty     Int?
+  isDisqualified Boolean @default(false)
+  
+  session     RaceSession     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  participant RaceParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+}
+
+model RaceLap {
+  id            String @id @default(uuid())
+  sessionId     String
+  participantId String
+  
+  lapNumber     Int
+  lapTime       Int // ms
+  sector1       Int? // ms
+  sector2       Int? // ms
+  sector3       Int? // ms
+  valid         Boolean @default(true)
+  
+  // New fields from "Laps"
+  cuts      Int?
+  tyre      String?
+  timestamp Int? // Session timestamp
+  
+  session     RaceSession     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  participant RaceParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, participantId])
+}
+
+model RaceEvent {
+  id            String @id @default(uuid())
+  sessionId     String
+  type          String // "COLLISION_WITH_CAR", "COLLISION_WITH_ENV"
+  
+  carId         Int?
+  driverGuid    String?
+  participantId String?
+  
+  otherCarId      Int?
+  otherDriverGuid String?
+  otherParticipantId String?
+  
+  impactSpeed   Float
+  
+  worldPosX     Float?
+  worldPosY     Float?
+  worldPosZ     Float?
+  
+  relPosX       Float?
+  relPosY       Float?
+  relPosZ       Float?
+  
+  session          RaceSession      @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  participant      RaceParticipant? @relation("EventPrimary", fields: [participantId], references: [id])
+  otherParticipant RaceParticipant? @relation("EventOther", fields: [otherParticipantId], references: [id])
+
+  @@index([sessionId])
+}
+
+
+model ParseReport {
+  id              String          @id @default(uuid())
+  uploadId        String          @unique
+  drivers         Json
+  resultsCount    Int
+  lapsCount       Int
+  anomalies       String[]
+  createdAt       DateTime        @default(now())
+
+  upload          RawResultUpload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+}
+

@@ -11,9 +11,14 @@ export default async function VenuesAdminPage() {
     <main className="mx-auto max-w-6xl p-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Venues</h1>
-        <Button asChild>
-          <Link href="/admin/venues/new">New Venue</Link>
-        </Button>
+        <div className="flex gap-4">
+          <Button asChild>
+            <Link href="/admin">Back to Admin Dashboard</Link>
+          </Button>
+          <Button asChild>
+            <Link href="/admin/venues/new">New Venue</Link>
+          </Button>
+        </div>
       </div>
       <div className="border rounded-lg overflow-x-auto">
         <table className="w-full text-left min-w-[700px]">

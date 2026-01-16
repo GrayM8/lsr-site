@@ -10,10 +10,28 @@ export default async function Home() {
   const upcomingEventsRaw = await getNextEventForHomepage()
   const featuredEvent = upcomingEventsRaw.length > 0 ? upcomingEventsRaw[0] : null
   const upcomingEvents = upcomingEventsRaw.length > 0 ? upcomingEventsRaw.slice(1) : []
-  const drivers = await prisma.user.findMany({
+  
+  const rawDrivers = await prisma.user.findMany({
     where: { status: { not: "deleted" } },
-    orderBy: [{ iRating: { sort: 'desc', nulls: 'last' } }, { displayName: 'asc' }],
   })
+
+  const driverIds = rawDrivers.map(d => d.id);
+  const pointsData = await prisma.entry.groupBy({
+      by: ['userId'],
+      _sum: { totalPoints: true },
+      where: { userId: { in: driverIds } }
+  });
+  
+  const pointsMap = new Map(pointsData.map(p => [p.userId, p._sum.totalPoints || 0]));
+  
+  const drivers = rawDrivers.map(d => ({
+      ...d,
+      allTimePoints: pointsMap.get(d.id) || 0
+  })).sort((a, b) => {
+      if (b.allTimePoints !== a.allTimePoints) return b.allTimePoints - a.allTimePoints;
+      return a.displayName.localeCompare(b.displayName);
+  });
+
   const galleryImages = await getAllGalleryImages()
 
   return <HomePageClient

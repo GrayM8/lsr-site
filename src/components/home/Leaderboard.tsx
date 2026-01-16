@@ -5,12 +5,16 @@ import Image from "next/image"
 import { Trophy } from "lucide-react"
 import { cn } from "@/lib/utils"
 
+type DriverWithPoints = User & { allTimePoints: number };
+
 type Props = {
   index: number;
-  drivers: User[];
+  drivers: DriverWithPoints[];
 };
 
 export default function Leaderboard({ index, drivers }: Props) {
+  const maxPoints = drivers.length > 0 ? (drivers[0].allTimePoints || 1) : 1;
+
   return (
     <SectionReveal index={index} className="mx-auto max-w-6xl mt-10 md:mt-14" clipClass="rounded-none">
       <div className="bg-lsr-charcoal border border-white/5 relative overflow-hidden">
@@ -37,7 +41,7 @@ export default function Leaderboard({ index, drivers }: Props) {
                 <tr className="border-b border-white/10">
                   <th className="pb-4 text-left font-sans font-black uppercase tracking-widest text-[10px] text-white/30 px-4">P.</th>
                   <th className="pb-4 text-left font-sans font-black uppercase tracking-widest text-[10px] text-white/30 px-4">Driver</th>
-                  <th className="pb-4 text-right font-sans font-black uppercase tracking-widest text-[10px] text-white/30 px-4">Rating</th>
+                  <th className="pb-4 text-right font-sans font-black uppercase tracking-widest text-[10px] text-white/30 px-4">Points</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -86,14 +90,14 @@ export default function Leaderboard({ index, drivers }: Props) {
                       </td>
                       <td className="py-5 px-4 text-right">
                         <div className="inline-flex flex-col items-end">
-                          <span className="font-sans font-black text-white text-lg tracking-widest">{driver.iRating}</span>
+                          <span className="font-sans font-black text-white text-lg tracking-widest">{driver.allTimePoints}</span>
                           <div className={cn(
                             "h-1 w-full mt-1 bg-white/5 overflow-hidden",
                             i < 3 && "bg-lsr-orange/10"
                           )}>
                             <div 
                               className={cn("h-full", i < 3 ? "bg-lsr-orange" : "bg-white/20")} 
-                              style={{ width: `${Math.min((driver.iRating || 0) / 100, 100)}%` }} 
+                              style={{ width: `${Math.min((driver.allTimePoints || 0) / maxPoints * 100, 100)}%` }} 
                             />
                           </div>
                         </div>

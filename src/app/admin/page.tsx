@@ -12,6 +12,11 @@ const adminPages = [
     href: "/admin/series",
   },
   {
+    title: "Seasons",
+    description: "Manage seasons and standings.",
+    href: "/admin/seasons",
+  },
+  {
     title: "Venues",
     description: "Manage venues for events.",
     href: "/admin/venues",
@@ -30,6 +35,21 @@ const adminPages = [
     title: "Misc. Tools",
     description: "Access miscellaneous administrative tools.",
     href: "/admin/tools",
+  },
+  {
+    title: "Results",
+    description: "Upload and manage race results.",
+    href: "/admin/results",
+  },
+  {
+    title: "Driver Mappings",
+    description: "Map driver GUIDs to Users.",
+    href: "/admin/drivers",
+  },
+  {
+    title: "Car Mappings",
+    description: "Map game car names to display names.",
+    href: "/admin/cars",
   },
 ];
 

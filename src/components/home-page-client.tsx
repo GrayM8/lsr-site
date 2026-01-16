@@ -12,11 +12,13 @@ import FinalCta from "@/components/home/FinalCta"
 import { type NewsFrontmatter } from '@/lib/news';
 import { type User, type Event, type Venue, type EventSeries, type GalleryImage } from '@prisma/client';
 
+type DriverWithPoints = User & { allTimePoints: number };
+
 type Props = {
   posts: Array<NewsFrontmatter & { slug: string }>;
   featuredEvent?: Event & { venue: Venue | null, series: EventSeries | null };
   upcomingEvents: (Event & { venue: Venue | null, series: EventSeries | null })[];
-  drivers: User[];
+  drivers: DriverWithPoints[];
   galleryImages: GalleryImage[];
 }
 

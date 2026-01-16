@@ -1,4 +1,3 @@
-import { getSeriesBySlug } from "@/server/queries/series";
 import { notFound } from "next/navigation";
 import {
   Carousel,
@@ -11,13 +10,46 @@ import Image from "next/image";
 import Link from "next/link";
 import { getStandings } from "@/server/queries/standings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StandingsTable } from "@/components/standings-table";
+import { prisma } from "@/server/db";
+
+// Helper to fetch series with event results for podiums
+async function getSeriesWithPodiums(slug: string) {
+  return prisma.eventSeries.findUnique({
+    where: { slug },
+    include: {
+      events: {
+        orderBy: { startsAtUtc: "asc" },
+        include: {
+          venue: true,
+          ingestedSessions: {
+            where: { sessionType: "RACE" },
+            take: 1, // Take the main race session
+            orderBy: { startedAt: "desc" },
+            include: {
+              results: {
+                orderBy: { position: "asc" },
+                take: 3,
+                include: {
+                  participant: {
+                    include: { user: true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+}
 
 export default async function LoneStarCupPage() {
   // Fetch both seasons
   const [currentSeries, currentStandings, s1Series, s1Standings] = await Promise.all([
-    getSeriesBySlug("lone-star-cup-s2"),
+    getSeriesWithPodiums("lone-star-cup-s2"),
     getStandings("lone-star-cup-s2"),
-    getSeriesBySlug("lone-star-cup-s1"),
+    getSeriesWithPodiums("lone-star-cup-s1"),
     getStandings("lone-star-cup-s1"),
   ]);
 
@@ -35,6 +67,25 @@ export default async function LoneStarCupPage() {
       standings: s1Standings 
     }
   ].filter(s => s.series);
+
+  // Logic for Next/Previous Round
+  const now = new Date();
+  const sortedEvents = currentSeries.events; // Already sorted by ASC date in query
+  
+  // Find first event in future
+  const nextEventIndex = sortedEvents.findIndex(e => new Date(e.startsAtUtc) > now);
+  
+  const nextEvent = nextEventIndex !== -1 ? sortedEvents[nextEventIndex] : null;
+  // Previous is the one before next, OR the last one if no next event (season over)
+  const prevEvent = nextEventIndex > 0 ? sortedEvents[nextEventIndex - 1] : (nextEventIndex === -1 && sortedEvents.length > 0 ? sortedEvents[sortedEvents.length - 1] : null);
+
+  const getDriverName = (r: any) => r?.participant?.user?.displayName || r?.participant?.displayName || "TBD";
+
+  // Helper for Prev Event Podium
+  const prevResults = prevEvent?.ingestedSessions[0]?.results || [];
+  const p1 = prevResults.find(r => r.position === 1);
+  const p2 = prevResults.find(r => r.position === 2);
+  const p3 = prevResults.find(r => r.position === 3);
 
   return (
     <main className="bg-lsr-charcoal text-white min-h-screen">
@@ -76,145 +127,175 @@ export default async function LoneStarCupPage() {
               </TabsList>
               
               {/* CURRENT SEASON (S2) */}
-              <TabsContent value="current" className="pt-8 space-y-12 outline-none">
-                {/* Dashboard / Next Round */}
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div className="border border-white/10 bg-white/[0.02] p-6">
-                    <h3 className="font-sans font-black text-xs uppercase tracking-[0.2em] text-white/40 mb-4">Previous Round</h3>
-                    <div className="space-y-4">
-                      <div className="font-sans font-bold text-lg text-white">Placeholder Track Name</div>
-                      <div className="font-mono text-xs text-lsr-orange">YYYY-MM-DD</div>
-                      
-                      <div className="space-y-2 pt-4 border-t border-white/5">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-lsr-orange font-bold">P1</span>
-                          <span className="text-white/80">Placeholder Driver 1</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-white/40 font-bold">P2</span>
-                          <span className="text-white/80">Placeholder Driver 2</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-white/40 font-bold">P3</span>
-                          <span className="text-white/80">Placeholder Driver 3</span>
-                        </div>
-                      </div>
-                      
-                      <div className="pt-4 mt-2 border-t border-white/5 flex justify-between items-center">
-                        <span className="text-[10px] uppercase tracking-widest text-white/40">Fastest Lap</span>
-                        <span className="text-xs font-bold text-white">Placeholder Driver 4</span>
-                      </div>
-                      
-                      <a href="#" className="block w-full text-center bg-white/5 hover:bg-lsr-orange hover:text-white py-2 text-[10px] font-bold uppercase tracking-widest transition-colors mt-4">
-                        Watch Replay
-                      </a>
+              <TabsContent value="current" className="pt-8 outline-none">
+                <div className="bg-white/[0.02] border border-white/10 p-6 md:p-8 space-y-12">
+                    {/* Dashboard / Next Round */}
+                    <div className="grid md:grid-cols-2 gap-8">
+                    {/* Previous Round */}
+                    <div className="border border-white/10 bg-black/20 p-6 flex flex-col h-full">
+                        <h3 className="font-sans font-black text-xs uppercase tracking-[0.2em] text-white/40 mb-4">Previous Round</h3>
+                        {prevEvent ? (
+                            <div className="space-y-4 flex-1 flex flex-col">
+                                <div className="font-sans font-bold text-lg text-white leading-tight">{prevEvent.title}</div>
+                                <div className="font-mono text-xs text-lsr-orange">{new Date(prevEvent.startsAtUtc).toLocaleDateString()}</div>
+                                
+                                {prevResults.length > 0 ? (
+                                    <div className="space-y-2 pt-4 border-t border-white/5 mt-auto">
+                                        <div className="flex justify-between text-sm items-center">
+                                            <span className="text-lsr-orange font-bold w-6">P1</span>
+                                            <span className="text-white/80 truncate flex-1 text-right">{p1 ? getDriverName(p1) : "-"}</span>
+                                        </div>
+                                        <div className="flex justify-between text-sm items-center">
+                                            <span className="text-white/40 font-bold w-6">P2</span>
+                                            <span className="text-white/80 truncate flex-1 text-right">{p2 ? getDriverName(p2) : "-"}</span>
+                                        </div>
+                                        <div className="flex justify-between text-sm items-center">
+                                            <span className="text-white/40 font-bold w-6">P3</span>
+                                            <span className="text-white/80 truncate flex-1 text-right">{p3 ? getDriverName(p3) : "-"}</span>
+                                        </div>
+                                        <Link href={`/events/${prevEvent.slug}`} className="block w-full text-center bg-white/5 hover:bg-lsr-orange hover:text-white py-2 text-[10px] font-bold uppercase tracking-widest transition-colors mt-4">
+                                            View Full Results
+                                        </Link>
+                                    </div>
+                                ) : (
+                                    <div className="pt-4 border-t border-white/5 mt-auto">
+                                        <p className="text-xs text-white/40 italic">Results pending or unavailable.</p>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="flex-1 flex items-center justify-center border border-dashed border-white/10">
+                                <span className="font-sans font-bold text-[10px] uppercase tracking-widest text-white/20">No Previous Race</span>
+                            </div>
+                        )}
                     </div>
-                  </div>
-                  
-                  <div className="border border-white/10 bg-white/[0.02] p-6">
-                    <h3 className="font-sans font-black text-xs uppercase tracking-[0.2em] text-white/40 mb-4">Next Round</h3>
-                    <div className="space-y-4">
-                      <div className="font-sans font-bold text-lg text-white">Placeholder Track Name</div>
-                      <div className="font-mono text-xs text-lsr-orange">YYYY-MM-DD</div>
-                      <div className="aspect-video bg-black/50 border border-white/5 flex items-center justify-center">
-                        <span className="text-[10px] uppercase tracking-widest text-white/20">Track Map Unavailable</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <section>
-                  <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-6">
-                    Race <span className="text-lsr-orange">Calendar</span>
-                  </h3>
-                  <Carousel className="w-full">
-                    <CarouselContent className="-ml-4">
-                      {currentSeries.events.map((event) => (
-                        <CarouselItem key={event.id} className="pl-4 md:basis-1/2">
-                          <Link
-                            href={`/events/${event.slug}`}
-                            className="block group border border-white/10 bg-white/[0.02] hover:border-lsr-orange/50 transition-colors"
-                          >
-                            <div className="relative h-48 bg-black overflow-hidden">
-                              {event.heroImageUrl ? (
-                                <Image
-                                  src={event.heroImageUrl}
-                                  alt={event.title}
-                                  fill
-                                  style={{ objectFit: "cover" }}
-                                  className="opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500"
-                                />
-                              ) : (
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                  <span className="text-[10px] uppercase tracking-widest text-white/20">No Preview</span>
+                    
+                    {/* Next Round */}
+                    <div className="border border-white/10 bg-black/20 p-6 flex flex-col h-full">
+                        <h3 className="font-sans font-black text-xs uppercase tracking-[0.2em] text-white/40 mb-4">Next Round</h3>
+                        {nextEvent ? (
+                            <div className="space-y-4 flex-1">
+                                <div className="font-sans font-bold text-lg text-white leading-tight">{nextEvent.title}</div>
+                                <div className="font-mono text-xs text-lsr-orange">{new Date(nextEvent.startsAtUtc).toLocaleDateString()}</div>
+                                <div className="aspect-video bg-black border border-white/10 relative overflow-hidden group mt-4">
+                                    {nextEvent.heroImageUrl ? (
+                                        <Image src={nextEvent.heroImageUrl} alt={nextEvent.title} fill className="object-cover opacity-60" />
+                                    ) : (
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <span className="text-[10px] uppercase tracking-widest text-white/20">Track Map Unavailable</span>
+                                        </div>
+                                    )}
                                 </div>
-                              )}
-                              <div className="absolute top-0 right-0 bg-lsr-orange text-white px-2 py-1 text-[9px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
-                                View
-                              </div>
+                                <Link href={`/events/${nextEvent.slug}`} className="block w-full text-center bg-lsr-orange text-white hover:bg-white hover:text-lsr-charcoal py-2 text-[10px] font-bold uppercase tracking-widest transition-colors mt-4">
+                                    Event Details
+                                </Link>
                             </div>
-                            <div className="p-4">
-                              <div className="font-mono text-[10px] text-lsr-orange mb-1">
-                                {new Date(event.startsAtUtc).toLocaleDateString()}
-                              </div>
-                              <h4 className="font-sans font-bold text-sm text-white uppercase tracking-tight truncate">{event.title}</h4>
+                        ) : (
+                            <div className="flex-1 flex items-center justify-center border border-dashed border-white/10">
+                                <span className="font-sans font-bold text-[10px] uppercase tracking-widest text-white/20">Season Completed</span>
                             </div>
-                          </Link>
-                        </CarouselItem>
-                      ))}
-                    </CarouselContent>
-                    <div className="flex justify-end gap-2 mt-4">
-                      <CarouselPrevious className="static translate-y-0 h-8 w-8 rounded-none border-white/10 hover:bg-lsr-orange hover:border-lsr-orange hover:text-white" />
-                      <CarouselNext className="static translate-y-0 h-8 w-8 rounded-none border-white/10 hover:bg-lsr-orange hover:border-lsr-orange hover:text-white" />
+                        )}
                     </div>
-                  </Carousel>
-                </section>
+                    </div>
 
-                <section>
-                  <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-6">
-                    Championship <span className="text-lsr-orange">Standings</span>
-                  </h3>
-                  <div className="overflow-x-auto border border-white/10">
-                    <table className="w-full text-left text-sm">
-                      <thead className="bg-white/5 font-sans font-black text-[9px] uppercase tracking-widest text-white/40">
-                        <tr>
-                          <th className="p-4 w-12">Pos</th>
-                          <th className="p-4">Driver</th>
-                          <th className="p-4">Car</th>
-                          <th className="p-4 text-center">Starts</th>
-                          <th className="p-4 text-center">Wins</th>
-                          <th className="p-4 text-center">Podiums</th>
-                          <th className="p-4 text-right">Pts</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-white/5 font-sans text-white/80">
-                        {currentStandings.map((standing: { driver: { id: string, name: string }, car: string | undefined, starts: number, wins: number, podiums: number, points: number }, index) => (
-                          <tr key={standing.driver.id} className="hover:bg-white/[0.02]">
-                            <td className="p-4 font-bold text-white">{index + 1}</td>
-                            <td className="p-4 font-bold text-white uppercase tracking-tight">{standing.driver.name}</td>
-                            <td className="p-4 text-xs text-white/50 uppercase">{standing.car}</td>
-                            <td className="p-4 text-center text-white/50">{standing.starts}</td>
-                            <td className="p-4 text-center text-white/50">{standing.wins}</td>
-                            <td className="p-4 text-center text-white/50">{standing.podiums}</td>
-                            <td className="p-4 text-right font-mono font-bold text-lsr-orange">{standing.points}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </section>
+                    <section>
+                    <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-6">
+                        Race <span className="text-lsr-orange">Calendar</span>
+                    </h3>
+                    <Carousel className="w-full">
+                        <CarouselContent className="-ml-4">
+                        {currentSeries.events.map((event) => {
+                            // Extract podium if available (Same logic as archive)
+                            const raceSession = event.ingestedSessions[0];
+                            const results = raceSession?.results || [];
+                            const p1 = results.find(r => r.position === 1);
+                            const p2 = results.find(r => r.position === 2);
+                            const p3 = results.find(r => r.position === 3);
+                            
+                            return (
+                                <CarouselItem key={event.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                                <div className="group border border-white/10 bg-black/20 hover:border-lsr-orange/50 transition-colors h-full flex flex-col">
+                                    <Link href={`/events/${event.slug}`} className="block relative h-40 bg-black overflow-hidden shrink-0">
+                                    {event.heroImageUrl ? (
+                                        <Image
+                                        src={event.heroImageUrl}
+                                        alt={event.title}
+                                        fill
+                                        style={{ objectFit: "cover" }}
+                                        className="opacity-50 group-hover:opacity-80 transition-all duration-500"
+                                        />
+                                    ) : (
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                        <span className="text-[9px] uppercase tracking-widest text-white/20">No Preview</span>
+                                        </div>
+                                    )}
+                                    </Link>
+                                    
+                                    <div className="p-4 border-b border-white/5 flex-grow">
+                                    <div className="font-mono text-[9px] text-lsr-orange mb-1">
+                                        {new Date(event.startsAtUtc).toLocaleDateString()}
+                                    </div>
+                                    <h4 className="font-sans font-bold text-xs text-white uppercase tracking-tight line-clamp-2">{event.title}</h4>
+                                    </div>
+
+                                    {/* Podium Section */}
+                                    <div className="p-4 bg-white/[0.02]">
+                                        <div className="space-y-2 mb-3">
+                                            <div className="flex justify-between items-center text-[10px]">
+                                                <span className="font-bold text-lsr-orange w-4">1</span>
+                                                <span className="text-white/80 truncate flex-1 text-right">{p1 ? getDriverName(p1) : "TBD"}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center text-[10px]">
+                                                <span className="font-bold text-white/40 w-4">2</span>
+                                                <span className="text-white/60 truncate flex-1 text-right">{p2 ? getDriverName(p2) : "TBD"}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center text-[10px]">
+                                                <span className="font-bold text-white/40 w-4">3</span>
+                                                <span className="text-white/60 truncate flex-1 text-right">{p3 ? getDriverName(p3) : "TBD"}</span>
+                                            </div>
+                                        </div>
+                                        <Link href={`/events/${event.slug}`} className="block text-[9px] font-bold uppercase tracking-widest text-white/30 hover:text-lsr-orange text-center transition-colors border-t border-white/5 pt-2">
+                                            View Results
+                                        </Link>
+                                    </div>
+                                </div>
+                                </CarouselItem>
+                            );
+                        })}
+                        </CarouselContent>
+                        <div className="flex justify-end gap-2 mt-4">
+                        <CarouselPrevious className="static translate-y-0 h-8 w-8 rounded-none border-white/10 hover:bg-lsr-orange hover:border-lsr-orange hover:text-white" />
+                        <CarouselNext className="static translate-y-0 h-8 w-8 rounded-none border-white/10 hover:bg-lsr-orange hover:border-lsr-orange hover:text-white" />
+                        </div>
+                    </Carousel>
+                    </section>
+
+                    <section>
+                    <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-6">
+                        Championship <span className="text-lsr-orange">Standings</span>
+                    </h3>
+                    {currentStandings.length > 0 ? (
+                        <StandingsTable standings={currentStandings} />
+                    ) : (
+                        <div className="border border-white/10 bg-black/20 p-12 text-center">
+                            <p className="font-sans font-bold text-white/40 uppercase tracking-widest text-sm">No Data to Display Yet</p>
+                            <p className="font-sans text-[10px] text-white/20 uppercase tracking-widest mt-2">Standings will populate after the first round</p>
+                        </div>
+                    )}
+                    </section>
+                </div>
               </TabsContent>
               
               {/* ARCHIVE (List of Previous Seasons) */}
-              <TabsContent value="history" className="pt-8 space-y-16 outline-none">
+              <TabsContent value="history" className="pt-8 space-y-12 outline-none">
                 {archivedSeasons.length > 0 ? (
                   archivedSeasons.map((season) => (
-                    <div key={season.id} className="space-y-8 border-b border-white/5 pb-12 last:border-0 last:pb-0">
-                      <div className="flex items-baseline justify-between border-b border-white/10 pb-4">
+                    <div key={season.id} className="bg-white/[0.02] border border-white/10 p-6 md:p-8 space-y-10">
+                      <div className="flex flex-col md:flex-row md:items-baseline justify-between border-b border-white/10 pb-4 gap-2">
                         <h3 className="font-display font-black italic text-3xl text-white uppercase tracking-normal">
                           {season.label} <span className="text-lsr-orange">Archive</span>
                         </h3>
-                        <span className="font-mono text-xs text-white/40">{season.series?.title}</span>
+                        <span className="font-mono text-xs text-white/40 uppercase tracking-widest">{season.series?.title}</span>
                       </div>
 
                       {/* Race Calendar */}
@@ -222,38 +303,68 @@ export default async function LoneStarCupPage() {
                         <h4 className="font-sans font-black text-xs uppercase tracking-[0.2em] text-white/60">Race Calendar</h4>
                         <Carousel className="w-full">
                           <CarouselContent className="-ml-4">
-                            {season.series!.events.map((event) => (
-                              <CarouselItem key={event.id} className="pl-4 md:basis-1/3 lg:basis-1/4">
-                                <Link
-                                  href={`/events/${event.slug}`}
-                                  className="block group border border-white/10 bg-white/[0.02] hover:border-lsr-orange/50 transition-colors"
-                                >
-                                  <div className="relative h-32 bg-black overflow-hidden">
-                                    {event.heroImageUrl ? (
-                                      <Image
-                                        src={event.heroImageUrl}
-                                        alt={event.title}
-                                        fill
-                                        style={{ objectFit: "cover" }}
-                                        className="opacity-50 group-hover:opacity-80 transition-all duration-500"
-                                      />
-                                    ) : (
-                                      <div className="absolute inset-0 flex items-center justify-center">
-                                        <span className="text-[9px] uppercase tracking-widest text-white/20">No Preview</span>
+                            {season.series!.events.map((event) => {
+                                // Extract podium if available
+                                const raceSession = event.ingestedSessions[0];
+                                const results = raceSession?.results || [];
+                                const p1 = results.find(r => r.position === 1);
+                                const p2 = results.find(r => r.position === 2);
+                                const p3 = results.find(r => r.position === 3);
+                                
+                                const getDriverName = (r: any) => r?.participant?.user?.displayName || r?.participant?.displayName || "TBD";
+
+                                return (
+                                  <CarouselItem key={event.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                                    <div className="group border border-white/10 bg-black/20 hover:border-lsr-orange/50 transition-colors h-full flex flex-col">
+                                      <Link href={`/events/${event.slug}`} className="block relative h-40 bg-black overflow-hidden shrink-0">
+                                        {event.heroImageUrl ? (
+                                          <Image
+                                            src={event.heroImageUrl}
+                                            alt={event.title}
+                                            fill
+                                            style={{ objectFit: "cover" }}
+                                            className="opacity-50 group-hover:opacity-80 transition-all duration-500"
+                                          />
+                                        ) : (
+                                          <div className="absolute inset-0 flex items-center justify-center">
+                                            <span className="text-[9px] uppercase tracking-widest text-white/20">No Preview</span>
+                                          </div>
+                                        )}
+                                      </Link>
+                                      
+                                      <div className="p-4 border-b border-white/5 flex-grow">
+                                        <div className="font-mono text-[9px] text-lsr-orange mb-1">
+                                          {new Date(event.startsAtUtc).toLocaleDateString()}
+                                        </div>
+                                        <h4 className="font-sans font-bold text-xs text-white uppercase tracking-tight line-clamp-2">{event.title}</h4>
                                       </div>
-                                    )}
-                                  </div>
-                                  <div className="p-3">
-                                    <div className="font-mono text-[9px] text-lsr-orange mb-1">
-                                      {new Date(event.startsAtUtc).toLocaleDateString()}
+
+                                      {/* Podium Section */}
+                                      <div className="p-4 bg-white/[0.02]">
+                                          <div className="space-y-2 mb-3">
+                                              <div className="flex justify-between items-center text-[10px]">
+                                                  <span className="font-bold text-lsr-orange w-4">1</span>
+                                                  <span className="text-white/80 truncate flex-1 text-right">{p1 ? getDriverName(p1) : "TBD"}</span>
+                                              </div>
+                                              <div className="flex justify-between items-center text-[10px]">
+                                                  <span className="font-bold text-white/40 w-4">2</span>
+                                                  <span className="text-white/60 truncate flex-1 text-right">{p2 ? getDriverName(p2) : "TBD"}</span>
+                                              </div>
+                                              <div className="flex justify-between items-center text-[10px]">
+                                                  <span className="font-bold text-white/40 w-4">3</span>
+                                                  <span className="text-white/60 truncate flex-1 text-right">{p3 ? getDriverName(p3) : "TBD"}</span>
+                                              </div>
+                                          </div>
+                                          <Link href={`/events/${event.slug}`} className="block text-[9px] font-bold uppercase tracking-widest text-white/30 hover:text-lsr-orange text-center transition-colors border-t border-white/5 pt-2">
+                                              View Results
+                                          </Link>
+                                      </div>
                                     </div>
-                                    <h4 className="font-sans font-bold text-xs text-white uppercase tracking-tight truncate">{event.title}</h4>
-                                  </div>
-                                </Link>
-                              </CarouselItem>
-                            ))}
+                                  </CarouselItem>
+                                );
+                            })}
                           </CarouselContent>
-                          <div className="flex justify-end gap-2 mt-2">
+                          <div className="flex justify-end gap-2 mt-4">
                             <CarouselPrevious className="static translate-y-0 h-6 w-6 rounded-none border-white/10 hover:bg-lsr-orange hover:border-lsr-orange hover:text-white" />
                             <CarouselNext className="static translate-y-0 h-6 w-6 rounded-none border-white/10 hover:bg-lsr-orange hover:border-lsr-orange hover:text-white" />
                           </div>
@@ -263,34 +374,13 @@ export default async function LoneStarCupPage() {
                       {/* Standings */}
                       <div className="space-y-4">
                         <h4 className="font-sans font-black text-xs uppercase tracking-[0.2em] text-white/60">Final Standings</h4>
-                        <div className="overflow-x-auto border border-white/10 bg-white/[0.01]">
-                          <table className="w-full text-left text-xs">
-                            <thead className="bg-white/5 font-sans font-black text-[9px] uppercase tracking-widest text-white/40">
-                              <tr>
-                                <th className="p-3 w-10">Pos</th>
-                                <th className="p-3">Driver</th>
-                                <th className="p-3">Car</th>
-                                <th className="p-3 text-center">Starts</th>
-                                <th className="p-3 text-center">Wins</th>
-                                <th className="p-3 text-center">Podiums</th>
-                                <th className="p-3 text-right">Pts</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5 font-sans text-white/70">
-                              {season.standings.map((standing: { driver: { id: string, name: string }, car: string | undefined, starts: number, wins: number, podiums: number, points: number }, index) => (
-                                <tr key={standing.driver.id} className="hover:bg-white/[0.02]">
-                                  <td className="p-3 font-bold text-white">{index + 1}</td>
-                                  <td className="p-3 font-bold text-white uppercase tracking-tight">{standing.driver.name}</td>
-                                  <td className="p-3 text-[10px] text-white/50 uppercase">{standing.car}</td>
-                                  <td className="p-3 text-center text-white/50">{standing.starts}</td>
-                                  <td className="p-3 text-center text-white/50">{standing.wins}</td>
-                                  <td className="p-3 text-center text-white/50">{standing.podiums}</td>
-                                  <td className="p-3 text-right font-mono font-bold text-lsr-orange">{standing.points}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
+                        {season.standings.length > 0 ? (
+                            <StandingsTable standings={season.standings} />
+                        ) : (
+                            <div className="border border-white/10 bg-black/20 p-8 text-center">
+                                <p className="font-sans font-bold text-white/40 uppercase tracking-widest text-xs">No Data Archived</p>
+                            </div>
+                        )}
                       </div>
                     </div>
                   ))
