@@ -353,7 +353,7 @@ export async function ingestUpload(uploadId: string) {
         }
     }
 
-    // 4. Process Laps (Same as before)
+    // 4. Process Laps
     if (Array.isArray(data.Laps)) {
         const lapsToCreate: any[] = [];
         const driverLapCounts = new Map<string, number>();
@@ -413,13 +413,21 @@ export async function ingestUpload(uploadId: string) {
         }
     }
 
-    // 5. Process Events (Same as before)
+    // 5. Process Events & Count Collisions
     if (Array.isArray(data.Events)) {
         const eventsToCreate: any[] = [];
+        const collisionCounts = new Map<string, number>();
+
         for (const evt of data.Events) {
             let participantId = null;
             if (evt.CarId !== undefined) participantId = carIdToParticipantId.get(evt.CarId);
             if (!participantId && evt.Driver?.Guid) participantId = guidToParticipantId.get(evt.Driver.Guid);
+
+            // Increment collision count for primary participant
+            if (participantId && (evt.Type === 'COLLISION_WITH_CAR' || evt.Type === 'COLLISION_WITH_ENV')) {
+                 const count = collisionCounts.get(participantId) || 0;
+                 collisionCounts.set(participantId, count + 1);
+            }
 
             let otherParticipantId = null;
             if (evt.OtherCarId !== undefined && evt.OtherCarId !== -1) {
@@ -427,6 +435,12 @@ export async function ingestUpload(uploadId: string) {
             }
             if (!otherParticipantId && evt.OtherDriver?.Guid) {
                 otherParticipantId = guidToParticipantId.get(evt.OtherDriver.Guid);
+            }
+            
+            // Increment collision count for other participant (only if with car)
+            if (otherParticipantId && evt.Type === 'COLLISION_WITH_CAR') {
+                 const count = collisionCounts.get(otherParticipantId) || 0;
+                 collisionCounts.set(otherParticipantId, count + 1);
             }
 
             eventsToCreate.push({
@@ -447,9 +461,18 @@ export async function ingestUpload(uploadId: string) {
                 relPosZ: evt.RelPosition?.Z,
             });
         }
+        
         if (eventsToCreate.length > 0) {
             await tx.raceEvent.createMany({
                 data: eventsToCreate
+            });
+        }
+        
+        // Backfill collisionCount in RaceResult
+        for (const [pid, count] of collisionCounts) {
+             await tx.raceResult.updateMany({
+                where: { sessionId: session.id, participantId: pid },
+                data: { collisionCount: count }
             });
         }
     }

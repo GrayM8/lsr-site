@@ -12,6 +12,11 @@ const adminPages = [
     href: "/admin/series",
   },
   {
+    title: "Seasons",
+    description: "Manage seasons and standings.",
+    href: "/admin/seasons",
+  },
+  {
     title: "Venues",
     description: "Manage venues for events.",
     href: "/admin/venues",

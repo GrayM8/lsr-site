@@ -40,8 +40,8 @@ export function ResultsTable({ results }: { results: ResultWithParticipant[] }) 
   }
 
   return (
-    <div className="border border-white/10 bg-black/40">
-      <Table>
+    <div className="border border-white/10 bg-black/40 overflow-x-auto">
+      <Table className="min-w-[800px]">
         <TableHeader className="bg-white/5 border-b border-white/10">
           <TableRow className="hover:bg-transparent">
             <TableHead className="w-12 text-center text-[10px] font-black uppercase tracking-widest text-white/50">Pos</TableHead>
@@ -52,6 +52,7 @@ export function ResultsTable({ results }: { results: ResultWithParticipant[] }) 
             <TableHead className="text-right text-[10px] font-black uppercase tracking-widest text-white/50">Gap</TableHead>
             <TableHead className="text-right text-[10px] font-black uppercase tracking-widest text-white/50">Best Lap</TableHead>
             <TableHead className="text-center text-[10px] font-black uppercase tracking-widest text-white/50">Cuts</TableHead>
+            <TableHead className="text-center text-[10px] font-black uppercase tracking-widest text-white/50">Collisions</TableHead>
             <TableHead className="text-center text-[10px] font-black uppercase tracking-widest text-white/50">Pts</TableHead>
           </TableRow>
         </TableHeader>
@@ -113,6 +114,9 @@ export function ResultsTable({ results }: { results: ResultWithParticipant[] }) 
                 <TableCell className="text-right font-mono text-xs text-lsr-orange">{formatTime(result.bestLapTime)}</TableCell>
                 <TableCell className={`text-center font-mono text-xs ${result.totalCuts && result.totalCuts > 0 ? 'text-red-400' : 'text-white/40'}`}>
                     {result.totalCuts ?? 0}
+                </TableCell>
+                <TableCell className={`text-center font-mono text-xs ${result.collisionCount && result.collisionCount > 0 ? 'text-red-400 font-bold' : 'text-white/40'}`}>
+                    {result.collisionCount ?? 0}
                 </TableCell>
                 <TableCell className="text-center font-sans font-black text-sm text-lsr-orange">
                     {result.points !== null && result.points > 0 ? result.points : "-"}
