@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     siteName: "Longhorn Sim Racing",
     images: [
       {
-        url: "/api/og",
+        url: "/brand/og.png",
         width: 1200,
         height: 630,
         alt: "Longhorn Sim Racing",
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     images: [
       {
-        url: "/api/og",
+        url: "/brand/og.png",
         width: 1200,
         height: 630,
         alt: "Longhorn Sim Racing",
