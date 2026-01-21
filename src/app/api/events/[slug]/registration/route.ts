@@ -45,6 +45,8 @@ export async function GET(req: NextRequest, { params }: Params) {
   
   if (!event.registrationEnabled) {
     windowStatus = "DISABLED";
+  } else if (now > event.endsAtUtc) {
+    windowStatus = "PASSED";
   } else if (event.registrationOpensAt && now < event.registrationOpensAt) {
     windowStatus = "NOT_OPEN";
   } else if (event.registrationClosesAt && now > event.registrationClosesAt) {

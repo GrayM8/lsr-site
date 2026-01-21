@@ -17,7 +17,7 @@ type Attendee = {
 type RegistrationSnapshot = {
   eventId: string;
   registrationEnabled: boolean;
-  windowStatus: "OPEN" | "CLOSED" | "NOT_OPEN" | "DISABLED";
+  windowStatus: "OPEN" | "CLOSED" | "NOT_OPEN" | "DISABLED" | "PASSED";
   registrationOpensAt: string | null;
   registrationClosesAt: string | null;
   capacity: number | null;
@@ -186,10 +186,9 @@ export function EventRegistrationPanel({ eventSlug, userLoggedIn }: { eventSlug:
             </>
         ) : (
             <div className="text-center py-3 bg-white/5 text-white/40 text-[10px] font-bold uppercase tracking-widest border border-white/5">
-                {snapshot.windowStatus === "NOT_OPEN" 
-                    ? `Opens ${snapshot.registrationOpensAt ? new Date(snapshot.registrationOpensAt).toLocaleString() : "Soon"}`
-                    : "Registration Closed"
-                }
+                {snapshot.windowStatus === "PASSED" && "This event has passed. Registration is not possible."}
+                {snapshot.windowStatus === "CLOSED" && "Registration for this event has closed."}
+                {snapshot.windowStatus === "NOT_OPEN" && `Registration opens ${snapshot.registrationOpensAt ? new Date(snapshot.registrationOpensAt).toLocaleString() : "soon"}`}
             </div>
         )}
       </div>
