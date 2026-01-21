@@ -1,9 +1,11 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { prisma } from '@/server/db';
 import { ROLE_LABEL, type RoleCode } from '@/lib/roles';
 import { DriversFilters } from '@/components/drivers-filters';
 import { DriversSearch } from '@/components/drivers-search';
 import { DriversTable } from '@/components/drivers-table';
+import { DriversSidebar } from '@/components/drivers-sidebar';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,6 +71,61 @@ export default async function DriversIndexPage({
       return true;
   });
 
+  const now = new Date();
+
+  // Fetch Latest Result Event
+  const latestEvent = await prisma.event.findFirst({
+      where: {
+          ingestedSessions: {
+              some: {
+                  sessionType: "RACE",
+                  results: { some: {} }
+              }
+          }
+      },
+      orderBy: { startsAtUtc: 'desc' },
+      include: {
+          series: true,
+          round: { include: { season: true } },
+          ingestedSessions: {
+              where: { sessionType: "RACE" },
+              orderBy: { startedAt: 'desc' },
+              take: 1,
+              include: {
+                  results: {
+                      orderBy: { position: 'asc' },
+                      take: 3,
+                      include: {
+                          participant: {
+                              include: { user: true }
+                          }
+                      }
+                  }
+              }
+          }
+      }
+  });
+
+  // Fetch Upcoming Event
+  const upcomingEvent = await prisma.event.findFirst({
+      where: {
+          startsAtUtc: { gt: now },
+          status: { not: "canceled" },
+          series: {
+              slug: { contains: "lone-star-cup" }
+          }
+      },
+      orderBy: { startsAtUtc: 'asc' },
+      include: {
+          series: true,
+          round: { include: { season: true } },
+          ingestedSessions: {
+             // Included to satisfy type, returns empty usually
+             include: { results: { include: { participant: { include: { user: true } } } } }
+          }
+      }
+  });
+
   return (
     <main className="bg-lsr-charcoal text-white min-h-screen">
       <div className="mx-auto max-w-6xl px-6 md:px-8 py-14 md:py-20">
@@ -87,34 +144,7 @@ export default async function DriversIndexPage({
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-1">
-            <div className="border border-white/10 bg-white/[0.02] p-6 sticky top-24">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="font-display font-black italic text-2xl text-white uppercase tracking-normal">Latest <span className="text-lsr-orange">Results</span></h2>
-                <div className="h-px flex-1 bg-white/10 ml-4" />
-              </div>
-              
-              <div className="aspect-video bg-black border border-white/10 relative overflow-hidden group">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <p className="font-sans font-black text-[10px] uppercase tracking-[0.2em] text-white/20">[Circuit Data Unavailable]</p>
-                </div>
-                {/* Scanline effect */}
-                <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px] opacity-20 pointer-events-none" />
-              </div>
-              
-              <div className="mt-6 space-y-4">
-                <h3 className="font-sans font-bold text-xs uppercase tracking-[0.2em] text-lsr-orange">Podium Finishers</h3>
-                <ul className="space-y-3">
-                  {['TBD', 'TBD', 'TBD'].map((driver, i) => (
-                    <li key={i} className="flex items-center gap-3 text-sm border-b border-white/5 pb-2 last:border-0 last:pb-0">
-                      <span className={`font-display font-black italic text-lg w-6 ${i === 0 ? 'text-lsr-orange' : 'text-white/30'}`}>
-                        {i + 1}
-                      </span>
-                      <span className="font-sans font-bold text-white/70 uppercase tracking-wide text-xs">{driver}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+            <DriversSidebar latestEvent={latestEvent} upcomingEvent={upcomingEvent} />
           </div>
 
           <div className="md:col-span-2">
