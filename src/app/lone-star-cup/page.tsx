@@ -437,7 +437,7 @@ export default async function LoneStarCupPage() {
                   <h4 className="font-display font-black italic text-xl text-white uppercase tracking-normal">Bryan Reyes</h4>
                   <p className="font-sans font-bold text-[9px] uppercase tracking-widest text-lsr-orange mb-3">Competitive Lead</p>
                   <p className="font-sans text-xs text-white/60 leading-relaxed">
-                    Ever since I was little, I’ve been fascinated with racing. I still remember watching Cars for the first time and instantly wanting to be Lightning McQueen. After gaining 5 years of racing experience, I have found that I enjoy coaching and teaching others about racing as much as being on the track.
+                    Ever since I was little, I’ve been fascinated with racing. I still remember watching Cars for the first time and instantly wanting to be Lightning McQueen. After gaining 5 years of sim racing experience, I have found that I enjoy coaching and teaching others about racing as much as being on the track.
                   </p>
                 </div>
 
