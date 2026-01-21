@@ -42,12 +42,16 @@ export async function GET(req: NextRequest, { params }: Params) {
   // Base snapshot (public/logged-out safe)
   const now = new Date();
   let windowStatus = "NOT_OPEN";
-  if (event.registrationOpensAt && now < event.registrationOpensAt) windowStatus = "NOT_OPEN";
-  else if (event.registrationClosesAt && now > event.registrationClosesAt) windowStatus = "CLOSED";
-  else if (event.registrationEnabled) windowStatus = "OPEN";
   
-  // If not enabled globally, it overrides dates
-  if (!event.registrationEnabled) windowStatus = "CLOSED"; // Or "DISABLED"
+  if (!event.registrationEnabled) {
+    windowStatus = "DISABLED";
+  } else if (event.registrationOpensAt && now < event.registrationOpensAt) {
+    windowStatus = "NOT_OPEN";
+  } else if (event.registrationClosesAt && now > event.registrationClosesAt) {
+    windowStatus = "CLOSED";
+  } else {
+    windowStatus = "OPEN";
+  }
 
   const snapshot = {
     eventId: event.id,

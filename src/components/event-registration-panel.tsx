@@ -17,7 +17,7 @@ type Attendee = {
 type RegistrationSnapshot = {
   eventId: string;
   registrationEnabled: boolean;
-  windowStatus: "OPEN" | "CLOSED" | "NOT_OPEN";
+  windowStatus: "OPEN" | "CLOSED" | "NOT_OPEN" | "DISABLED";
   registrationOpensAt: string | null;
   registrationClosesAt: string | null;
   capacity: number | null;
@@ -51,14 +51,10 @@ export function EventRegistrationPanel({ eventSlug, userLoggedIn }: { eventSlug:
 
   useEffect(() => {
     fetchSnapshot();
-  }, [eventSlug]);
+  }, [eventSlug, userLoggedIn]);
 
   const handleAction = async (intent: "YES" | "NO") => {
-    if (!userLoggedIn) {
-      // Trigger auth dialog ideally, but for now redirect or just show message
-      // Assuming parent handles 'Log in to register' CTA if not logged in
-      return;
-    }
+    if (!userLoggedIn) return;
     
     setActionLoading(true);
     try {
@@ -71,7 +67,7 @@ export function EventRegistrationPanel({ eventSlug, userLoggedIn }: { eventSlug:
       if (res.ok) {
         const updatedSnapshot = await res.json();
         setSnapshot(updatedSnapshot);
-        router.refresh(); // Refresh server components if needed
+        router.refresh(); 
       } else {
         const err = await res.json();
         alert(err.message || "Registration failed");
@@ -84,29 +80,37 @@ export function EventRegistrationPanel({ eventSlug, userLoggedIn }: { eventSlug:
     }
   };
 
-  if (!userLoggedIn) {
-    return (
-      <div className="pt-6 border-t border-white/10 text-center space-y-4">
-        <p className="text-white/40 text-[10px] uppercase tracking-widest font-bold">
-            Registration and attendee lists are restricted to members only.
-        </p>
-        <Button 
-          className="w-full rounded-none bg-lsr-orange text-white hover:bg-white hover:text-lsr-charcoal font-black uppercase tracking-[0.2em] text-[10px] h-12 transition-all"
-          onClick={() => {
-             document.dispatchEvent(new CustomEvent("open-auth-dialog")); 
-          }}
-        >
-          Log in to Register & View Attendees
-        </Button>
-      </div>
-    );
-  }
-
   if (loading && !snapshot) {
     return <div className="pt-6 border-t border-white/10 text-center text-white/40 text-xs animate-pulse">Loading registration...</div>;
   }
 
   if (!snapshot) return null;
+
+  if (snapshot.windowStatus === "DISABLED") {
+    return (
+        <div className="pt-6 border-t border-white/10 text-center text-white/40 text-[10px] uppercase tracking-widest font-bold">
+            Registration not required for this event.
+        </div>
+    );
+  }
+
+  if (!userLoggedIn) {
+    return (
+      <div className="pt-6 border-t border-white/10 text-center space-y-4">
+        <p className="text-white/40 text-[10px] uppercase tracking-widest font-bold px-2">
+            Registration and attendee lists are restricted to members only.
+        </p>
+        <Button 
+          className="w-full rounded-none bg-lsr-orange text-white hover:bg-white hover:text-lsr-charcoal font-black uppercase tracking-[0.1em] text-[10px] h-12 transition-all"
+          onClick={() => {
+             window.dispatchEvent(new CustomEvent("open-auth-dialog")); 
+          }}
+        >
+          Log In to Register
+        </Button>
+      </div>
+    );
+  }
 
   const isFull = snapshot.capacity !== null && snapshot.registeredCount >= snapshot.capacity;
   const canRegister = snapshot.windowStatus === "OPEN" && (!isFull || snapshot.waitlistEnabled);
