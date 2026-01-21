@@ -21,9 +21,9 @@ export default async function EditEventPage({ params }: EditEventArgs) {
   }
 
   return (
-    <main className="mx-auto max-w-2xl p-8">
+    <main className="mx-auto max-w-4xl p-8 pb-32">
       <h1 className="text-3xl font-bold mb-6">Edit Event</h1>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto space-y-12">
         <EventForm event={event} series={series} venues={venues} />
       </div>
     </main>

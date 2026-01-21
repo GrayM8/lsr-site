@@ -40,10 +40,11 @@ enum EventType {
   social
 }
 
-enum RSVPStatus {
-  going
-  waitlist
-  canceled
+// Replaced RSVPStatus with RegistrationStatus
+enum RegistrationStatus {
+  REGISTERED
+  WAITLISTED
+  NOT_ATTENDING
 }
 
 enum CheckinMethod {
@@ -107,7 +108,8 @@ enum AuditAction {
   import
   login
   logout
-  rsvp
+  rsvp // Kept for legacy history if needed, though we can deprecate
+  registration_change // New action
   checkin
   payment_success
   payment_failed
@@ -140,7 +142,7 @@ model User {
   memberships            UserMembership[]
   posts                  Post[]           @relation("PostAuthor")
   pages                  Page[]           @relation("PageAuthor")
-  RSVPs                  RSVP[]
+  registrations          EventRegistration[] // Renamed from RSVPs
   checkins               Attendance[]
   entries                Entry[]          @relation("EntryUser")
   auditLogs              AuditLog[]       @relation("AuditActor")
@@ -552,11 +554,14 @@ model Event {
   visibility Visibility  @default(public)
   status     EventStatus @default(scheduled)
 
-  rsvpRequired    Boolean   @default(false)
-  rsvpOpenAt      DateTime?
-  rsvpCloseAt     DateTime?
-  capacity        Int?
-  waitlistEnabled Boolean   @default(true)
+  // Registration Config (Renamed/New fields)
+  registrationEnabled         Boolean   @default(false)
+  registrationOpensAt         DateTime?
+  registrationClosesAt        DateTime?
+  registrationMax             Int?
+  registrationWaitlistEnabled Boolean   @default(false)
+
+  // Removed old fields to avoid confusion: rsvpRequired, rsvpOpenAt, rsvpCloseAt, capacity, waitlistEnabled
 
   meetingUrl         String?
   streamUrl          String?
@@ -566,9 +571,9 @@ model Event {
   series EventSeries? @relation(fields: [seriesId], references: [id], onDelete: SetNull)
   venue  Venue?       @relation(fields: [venueId], references: [id], onDelete: SetNull)
 
-  eligibility EventEligibility?
-  rsvps       RSVP[]
-  checkins    Attendance[]
+  eligibility   EventEligibility?
+  registrations EventRegistration[] // Renamed from rsvps
+  checkins      Attendance[]
 
   rawResultUploads RawResultUpload[]
   ingestedSessions RaceSession[]
@@ -599,21 +604,28 @@ model EventEligibility {
   @@index([minRoleId])
 }
 
-model RSVP {
-  id          String     @id @default(uuid())
-  eventId     String
-  userId      String
-  status      RSVPStatus
-  waitlistPos Int?
-  respondedAt DateTime   @default(now())
-  source      String     @default("web")
+// Renamed from RSVP
+model EventRegistration {
+  id              String             @id @default(uuid())
+  eventId         String
+  userId          String
+  status          RegistrationStatus
+  
+  // Waitlist Logic
+  waitlistOrder   Int?
+  promotedAt      DateTime?
+  promotionSource String? // "AUTO", "ADMIN"
+  statusReason    String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([eventId, userId])
-  @@index([eventId, status, respondedAt])
-  @@index([eventId, waitlistPos])
+  @@index([eventId, status])
+  @@index([eventId, status, waitlistOrder])
 }
 
 model Attendance {
@@ -916,4 +928,3 @@ model ParseReport {
 
   upload          RawResultUpload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
 }
-
