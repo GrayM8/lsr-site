@@ -43,7 +43,7 @@ export function AvatarUploader({ initialUrl }: { initialUrl?: string | null }) {
 
   return (
     <div className="flex items-center gap-4">
-      <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
+      <div className="h-20 w-20 overflow-hidden rounded-none border bg-muted">
         {preview ? (
           <Image src={preview} alt="Avatar" width={80} height={80} className="h-20 w-20 object-cover" />
         ) : (
