@@ -1,12 +1,9 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { prisma } from '@/server/db';
 import { ROLE_LABEL, type RoleCode } from '@/lib/roles';
-import { Separator } from '@/components/ui/separator';
 import { DriversFilters } from '@/components/drivers-filters';
 import { DriversSearch } from '@/components/drivers-search';
-import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { DriversTable } from '@/components/drivers-table';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,33 +15,22 @@ export default async function DriversIndexPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const sp = await searchParams;
-  const q = typeof sp.q === 'string' ? sp.q.trim() : '';
+  const q = typeof sp.q === 'string' ? sp.q.trim().toLowerCase() : '';
   const roleParam = sp.role;
   const selectedRoles = (Array.isArray(roleParam) ? roleParam : roleParam ? [roleParam] : [])
     .map(r => r.toString().toLowerCase())
     .filter((r): r is RoleCode => ALL_ROLES.includes(r as RoleCode));
 
-  // Fetch all matching drivers first
-  const rawDrivers = await prisma.user.findMany({
+  // Fetch ALL drivers to calculate global rank
+  const allDrivers = await prisma.user.findMany({
     where: {
       status: { not: 'deleted' },
-      ...(q
-        ? {
-            OR: [
-              { displayName: { contains: q, mode: 'insensitive' } },
-              { handle: { contains: q, mode: 'insensitive' } },
-            ],
-          }
-        : {}),
-      ...(selectedRoles.length
-        ? { roles: { some: { role: { key: { in: selectedRoles } } } } }
-        : {}),
     },
     include: { roles: { include: { role: true } } },
   });
 
   // Calculate All Time Points
-  const driverIds = rawDrivers.map(d => d.id);
+  const driverIds = allDrivers.map(d => d.id);
   const pointsData = await prisma.entry.groupBy({
       by: ['userId'],
       _sum: { totalPoints: true },
@@ -53,13 +39,34 @@ export default async function DriversIndexPage({
   
   const pointsMap = new Map(pointsData.map(p => [p.userId, p._sum.totalPoints || 0]));
   
-  // Sort by All Time Points Descending
-  const drivers = rawDrivers.map(d => ({
+  // Sort by All Time Points Descending to assign Rank
+  const rankedDrivers = allDrivers.map(d => ({
       ...d,
       allTimePoints: pointsMap.get(d.id) || 0
   })).sort((a, b) => {
       if (b.allTimePoints !== a.allTimePoints) return b.allTimePoints - a.allTimePoints;
       return a.displayName.localeCompare(b.displayName);
+  }).map((d, index) => ({
+      ...d,
+      rank: index + 1
+  }));
+
+  // Apply Filters (Search & Roles) on the Ranked List
+  const filteredDrivers = rankedDrivers.filter(d => {
+      // Search Filter
+      if (q) {
+          const matchesName = d.displayName.toLowerCase().includes(q);
+          const matchesHandle = d.handle.toLowerCase().includes(q);
+          if (!matchesName && !matchesHandle) return false;
+      }
+
+      // Role Filter
+      if (selectedRoles.length > 0) {
+          const hasRole = d.roles.some(r => selectedRoles.includes(r.role.key as RoleCode));
+          if (!hasRole) return false;
+      }
+
+      return true;
   });
 
   return (
@@ -111,105 +118,10 @@ export default async function DriversIndexPage({
           </div>
 
           <div className="md:col-span-2">
-            <div className="border border-white/10 bg-lsr-charcoal overflow-hidden">
-              <div className="overflow-x-auto">
-                <TooltipProvider>
-                <table className="w-full text-sm min-w-[500px] md:min-w-full">
-                  <thead className="bg-white/5 border-b border-white/10">
-                <tr>
-                  <th className="px-4 py-4 text-left font-sans font-black uppercase tracking-widest text-[9px] text-white/40 w-12">Pos</th>
-                  <th className="px-4 py-4 text-left font-sans font-black uppercase tracking-widest text-[9px] text-white/40">Driver</th>
-                  <th className="px-4 py-4 text-center font-sans font-black uppercase tracking-widest text-[9px] text-white/40 w-24 md:w-32">
-                    Points
-                  </th>
-                  <th className="px-4 py-4 text-center font-sans font-black uppercase tracking-widest text-[9px] text-white/40 w-24 md:w-32 hidden sm:table-cell">
-                      <Tooltip>
-                          <TooltipTrigger className="cursor-help decoration-dashed underline underline-offset-2">Events</TooltipTrigger>
-                          <TooltipContent>
-                              <p>Event attendance tracking coming soon</p>
-                          </TooltipContent>
-                      </Tooltip>
-                  </th>
-                </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                {drivers.map((d, index) => {
-                  const initials = d.displayName
-                    .split(' ')
-                    .map(n => n[0])
-                    .slice(0, 2)
-                    .join('')
-                    .toUpperCase();
-                  const codes: RoleCode[] = d.roles.length
-                    ? d.roles.map(ur => ur.role.key as RoleCode)
-                    : [];
-
-                  return (
-                    <tr key={d.id} className="group hover:bg-white/[0.02] transition-colors">
-                      <td className="px-4 py-3 text-center">
-                        <span className={`font-display font-black italic text-xl ${index < 3 ? 'text-lsr-orange' : 'text-white/20'}`}>
-                          {index + 1}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Link href={`/drivers/${d.handle}`} className="flex items-center gap-4 group/driver">
-                          <div
-                            className="h-10 w-10 flex-shrink-0 overflow-hidden border border-white/10 bg-black group-hover/driver:border-lsr-orange transition-colors">
-                            {d.avatarUrl ? (
-                              <Image
-                                src={d.avatarUrl}
-                                alt=""
-                                width={40}
-                                height={40}
-                                className="h-full w-full object-cover"
-                              />
-                            ) : (
-                              <div className="flex h-full w-full items-center justify-center font-sans font-bold text-[10px] text-white/30">
-                                {initials || 'U'}
-                              </div>
-                            )}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                              <div className="truncate font-sans font-bold text-white uppercase tracking-tight group-hover/driver:text-lsr-orange transition-colors">
-                                {d.displayName}
-                              </div>
-                              <div className="flex flex-wrap gap-1">
-                                {d.status === 'pending_verification' && (
-                                  <span className="bg-red-900/50 text-red-200 border border-red-900 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-widest">
-                                    Unverified
-                                  </span>
-                                )}
-                                {codes.map(c => (
-                                  <span key={c} className="bg-white/5 text-white/60 border border-white/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-widest">
-                                    {ROLE_LABEL[c]}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                            <div className="text-[9px] font-medium text-white/40 uppercase tracking-widest mt-0.5">@{d.handle}</div>
-                          </div>
-                        </Link>
-                      </td>
-                      <td className="px-4 py-3 text-center font-display font-bold text-white text-lg sm:text-xl">
-                          {d.allTimePoints > 0 ? d.allTimePoints : <span className="text-white/20">—</span>}
-                      </td>
-                      <td className="px-4 py-3 text-center hidden sm:table-cell">
-                        <span className="font-display font-bold italic text-white/20 text-lg tracking-tight">
-                          —
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-                </tbody>
-              </table>
-              </TooltipProvider>
-            </div>
+            <DriversTable drivers={filteredDrivers} />
           </div>
         </div>
       </div>
-    </div>
-  </main>
+    </main>
   );
 }

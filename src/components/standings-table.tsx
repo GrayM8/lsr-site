@@ -1,5 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useState } from "react";
+import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type Standing = {
     driver: {
@@ -18,24 +23,90 @@ type Standing = {
     rank: number | null;
 };
 
+type SortConfig = {
+    key: string;
+    direction: "asc" | "desc";
+};
+
 export function StandingsTable({ standings }: { standings: Standing[] }) {
+    const [sortConfig, setSortConfig] = useState<SortConfig>({ key: "rank", direction: "asc" });
+
+    const handleSort = (key: string) => {
+        setSortConfig((current) => ({
+            key,
+            direction: current.key === key && current.direction === "asc" ? "desc" : "asc",
+        }));
+    };
+
+    const getValue = (row: Standing, key: string) => {
+        switch (key) {
+            case "rank":
+                // Treat null rank as infinity so they go to bottom in asc sort
+                return row.rank ?? Infinity;
+            case "driver":
+                return row.driver.name.toLowerCase();
+            case "points":
+                return row.points;
+            case "wins":
+                return row.wins;
+            case "podiums":
+                return row.podiums;
+            case "bestFinish":
+                // For race positions, lower is better, but for sorting:
+                // If sorting ASC (1 -> 10), we want nulls (no finish) at bottom.
+                // If sorting DESC (10 -> 1), we want nulls at bottom too usually?
+                // Let's standardise: return value or Infinity if null for correct numeric sort
+                return row.bestFinish ?? Infinity;
+            case "starts":
+                return row.starts;
+            case "incidents":
+                return row.incidents;
+            default:
+                return 0;
+        }
+    };
+
+    const sortedStandings = [...standings].sort((a, b) => {
+        const aValue = getValue(a, sortConfig.key);
+        const bValue = getValue(b, sortConfig.key);
+
+        if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+    });
+
+    const SortHeader = ({ label, sortKey, align = "left", className }: { label: string; sortKey: string; align?: "left" | "center" | "right"; className?: string }) => (
+        <th className={cn("p-4 cursor-pointer select-none group hover:text-white", className)} onClick={() => handleSort(sortKey)}>
+            <div className={cn("flex items-center gap-1", align === "center" && "justify-center", align === "right" && "justify-end")}>
+                {label}
+                <span className="text-white/30 group-hover:text-white/60 transition-colors">
+                    {sortConfig.key === sortKey ? (
+                        sortConfig.direction === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                    ) : (
+                        <ArrowUpDown className="w-3 h-3 opacity-0 group-hover:opacity-100" />
+                    )}
+                </span>
+            </div>
+        </th>
+    );
+
     return (
         <div className="border border-white/10 bg-black/40 overflow-x-auto">
             <table className="w-full text-left text-sm min-w-[800px]">
                 <thead className="bg-white/5 border-b border-white/10 font-sans font-black text-[10px] uppercase tracking-widest text-white/50">
                     <tr>
-                        <th className="p-4 w-12 text-center">Rank</th>
-                        <th className="p-4">Driver</th>
-                        <th className="p-4 text-right">Points</th>
-                        <th className="p-4 text-center">Wins</th>
-                        <th className="p-4 text-center">Podiums</th>
-                        <th className="p-4 text-center">Best Finish</th>
-                        <th className="p-4 text-center">Starts</th>
-                        <th className="p-4 text-center">Incidents</th>
+                        <SortHeader label="Rank" sortKey="rank" align="center" className="w-12" />
+                        <SortHeader label="Driver" sortKey="driver" />
+                        <SortHeader label="Points" sortKey="points" align="right" />
+                        <SortHeader label="Wins" sortKey="wins" align="center" />
+                        <SortHeader label="Podiums" sortKey="podiums" align="center" />
+                        <SortHeader label="Best Finish" sortKey="bestFinish" align="center" />
+                        <SortHeader label="Starts" sortKey="starts" align="center" />
+                        <SortHeader label="Incidents" sortKey="incidents" align="center" />
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5 font-sans text-white/80">
-                    {standings.map((standing) => (
+                    {sortedStandings.map((standing) => (
                         <tr key={standing.driver.id} className="hover:bg-white/5 transition-colors border-b border-white/5">
                             <td className="p-4 font-bold text-center text-white/80">{standing.rank}</td>
                             <td className="p-4">
