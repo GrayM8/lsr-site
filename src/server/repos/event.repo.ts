@@ -2,7 +2,7 @@
 import { prisma } from '@/server/db';
 import { getActiveEntitlements } from './membership.repo';
 import { getSessionUser } from '@/server/auth/session';
-import { EventEligibility, Prisma, RSVPStatus, CheckinMethod, EventType } from '@prisma/client';
+import { EventEligibility, Prisma, RegistrationStatus, CheckinMethod, EventType } from '@prisma/client';
 import { logAudit } from '@/server/audit/log';
 
 export async function listUpcomingEvents(limit = 10) {
@@ -86,7 +86,7 @@ export async function getEventBySlug(slug: string) {
       venue: true,
       series: true,
       eligibility: true,
-      rsvps: {
+      registrations: {
         include: {
           user: {
             select: { id: true, displayName: true, avatarUrl: true },
@@ -177,47 +177,6 @@ export async function checkEligibility(
   }
 
   return { ok: true };
-}
-
-export async function rsvp(eventId: string, userId: string, status: RSVPStatus) {
-  const event = await prisma.event.findUnique({
-    where: { id: eventId },
-    include: { eligibility: true },
-  });
-
-  if (!event || !event.eligibility) {
-    throw new Error('Event not found or eligibility not configured.');
-  }
-
-  const eligibilityResult = await checkEligibility(event.eligibility, userId);
-  if (!eligibilityResult.ok) {
-    return eligibilityResult;
-  }
-
-  const rsvp = await prisma.rSVP.upsert({
-    where: {
-      eventId_userId: {
-        eventId,
-        userId,
-      },
-    },
-    update: { status },
-    create: {
-      eventId,
-      userId,
-      status,
-    },
-  });
-
-  await logAudit({
-    actorUserId: userId,
-    action: 'rsvp',
-    entityType: 'RSVP',
-    entityId: rsvp.id,
-    metaJson: JSON.stringify({ eventId, status }),
-  });
-
-  return { ok: true, rsvp };
 }
 
 export async function checkIn(eventId: string, userId: string, method: string, actorId: string) {

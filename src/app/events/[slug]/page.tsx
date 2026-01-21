@@ -8,6 +8,8 @@ import Link from "next/link";
 import { GeoPoint } from "@/types";
 import { Button } from "@/components/ui/button";
 import { ResultsTable } from "@/components/results-table";
+import { EventRegistrationPanel } from "@/components/event-registration-panel";
+import { getSessionUser } from "@/server/auth/session";
 
 type EventPageArgs = {
   params: Promise<{ slug: string }>;
@@ -16,6 +18,7 @@ type EventPageArgs = {
 export default async function EventPage({ params }: EventPageArgs) {
   const { slug } = await params;
   const event = await getEventBySlug(slug);
+  const { user } = await getSessionUser();
 
   if (!event) {
     return notFound();
@@ -24,7 +27,7 @@ export default async function EventPage({ params }: EventPageArgs) {
   const raceSessions = await getIngestedResultsByEventId(event.id);
   const startsAt = new Date(event.startsAtUtc);
   const endsAt = new Date(event.endsAtUtc);
-  const isEventPassed = new Date() > endsAt;
+  // const isEventPassed = new Date() > endsAt; // Logic handled by registration config/snapshot
 
   const venue = event.venue;
   const geo = venue?.geo as GeoPoint | null;
@@ -115,13 +118,7 @@ export default async function EventPage({ params }: EventPageArgs) {
                   )}
                 </div>
 
-                {!isEventPassed && (
-                  <div className="pt-6 border-t border-white/10">
-                    <Button disabled className="w-full rounded-none bg-white/5 border border-white/10 text-white/40 font-black uppercase tracking-[0.2em] text-[10px] h-12">
-                      Registration Coming Soon
-                    </Button>
-                  </div>
-                )}
+                <EventRegistrationPanel eventSlug={slug} userLoggedIn={!!user} />
               </div>
             </div>
           </div>

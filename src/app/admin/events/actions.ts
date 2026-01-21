@@ -14,6 +14,9 @@ export async function createEvent(formData: FormData) {
 
   const seriesId = formData.get("seriesId") as string;
   const venueId = formData.get("venueId") as string;
+  const opensAtRaw = formData.get("registrationOpensAt") as string;
+  const closesAtRaw = formData.get("registrationClosesAt") as string;
+  const maxRaw = formData.get("registrationMax") as string;
 
   const event = await prisma.event.create({
     data: {
@@ -29,6 +32,11 @@ export async function createEvent(formData: FormData) {
       heroImageUrl: formData.get("heroImageUrl") as string,
       status: "draft",
       visibility: "public",
+      registrationEnabled: formData.get("registrationEnabled") === "on",
+      registrationOpensAt: opensAtRaw ? new Date(opensAtRaw) : null,
+      registrationClosesAt: closesAtRaw ? new Date(closesAtRaw) : null,
+      registrationMax: maxRaw && maxRaw !== "-1" ? parseInt(maxRaw) : null,
+      registrationWaitlistEnabled: formData.get("registrationWaitlistEnabled") === "on",
     },
   });
 
@@ -86,6 +94,9 @@ export async function updateEvent(id: string, formData: FormData) {
 
   const seriesId = formData.get("seriesId") as string;
   const venueId = formData.get("venueId") as string;
+  const opensAtRaw = formData.get("registrationOpensAt") as string;
+  const closesAtRaw = formData.get("registrationClosesAt") as string;
+  const maxRaw = formData.get("registrationMax") as string;
 
   await prisma.event.update({
     where: { id },
@@ -100,6 +111,11 @@ export async function updateEvent(id: string, formData: FormData) {
       summary: formData.get("summary") as string,
       description: formData.get("description") as string,
       heroImageUrl: formData.get("heroImageUrl") as string,
+      registrationEnabled: formData.get("registrationEnabled") === "on",
+      registrationOpensAt: opensAtRaw ? new Date(opensAtRaw) : null,
+      registrationClosesAt: closesAtRaw ? new Date(closesAtRaw) : null,
+      registrationMax: maxRaw && maxRaw !== "-1" ? parseInt(maxRaw) : null,
+      registrationWaitlistEnabled: formData.get("registrationWaitlistEnabled") === "on",
     },
   });
 
@@ -133,4 +149,113 @@ export async function deleteEvent(eventId: string) {
   });
 
   revalidatePath("/admin/events");
+}
+
+import { adminOverrideRegistration } from "@/server/services/registration.service";
+import { RegistrationStatus } from "@prisma/client";
+import { requireAdmin } from "@/lib/authz";
+
+export async function updateEventRegistrationConfig(eventId: string, formData: FormData) {
+  const { user } = await getSessionUser();
+  const { ok } = await requireAdmin();
+  if (!ok || !user) {
+    throw new Error("Unauthorized");
+  }
+
+  const enabled = formData.get("registrationEnabled") === "on";
+  const opensAtRaw = formData.get("registrationOpensAt") as string;
+  const closesAtRaw = formData.get("registrationClosesAt") as string;
+  const maxRaw = formData.get("registrationMax") as string;
+  const waitlistEnabled = formData.get("registrationWaitlistEnabled") === "on";
+
+  await prisma.event.update({
+    where: { id: eventId },
+    data: {
+      registrationEnabled: enabled,
+      registrationOpensAt: opensAtRaw ? new Date(opensAtRaw) : null,
+      registrationClosesAt: closesAtRaw ? new Date(closesAtRaw) : null,
+      registrationMax: maxRaw && maxRaw !== "-1" ? parseInt(maxRaw) : null,
+      registrationWaitlistEnabled: waitlistEnabled,
+    },
+  });
+
+  await logAudit({
+    actorUserId: user.id,
+    action: "update",
+    entityType: "Event",
+    entityId: eventId,
+    metaJson: JSON.stringify({
+      updateType: "registration_config",
+    })
+  });
+
+  revalidatePath(`/admin/events/${eventId}`);
+  revalidatePath(`/events`);
+}
+
+export async function overrideRegistrationStatus(eventId: string, userId: string, status: RegistrationStatus, reason?: string) {
+  const { user } = await getSessionUser();
+  const { ok } = await requireAdmin();
+  if (!ok || !user) {
+    throw new Error("Unauthorized");
+  }
+
+  await adminOverrideRegistration(user.id, userId, eventId, status, reason);
+
+  revalidatePath(`/admin/events/${eventId}`);
+  revalidatePath(`/events`);
+}
+
+export async function reorderWaitlist(eventId: string, orderedRegistrationIds: string[]) {
+  const { user } = await getSessionUser();
+  const { ok } = await requireAdmin();
+  if (!ok || !user) {
+    throw new Error("Unauthorized");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    for (let i = 0; i < orderedRegistrationIds.length; i++) {
+      await tx.eventRegistration.update({
+        where: { id: orderedRegistrationIds[i] },
+        data: {
+          waitlistOrder: i + 1,
+          // Ideally we check status is WAITLISTED, but admin reorder implies waitlist context
+        },
+      });
+    }
+  });
+
+  await logAudit({
+    actorUserId: user.id,
+    action: "update",
+    entityType: "Event",
+    entityId: eventId,
+    metaJson: JSON.stringify({
+      updateType: "waitlist_reorder",
+      count: orderedRegistrationIds.length,
+    })
+  });
+
+  revalidatePath(`/admin/events/${eventId}`);
+}
+
+export async function removeRegistration(eventId: string, userId: string) {
+  const { user } = await getSessionUser();
+  const { ok } = await requireAdmin();
+  if (!ok || !user) {
+    throw new Error("Unauthorized");
+  }
+
+  await prisma.eventRegistration.delete({
+    where: { eventId_userId: { eventId, userId } },
+  });
+
+  await logAudit({
+    actorUserId: user.id,
+    action: "delete",
+    entityType: "EventRegistration",
+    entityId: `${eventId}:${userId}`,
+  });
+
+  revalidatePath(`/admin/events/${eventId}`);
 }
