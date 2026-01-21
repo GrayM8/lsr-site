@@ -117,8 +117,8 @@ export default async function EventPage({ params }: EventPageArgs) {
 
                 {!isEventPassed && (
                   <div className="pt-6 border-t border-white/10">
-                    <Button className="w-full rounded-none bg-lsr-orange text-white hover:bg-white hover:text-lsr-charcoal font-black uppercase tracking-[0.2em] text-[10px] h-12 transition-all">
-                      Register for Event
+                    <Button disabled className="w-full rounded-none bg-white/5 border border-white/10 text-white/40 font-black uppercase tracking-[0.2em] text-[10px] h-12">
+                      Registration Coming Soon
                     </Button>
                   </div>
                 )}

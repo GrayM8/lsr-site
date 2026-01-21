@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/form";
 import { uploadResult } from "@/app/admin/results/actions";
 import { type RawResultUpload, type User, type Event } from "@prisma/client";
+import { Download } from "lucide-react";
 
 type ResultWithUser = RawResultUpload & {
   uploadedBy: User;
@@ -66,6 +67,19 @@ export function ResultsAdminClient({
       setIsUploading(false);
       form.reset();
     }
+  };
+
+  const downloadJson = (result: ResultWithUser) => {
+    const jsonString = JSON.stringify(result.rawJson, null, 2);
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = result.filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -123,6 +137,7 @@ export function ResultsAdminClient({
                   <TableHead>Uploaded At</TableHead>
                   <TableHead>Assigned Event</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead className="w-[50px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -144,6 +159,12 @@ export function ResultsAdminClient({
                         )}
                     </TableCell>
                     <TableCell>{result.status}</TableCell>
+                    <TableCell>
+                      <Button variant="ghost" size="sm" onClick={() => downloadJson(result)}>
+                        <Download className="h-4 w-4" />
+                        <span className="sr-only">Download</span>
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
