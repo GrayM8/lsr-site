@@ -149,31 +149,41 @@ export function EventRegistrationPanel({ eventSlug, userLoggedIn }: { eventSlug:
 
         {/* Action Buttons */}
         {snapshot.windowStatus === "OPEN" ? (
-            <div className="grid grid-cols-2 gap-3">
-                <Button 
-                    onClick={() => handleAction("YES")}
-                    disabled={actionLoading || myStatus === "REGISTERED" || (myStatus === "WAITLISTED") || (!canRegister && myStatus === "NONE")}
-                    className={cn(
-                        "rounded-none font-black uppercase tracking-[0.1em] text-[10px] h-10 transition-all",
-                        myStatus === "REGISTERED" || myStatus === "WAITLISTED" 
-                            ? "bg-white/10 text-white/40 cursor-default border border-transparent" 
-                            : "bg-lsr-orange text-white hover:bg-white hover:text-lsr-charcoal"
-                    )}
-                >
-                    {myStatus === "REGISTERED" ? "Registered" : 
-                     myStatus === "WAITLISTED" ? "On Waitlist" : 
-                     (isFull && snapshot.waitlistEnabled) ? "Join Waitlist" :
-                     "Attending"
-                    }
-                </Button>
-                <Button 
-                    onClick={() => handleAction("NO")}
-                    disabled={actionLoading || myStatus === "NOT_ATTENDING" || myStatus === "NONE"}
-                    className="rounded-none border border-white/20 bg-transparent text-white hover:bg-red-900/50 hover:border-red-500/50 hover:text-red-200 font-black uppercase tracking-[0.1em] text-[10px] h-10 transition-all"
-                >
-                    Not Attending
-                </Button>
-            </div>
+            <>
+                {isFull && !snapshot.waitlistEnabled && myStatus !== "REGISTERED" && myStatus !== "WAITLISTED" ? (
+                    <div className="text-center py-3 bg-white/5 text-white/40 text-[10px] font-bold uppercase tracking-widest border border-white/5">
+                        Event is at capacity and waitlist is disabled.
+                    </div>
+                ) : (
+                    <div className={cn("grid gap-3", (myStatus === "REGISTERED" || myStatus === "WAITLISTED") ? "grid-cols-2" : "grid-cols-1")}>
+                        <Button 
+                            onClick={() => handleAction("YES")}
+                            disabled={actionLoading || myStatus === "REGISTERED" || (myStatus === "WAITLISTED") || (!canRegister && myStatus === "NONE")}
+                            className={cn(
+                                "rounded-none font-black uppercase tracking-[0.1em] text-[10px] h-10 transition-all",
+                                myStatus === "REGISTERED" || myStatus === "WAITLISTED" 
+                                    ? "bg-white/10 text-white/40 cursor-default border border-transparent" 
+                                    : "bg-lsr-orange text-white hover:bg-white hover:text-lsr-charcoal"
+                            )}
+                        >
+                            {myStatus === "REGISTERED" ? "Registered" : 
+                            myStatus === "WAITLISTED" ? "On Waitlist" : 
+                            (isFull && snapshot.waitlistEnabled) ? "Join Waitlist" :
+                            "Attending"
+                            }
+                        </Button>
+                        {(myStatus === "REGISTERED" || myStatus === "WAITLISTED") && (
+                            <Button 
+                                onClick={() => handleAction("NO")}
+                                disabled={actionLoading}
+                                className="rounded-none border border-white/20 bg-transparent text-white hover:bg-red-900/50 hover:border-red-500/50 hover:text-red-200 font-black uppercase tracking-[0.1em] text-[10px] h-10 transition-all"
+                            >
+                                Not Attending
+                            </Button>
+                        )}
+                    </div>
+                )}
+            </>
         ) : (
             <div className="text-center py-3 bg-white/5 text-white/40 text-[10px] font-bold uppercase tracking-widest border border-white/5">
                 {snapshot.windowStatus === "NOT_OPEN" 

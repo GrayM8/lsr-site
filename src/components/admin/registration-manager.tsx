@@ -65,7 +65,11 @@ export function RegistrationManager({ eventId, registrations }: { eventId: strin
   }
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -106,7 +110,7 @@ export function RegistrationManager({ eventId, registrations }: { eventId: strin
                   <div className="text-xs text-muted-foreground flex gap-2">
                     {reg.promotionSource === "AUTO" && <Badge variant="secondary" className="text-[10px]">Auto-Promoted</Badge>}
                     {reg.promotionSource === "ADMIN" && <Badge variant="destructive" className="text-[10px]">Admin-Promoted</Badge>}
-                    <span>{new Date(reg.createdAt).toLocaleDateString()}</span>
+                    <span>{new Date(reg.createdAt).toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -157,7 +161,7 @@ export function RegistrationManager({ eventId, registrations }: { eventId: strin
                         </Avatar>
                         <div>
                           <div className="font-bold">{reg.user.displayName}</div>
-                          <div className="text-xs text-muted-foreground">Joined: {new Date(reg.createdAt).toLocaleDateString()}</div>
+                          <div className="text-xs text-muted-foreground">Joined: {new Date(reg.createdAt).toLocaleString()}</div>
                         </div>
                       </div>
                       <div className="flex gap-2">
