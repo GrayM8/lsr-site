@@ -184,9 +184,9 @@ export async function updateEventRegistrationConfig(eventId: string, formData: F
     action: "update",
     entityType: "Event",
     entityId: eventId,
-    metaJson: {
+    metaJson: JSON.stringify({
       updateType: "registration_config",
-    }
+    })
   });
 
   revalidatePath(`/admin/events/${eventId}`);
@@ -230,10 +230,10 @@ export async function reorderWaitlist(eventId: string, orderedRegistrationIds: s
     action: "update",
     entityType: "Event",
     entityId: eventId,
-    metaJson: {
+    metaJson: JSON.stringify({
       updateType: "waitlist_reorder",
       count: orderedRegistrationIds.length,
-    }
+    })
   });
 
   revalidatePath(`/admin/events/${eventId}`);

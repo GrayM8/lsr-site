@@ -148,7 +148,7 @@ function Tile({
               {type === "upcoming" && (
                   <div className="mb-3 text-center">
                       <p className="font-sans font-bold text-[10px] text-white/60 uppercase tracking-widest">
-                          {event.rsvpRequired ? "Registration Open" : "Coming Soon"}
+                          {event.registrationEnabled ? "Registration Open" : "Coming Soon"}
                       </p>
                   </div>
               )}
