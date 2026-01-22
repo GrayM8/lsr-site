@@ -1,6 +1,7 @@
 "use server"
 
 import { prisma } from "@/server/db";
+import { fromZonedTime } from "date-fns-tz";
 import { getSessionUser } from "@/server/auth/session";
 import { logAudit } from "@/server/audit/log";
 import { revalidatePath } from "next/cache";
@@ -24,8 +25,8 @@ export async function createEvent(formData: FormData) {
       slug: formData.get("slug") as string,
       seriesId: seriesId === "" ? null : seriesId,
       venueId: venueId === "" ? null : venueId,
-      startsAtUtc: new Date(formData.get("startsAtUtc") as string),
-      endsAtUtc: new Date(formData.get("endsAtUtc") as string),
+      startsAtUtc: fromZonedTime(formData.get("startsAtUtc") as string, formData.get("timezone") as string),
+      endsAtUtc: fromZonedTime(formData.get("endsAtUtc") as string, formData.get("timezone") as string),
       timezone: formData.get("timezone") as string,
       summary: formData.get("summary") as string,
       description: formData.get("description") as string,
@@ -33,8 +34,8 @@ export async function createEvent(formData: FormData) {
       status: "draft",
       visibility: "public",
       registrationEnabled: formData.get("registrationEnabled") === "on",
-      registrationOpensAt: opensAtRaw ? new Date(opensAtRaw) : null,
-      registrationClosesAt: closesAtRaw ? new Date(closesAtRaw) : null,
+      registrationOpensAt: opensAtRaw ? fromZonedTime(opensAtRaw, formData.get("timezone") as string) : null,
+      registrationClosesAt: closesAtRaw ? fromZonedTime(closesAtRaw, formData.get("timezone") as string) : null,
       registrationMax: maxRaw && maxRaw !== "-1" ? parseInt(maxRaw) : null,
       registrationWaitlistEnabled: formData.get("registrationWaitlistEnabled") === "on",
     },
@@ -105,15 +106,15 @@ export async function updateEvent(id: string, formData: FormData) {
       slug: formData.get("slug") as string,
       seriesId: seriesId === "" ? null : seriesId,
       venueId: venueId === "" ? null : venueId,
-      startsAtUtc: new Date(formData.get("startsAtUtc") as string),
-      endsAtUtc: new Date(formData.get("endsAtUtc") as string),
+      startsAtUtc: fromZonedTime(formData.get("startsAtUtc") as string, formData.get("timezone") as string),
+      endsAtUtc: fromZonedTime(formData.get("endsAtUtc") as string, formData.get("timezone") as string),
       timezone: formData.get("timezone") as string,
       summary: formData.get("summary") as string,
       description: formData.get("description") as string,
       heroImageUrl: formData.get("heroImageUrl") as string,
       registrationEnabled: formData.get("registrationEnabled") === "on",
-      registrationOpensAt: opensAtRaw ? new Date(opensAtRaw) : null,
-      registrationClosesAt: closesAtRaw ? new Date(closesAtRaw) : null,
+      registrationOpensAt: opensAtRaw ? fromZonedTime(opensAtRaw, formData.get("timezone") as string) : null,
+      registrationClosesAt: closesAtRaw ? fromZonedTime(closesAtRaw, formData.get("timezone") as string) : null,
       registrationMax: maxRaw && maxRaw !== "-1" ? parseInt(maxRaw) : null,
       registrationWaitlistEnabled: formData.get("registrationWaitlistEnabled") === "on",
     },
@@ -162,6 +163,9 @@ export async function updateEventRegistrationConfig(eventId: string, formData: F
     throw new Error("Unauthorized");
   }
 
+  const event = await prisma.event.findUnique({ where: { id: eventId }, select: { timezone: true } });
+  const timezone = event?.timezone || "America/Chicago";
+
   const enabled = formData.get("registrationEnabled") === "on";
   const opensAtRaw = formData.get("registrationOpensAt") as string;
   const closesAtRaw = formData.get("registrationClosesAt") as string;
@@ -172,8 +176,8 @@ export async function updateEventRegistrationConfig(eventId: string, formData: F
     where: { id: eventId },
     data: {
       registrationEnabled: enabled,
-      registrationOpensAt: opensAtRaw ? new Date(opensAtRaw) : null,
-      registrationClosesAt: closesAtRaw ? new Date(closesAtRaw) : null,
+      registrationOpensAt: opensAtRaw ? fromZonedTime(opensAtRaw, timezone) : null,
+      registrationClosesAt: closesAtRaw ? fromZonedTime(closesAtRaw, timezone) : null,
       registrationMax: maxRaw && maxRaw !== "-1" ? parseInt(maxRaw) : null,
       registrationWaitlistEnabled: waitlistEnabled,
     },

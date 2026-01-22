@@ -1,5 +1,6 @@
 import { Calendar, Clock, MapPin, Send } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { LocalTime, LocalTimeRange } from "@/components/ui/local-time"
 import Image from "next/image"
 import SectionReveal from "./SectionReveal"
 import { Button } from "@/components/ui/button"
@@ -74,16 +75,12 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 text-white/90 font-bold uppercase tracking-wider text-[11px]">
                     <Calendar className="h-4 w-4 text-lsr-orange" />
-                    <span>{nextEventDate.toLocaleDateString(undefined, {
-                      weekday: "long",
-                      month: "long",
-                      day: "numeric",
-                    })}</span>
+                    <span><LocalTime date={nextEventDate} format="weekday-date" /></span>
                   </div>
                   <div className="flex items-center gap-3 text-white/90 font-bold uppercase tracking-wider text-[11px]">
                     <Clock className="h-4 w-4 text-lsr-orange" />
                     <span>
-                      {nextEventDate.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })} - {nextEventEndDate.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
+                      <LocalTimeRange start={nextEventDate} end={nextEventEndDate} />
                     </span>
                   </div>
                 </div>
@@ -148,7 +145,7 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
                         <div className="bg-red-600 text-white px-2 py-0.5 text-[8px] font-black uppercase tracking-widest">Live</div>
                       ) : (
                         <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
-                          {eventDate.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                          <LocalTime date={eventDate} format="short-date" />
                         </div>
                       )}
                     </div>

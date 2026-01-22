@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, MapPin, Send, Trophy } from "lucide-react";
 import Link from "next/link";
+import { LocalTime, LocalTimeRange } from "@/components/ui/local-time";
 import { GeoPoint } from "@/types";
 import { Button } from "@/components/ui/button";
 import { ResultsTable } from "@/components/results-table";
@@ -50,7 +51,7 @@ export default async function EventPage({ params }: EventPageArgs) {
             <div className="absolute top-0 right-0 w-32 h-32 bg-lsr-orange/5 -rotate-45 translate-x-16 -translate-y-16" />
           </div>
           
-          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-12">
+          <div className="relative grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="lg:col-span-2">
               <div className="flex flex-wrap items-center gap-3 mb-6">
                 {event.series && (
@@ -84,7 +85,7 @@ export default async function EventPage({ params }: EventPageArgs) {
                     <div>
                       <div className="font-sans font-bold text-[10px] uppercase tracking-widest text-white/40 mb-1">Date</div>
                       <div className="font-sans font-bold text-sm text-white">
-                        {startsAt.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
+                        <LocalTime date={startsAt} format="weekday-date" />
                       </div>
                     </div>
                   </div>
@@ -94,7 +95,7 @@ export default async function EventPage({ params }: EventPageArgs) {
                     <div>
                       <div className="font-sans font-bold text-[10px] uppercase tracking-widest text-white/40 mb-1">Time</div>
                       <div className="font-sans font-bold text-sm text-white">
-                        {startsAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })} - {endsAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
+                        <LocalTimeRange start={startsAt} end={endsAt} />
                       </div>
                     </div>
                   </div>
@@ -126,19 +127,14 @@ export default async function EventPage({ params }: EventPageArgs) {
           </div>
 
           {raceSessions.length > 0 && (
-            <div className="relative z-10 mt-12 pt-12 border-t border-white/10">
-              <div className="flex items-center gap-3 mb-6">
-                <Trophy className="h-5 w-5 text-lsr-orange" />
-                <h2 className="font-sans font-black text-sm uppercase tracking-widest text-white">Official Results</h2>
-              </div>
-              
+            <div className="relative mt-12 pt-12 border-t border-white/10">
               <div className="space-y-8">
                 {raceSessions.map(session => (
                     <div key={session.id}>
-                        <h3 className="font-sans font-bold text-xs uppercase tracking-widest text-white/50 mb-4">
-                            {session.sessionType} {session.trackName && `- ${session.trackName}`}
-                        </h3>
-                        <ResultsTable results={session.results} />
+                        <ResultsTable 
+                            results={session.results} 
+                            title={`Official Results | ${session.sessionType}${session.trackName ? ` - ${session.trackName}` : ''}`}
+                        />
                     </div>
                 ))}
               </div>

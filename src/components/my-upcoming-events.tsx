@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LocalTime } from "@/components/ui/local-time";
 
 // Define a type that matches what getUpcomingRegistrations returns
 // This avoids importing Prisma types directly in client components if possible, 
@@ -77,11 +78,11 @@ export function MyUpcomingEvents({ registrations }: { registrations: any[] }) {
             <div className="flex flex-wrap gap-4 text-[10px] text-white/60 font-medium uppercase tracking-wider">
                 <div className="flex items-center gap-2">
                     <Calendar className="h-3 w-3 text-white/40" />
-                    <span>{new Date(reg.event.startsAtUtc).toLocaleDateString()}</span>
+                    <span><LocalTime date={reg.event.startsAtUtc} format="short-date" /></span>
                 </div>
                 <div className="flex items-center gap-2">
                     <Clock className="h-3 w-3 text-white/40" />
-                    <span>{new Date(reg.event.startsAtUtc).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}</span>
+                    <span><LocalTime date={reg.event.startsAtUtc} format="time" /></span>
                 </div>
                 {reg.event.venue && (
                     <div className="flex items-center gap-2">

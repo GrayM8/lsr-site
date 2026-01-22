@@ -8,11 +8,19 @@ import { Label } from "@/components/ui/label";
 
 import { ImageUploader } from "@/components/image-uploader";
 import { Event, EventSeries, Venue } from "@prisma/client";
+import { useState } from "react";
+import { DEFAULT_TIMEZONE, TIMEZONES, dateToZonedValue } from "@/lib/dates";
 
 export function EventForm({ event, series, venues }: { event?: Event, series: EventSeries[], venues: Venue[] }) {
+  // Initialize timezone state from event or default
+  const [timezone, setTimezone] = useState<string>(event?.timezone || DEFAULT_TIMEZONE);
+
   return (
     <div className="overflow-x-auto">
       <form action={event ? updateEvent.bind(null, event.id) : createEvent} className="min-w-[600px]">
+        {/* Hidden input to ensure timezone is submitted even if state controls it */}
+        <input type="hidden" name="timezone" value={timezone} />
+        
         <div className="space-y-4">
           <div>
             <label htmlFor="title">Title</label>
@@ -54,18 +62,54 @@ export function EventForm({ event, series, venues }: { event?: Event, series: Ev
               ))}
             </select>
           </div>
-          <div>
-            <label htmlFor="startsAtUtc">Starts At (UTC)</label>
-            <Input id="startsAtUtc" name="startsAtUtc" type="datetime-local" defaultValue={event?.startsAtUtc ? event.startsAtUtc.toISOString().slice(0, 16) : ""} required />
+
+          <div className="p-4 border border-white/10 rounded-md bg-white/5 space-y-4">
+            <h3 className="text-md font-bold text-white/80 uppercase tracking-widest">Time & Location</h3>
+            
+            <div>
+              <label htmlFor="timezone-select">Event Timezone</label>
+              <select
+                id="timezone-select"
+                // No 'name' attribute here because we use the hidden input for the form submission
+                value={timezone}
+                onChange={(e) => setTimezone(e.target.value)}
+                className="w-full p-2 border rounded-md bg-gray-800 text-white"
+              >
+                {TIMEZONES.map((tz) => (
+                  <option key={tz.value} value={tz.value}>
+                    {tz.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="startsAtUtc">Starts At ({timezone})</label>
+                <Input 
+                  id="startsAtUtc" 
+                  name="startsAtUtc" 
+                  type="datetime-local" 
+                  // Key forces re-render when timezone changes to update the displayed local time
+                  key={`start-${timezone}`} 
+                  defaultValue={dateToZonedValue(event?.startsAtUtc, timezone)} 
+                  required 
+                />
+              </div>
+              <div>
+                <label htmlFor="endsAtUtc">Ends At ({timezone})</label>
+                <Input 
+                  id="endsAtUtc" 
+                  name="endsAtUtc" 
+                  type="datetime-local" 
+                  key={`end-${timezone}`}
+                  defaultValue={dateToZonedValue(event?.endsAtUtc, timezone)} 
+                  required 
+                />
+              </div>
+            </div>
           </div>
-          <div>
-            <label htmlFor="endsAtUtc">Ends At (UTC)</label>
-            <Input id="endsAtUtc" name="endsAtUtc" type="datetime-local" defaultValue={event?.endsAtUtc ? event.endsAtUtc.toISOString().slice(0, 16) : ""} required />
-          </div>
-          <div>
-            <label htmlFor="timezone">Timezone</label>
-            <Input id="timezone" name="timezone" defaultValue={event?.timezone} required />
-          </div>
+
           <div>
             <label htmlFor="summary">Summary</label>
             <Input id="summary" name="summary" defaultValue={event?.summary ?? ""} />
@@ -89,21 +133,23 @@ export function EventForm({ event, series, venues }: { event?: Event, series: Ev
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="registrationOpensAt">Opens At (UTC)</Label>
+                  <Label htmlFor="registrationOpensAt">Opens At ({timezone})</Label>
                   <Input 
                     id="registrationOpensAt" 
                     name="registrationOpensAt" 
                     type="datetime-local" 
-                    defaultValue={event?.registrationOpensAt ? new Date(event.registrationOpensAt).toISOString().slice(0, 16) : ""} 
+                    key={`reg-open-${timezone}`}
+                    defaultValue={dateToZonedValue(event?.registrationOpensAt, timezone)} 
                   />
                 </div>
                 <div>
-                  <Label htmlFor="registrationClosesAt">Closes At (UTC)</Label>
+                  <Label htmlFor="registrationClosesAt">Closes At ({timezone})</Label>
                   <Input 
                     id="registrationClosesAt" 
                     name="registrationClosesAt" 
                     type="datetime-local" 
-                    defaultValue={event?.registrationClosesAt ? new Date(event.registrationClosesAt).toISOString().slice(0, 16) : ""} 
+                    key={`reg-close-${timezone}`}
+                    defaultValue={dateToZonedValue(event?.registrationClosesAt, timezone)} 
                   />
                 </div>
               </div>

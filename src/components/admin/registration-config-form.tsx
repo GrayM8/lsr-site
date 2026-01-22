@@ -6,8 +6,11 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { updateEventRegistrationConfig } from "@/app/admin/events/actions";
 import { Event } from "@prisma/client";
+import { dateToZonedValue, DEFAULT_TIMEZONE } from "@/lib/dates";
 
 export function RegistrationConfigForm({ event }: { event: Event }) {
+  const timezone = event.timezone || DEFAULT_TIMEZONE;
+
   return (
     <form action={updateEventRegistrationConfig.bind(null, event.id)} className="space-y-6 border p-4 rounded-md mt-8">
       <h2 className="text-xl font-bold">Registration Settings</h2>
@@ -19,21 +22,21 @@ export function RegistrationConfigForm({ event }: { event: Event }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="registrationOpensAt">Opens At (UTC)</Label>
+          <Label htmlFor="registrationOpensAt">Opens At ({timezone})</Label>
           <Input 
             id="registrationOpensAt" 
             name="registrationOpensAt" 
             type="datetime-local" 
-            defaultValue={event.registrationOpensAt ? new Date(event.registrationOpensAt).toISOString().slice(0, 16) : ""} 
+            defaultValue={dateToZonedValue(event.registrationOpensAt, timezone)} 
           />
         </div>
         <div>
-          <Label htmlFor="registrationClosesAt">Closes At (UTC)</Label>
+          <Label htmlFor="registrationClosesAt">Closes At ({timezone})</Label>
           <Input 
             id="registrationClosesAt" 
             name="registrationClosesAt" 
             type="datetime-local" 
-            defaultValue={event.registrationClosesAt ? new Date(event.registrationClosesAt).toISOString().slice(0, 16) : ""} 
+            defaultValue={dateToZonedValue(event.registrationClosesAt, timezone)} 
           />
         </div>
       </div>

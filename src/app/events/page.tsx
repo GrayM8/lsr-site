@@ -3,6 +3,7 @@ import { EventsSearch } from "@/components/events-search"
 import { EventsFilters } from "@/components/events-filters"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Clock, MapPin, Send } from "lucide-react"
+import { LocalTime, LocalTimeRange } from "@/components/ui/local-time"
 import { getAllEvents } from "@/server/queries/events";
 import { Event, Venue, EventSeries } from "@prisma/client"
 import { GeoPoint } from "@/types";
@@ -54,13 +55,13 @@ function FeaturedEventCard({ event }: { event: Event & { series: EventSeries | n
           <div className="flex items-center gap-3">
             <Calendar className="h-4 w-4 text-lsr-orange" />
             <span className="font-sans font-bold text-xs uppercase tracking-widest text-white/90">
-              {startsAt.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
+              <LocalTime date={startsAt} format="weekday-date" />
             </span>
           </div>
           <div className="flex items-center gap-3">
             <Clock className="h-4 w-4 text-lsr-orange" />
             <span className="font-sans font-bold text-xs uppercase tracking-widest text-white/90">
-              {startsAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })} - {endsAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
+              <LocalTimeRange start={startsAt} end={endsAt} />
             </span>
           </div>
           {venue && (
@@ -130,7 +131,7 @@ function EventCard({ event }: { event: Event & { series: EventSeries | null, ven
           <div className="flex items-center gap-2">
             <Calendar className="h-3 w-3 text-white/40" />
             <span className="font-sans font-bold text-[10px] uppercase tracking-widest text-white/60">
-              {startsAt.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+              <LocalTime date={startsAt} format="short-date" />
             </span>
           </div>
           {event.venue && (

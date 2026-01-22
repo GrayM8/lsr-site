@@ -2,7 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { type RaceResult, type RaceParticipant, type User, type CarMapping } from "@prisma/client";
-import { UserIcon, ArrowUpDown, ArrowUp, ArrowDown, Maximize2, Minimize2, Search } from "lucide-react";
+import { UserIcon, ArrowUpDown, ArrowUp, ArrowDown, Maximize2, Minimize2, Search, Trophy } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -19,7 +19,7 @@ type SortConfig = {
     direction: "asc" | "desc";
 };
 
-export function ResultsTable({ results, title = "Official Results" }: { results: ResultWithParticipant[], title?: string }) {
+export function ResultsTable({ results, title }: { results: ResultWithParticipant[], title?: string }) {
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: "position", direction: "asc" });
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -105,7 +105,12 @@ export function ResultsTable({ results, title = "Official Results" }: { results:
             isFullscreen ? "fixed inset-0 z-[60] bg-lsr-charcoal" : "border border-white/10"
         )}>
             <div className="flex items-center justify-between p-4 bg-white/5 border-b border-white/10 shrink-0">
-                <h4 className="font-sans font-bold text-xs text-white/60 uppercase tracking-[0.2em]">{title}</h4>
+                {title && (
+                  <div className="flex items-center gap-3">
+                    <Trophy className="h-4 w-4 text-lsr-orange" />
+                    <h4 className="font-sans font-bold text-xs text-white/60 uppercase tracking-[0.2em]">{title}</h4>
+                  </div>
+                )}
                 <div className="flex items-center gap-3">
                     <div className="relative">
                         <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-white/40" />
