@@ -1,8 +1,9 @@
 import { AuditConsole } from "@/components/admin/audit-console";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Info } from "lucide-react";
+import { Metadata } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Admin Console | LSR",
 };
 

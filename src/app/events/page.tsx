@@ -9,6 +9,12 @@ import { Event, Venue, EventSeries } from "@prisma/client"
 import { GeoPoint } from "@/types";
 import Image from "next/image"
 import Link from "next/link"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Events Schedule",
+  description: "View the official Longhorn Sim Racing event calendar, upcoming races, and past results.",
+};
 
 const isLive = (event: Event) => {
   const now = new Date();

@@ -1,5 +1,11 @@
 import { Separator } from "@/components/ui/separator"
 import Image from "next/image"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "About Us",
+  description: "Learn about the mission, vision, and the student team behind Longhorn Sim Racing.",
+};
 
 export default function AboutPage() {
   return (

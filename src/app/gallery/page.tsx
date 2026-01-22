@@ -3,6 +3,12 @@ import { Separator } from "@/components/ui/separator"
 import { galleryItems } from "@/lib/gallery";
 import { getAllGalleryImages } from "@/server/queries/gallery";
 import { Camera } from "lucide-react";
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Gallery",
+  description: "Experience the intensity of Longhorn Sim Racing through our photo archive and race reels.",
+};
 
 export default async function GalleryPage() {
   const videos = galleryItems.filter(item => item.type !== 'image');

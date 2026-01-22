@@ -3,6 +3,12 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import Image from "next/image"
 import { Check, Download, ExternalLink, ArrowRight, Building2, Users, Trophy, Cpu } from "lucide-react"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Sponsors",
+  description: "Partner with Longhorn Sim Racing to support student engineering and motorsport excellence at UT Austin.",
+};
 
 export default function SponsorsPage() {
   const outreachEmail = "outreach@longhornsimracing.org"

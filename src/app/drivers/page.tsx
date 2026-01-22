@@ -6,6 +6,12 @@ import { DriversFilters } from '@/components/drivers-filters';
 import { DriversSearch } from '@/components/drivers-search';
 import { DriversTable } from '@/components/drivers-table';
 import { DriversSidebar } from '@/components/drivers-sidebar';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: "Driver Roster",
+  description: "Official entry list and driver profiles for Longhorn Sim Racing.",
+};
 
 export const dynamic = 'force-dynamic';
 

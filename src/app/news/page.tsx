@@ -3,6 +3,12 @@ import { getAllPosts } from "@/lib/news"
 import { Separator } from "@/components/ui/separator"
 import { NewsSearch } from "@/components/news-search"
 import { NewsFilters } from "@/components/news-filters"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Team News",
+  description: "Latest updates, race reports, and announcements from Longhorn Sim Racing.",
+};
 
 export const revalidate = 60 // revalidate list once per min
 

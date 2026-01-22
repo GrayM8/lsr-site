@@ -1,5 +1,5 @@
 import "./globals.css"
-import type { Metadata, Viewport } from "next"
+import { Metadata, Viewport } from "next"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Montserrat, Kanit } from "next/font/google"
 import { SiteHeader } from "@/components/site-header"

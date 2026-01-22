@@ -12,6 +12,12 @@ import { getStandings } from "@/server/queries/standings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StandingsTable } from "@/components/standings-table";
 import { prisma } from "@/server/db";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Lone Star Cup",
+  description: "The official championship series of Longhorn Sim Racing. Join our welcoming and competitive racing community.",
+};
 
 // Helper to fetch series with event results for podiums
 async function getSeriesWithPodiums(slug: string) {
