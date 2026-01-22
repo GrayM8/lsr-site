@@ -106,7 +106,7 @@ export function StandingsTable({ standings, title = "Standings", infoText }: { s
     return (
         <div className={cn(
             "relative flex flex-col transition-all duration-300 bg-black/40",
-            isFullscreen ? "fixed inset-0 z-50 bg-lsr-charcoal" : "border border-white/10"
+            isFullscreen ? "fixed inset-0 z-[60] bg-lsr-charcoal" : "border border-white/10"
         )}>
             <div className="flex items-center justify-between p-4 bg-white/5 border-b border-white/10 shrink-0">
                 <div className="flex items-center gap-2">
@@ -135,7 +135,7 @@ export function StandingsTable({ standings, title = "Standings", infoText }: { s
                             className="bg-black/20 border border-white/10 rounded-none pl-8 pr-2 py-1.5 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-lsr-orange w-32 md:w-48 transition-all"
                         />
                     </div>
-                    <button onClick={() => setIsFullscreen(!isFullscreen)} className="p-1.5 text-white transition-colors bg-black/50 hover:bg-black/80 border border-white/10 rounded-full shadow-lg">
+                    <button onClick={() => setIsFullscreen(!isFullscreen)} className="p-1.5 text-white/50 hover:text-white transition-colors bg-black/20 hover:bg-black/40 border border-white/10 rounded-none">
                         {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
                     </button>
                 </div>

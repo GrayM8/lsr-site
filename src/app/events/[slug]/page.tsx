@@ -44,9 +44,11 @@ export default async function EventPage({ params }: EventPageArgs) {
           </Link>
         </div>
 
-        <div className="border border-white/10 bg-white/[0.02] p-8 md:p-12 mb-12 relative overflow-hidden">
+        <div className="border border-white/10 bg-white/[0.02] p-8 md:p-12 mb-12 relative">
           {/* Background decorative elements */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-lsr-orange/5 -rotate-45 translate-x-16 -translate-y-16 pointer-events-none" />
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-lsr-orange/5 -rotate-45 translate-x-16 -translate-y-16" />
+          </div>
           
           <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="lg:col-span-2">

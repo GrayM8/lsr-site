@@ -104,7 +104,7 @@ export function DriverHistoryTable({ history, title = "Race History" }: { histor
     return (
         <div className={cn(
             "relative flex flex-col transition-all duration-300 bg-black/40",
-            isFullscreen ? "fixed inset-0 z-50 bg-lsr-charcoal" : "border border-white/10"
+            isFullscreen ? "fixed inset-0 z-[60] bg-lsr-charcoal" : "border border-white/10"
         )}>
             <div className="flex items-center justify-between p-4 bg-white/5 border-b border-white/10 shrink-0">
                 <h4 className="font-sans font-bold text-xs text-white/60 uppercase tracking-[0.2em]">{title}</h4>
