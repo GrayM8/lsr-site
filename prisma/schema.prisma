@@ -101,21 +101,6 @@ enum EntitlementScope {
   lifetime
 }
 
-enum AuditAction {
-  create
-  update
-  delete
-  import
-  login
-  logout
-  rsvp // Kept for legacy history if needed, though we can deprecate
-  registration_change // New action
-  checkin
-  payment_success
-  payment_failed
-  profile_update
-}
-
 // ---------- Identity & Access ----------
 model User {
   id             String     @id @default(uuid())
@@ -196,23 +181,29 @@ model AuthIdentity {
 }
 
 model AuditLog {
-  id          String  @id @default(uuid())
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
   actorUserId String?
+  actionType  String
+  entityType  String
+  entityId    String
+  targetUserId String?
+  
+  summary     String
+  before      Json?
+  after       Json?
+  metadata    Json?
+  
+  requestId   String?
   ip          String?
   userAgent   String?
 
-  entityType String
-  entityId   String
-  action     AuditAction
-  diffJson   Json?
-  metaJson   Json?
-
   actor User? @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
 
-  createdAt DateTime @default(now())
-
-  @@index([entityType, entityId, createdAt])
   @@index([createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([entityType, entityId, createdAt])
+  @@index([actionType, createdAt])
 }
 
 // ---------- Membership, Dues & Fees ----------
