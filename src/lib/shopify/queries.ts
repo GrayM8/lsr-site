@@ -23,6 +23,7 @@ const productFragment = `
   descriptionHtml
   productType
   tags
+  updatedAt
   priceRange {
     maxVariantPrice {
       amount

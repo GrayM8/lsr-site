@@ -11,6 +11,7 @@ export default function Loading() {
           fill
           className="object-contain opacity-20"
           priority
+          fetchPriority="high"
         />
         
         {/* Shimmer overlay masked to logo */}

@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next"
 import { prisma } from "@/server/db"
+import { getProducts } from "@/lib/shopify/catalog"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000")
@@ -10,9 +11,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/about`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/drivers`, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/events`, changeFrequency: "weekly", priority: 0.9 },
-        {url: `${base}/gallery`, changeFrequency: "weekly", priority: 0.7},
-        {url: `${base}/lone-star-cup`, changeFrequency: "weekly", priority: 0.8},
-        {url: `${base}/news`, changeFrequency: "daily", priority: 0.9},
+    { url: `${base}/gallery`, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${base}/lone-star-cup`, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${base}/news`, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/shop`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/sponsors`, changeFrequency: "monthly", priority: 0.6 },
   ]
@@ -65,11 +66,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
+  // 6. Dynamic: Shop Products
+  let productRoutes: MetadataRoute.Sitemap = [];
+  const SHOP_ENABLED = process.env.NEXT_PUBLIC_SHOP_ENABLED === "true";
+  
+  if (SHOP_ENABLED) {
+    try {
+      const products = await getProducts();
+      productRoutes = products.map((product) => ({
+        url: `${base}/shop/products/${product.handle}`,
+        lastModified: new Date(product.updatedAt),
+        changeFrequency: "weekly",
+        priority: 0.8,
+      }));
+    } catch (error) {
+      console.error("Sitemap: Failed to fetch products", error);
+    }
+  }
+
   return [
     ...staticRoutes,
     ...driverRoutes,
     ...eventRoutes,
     ...postRoutes,
     ...seriesRoutes,
+    ...productRoutes,
   ]
 }

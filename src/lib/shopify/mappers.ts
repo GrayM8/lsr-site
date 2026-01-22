@@ -34,6 +34,7 @@ export const mapProduct = (product: any): Product => ({
   title: product.title,
   description: product.description,
   descriptionHtml: product.descriptionHtml,
+  updatedAt: product.updatedAt,
   images: removeEdgesAndNodes(product.images).map(mapImage),
   variants: removeEdgesAndNodes(product.variants).map(mapVariant),
   tags: product.tags || [],

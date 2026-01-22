@@ -24,6 +24,7 @@ export default function SponsorsPage() {
             fill 
             className="object-cover opacity-40 grayscale-[0.5]"
             priority
+            fetchPriority="high"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-lsr-charcoal/80 via-lsr-charcoal/60 to-lsr-charcoal" />
         </div>

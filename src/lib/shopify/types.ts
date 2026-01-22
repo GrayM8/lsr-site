@@ -27,6 +27,7 @@ export type Product = {
   title: string;
   description: string;
   descriptionHtml?: string;
+  updatedAt: string;
   images: Image[];
   variants: ProductVariant[];
   tags: string[];
