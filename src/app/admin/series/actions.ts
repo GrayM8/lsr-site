@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createSeries as createSeriesInDb, updateSeries as updateSeriesInDb, deleteSeries as deleteSeriesInDb } from "@/server/repos/series.repo";
 import { getSessionUser } from "@/server/auth/session";
-import { logAudit } from "@/server/audit/log";
+import { createAuditLog } from "@/server/audit/log";
 
 export async function createSeries(formData: FormData) {
   const { user } = await getSessionUser();
@@ -20,11 +20,13 @@ export async function createSeries(formData: FormData) {
     slug,
   });
 
-  await logAudit({
+  await createAuditLog({
     actorUserId: user.id,
-    action: "create",
-    entityType: "EventSeries",
+    actionType: "CREATE",
+    entityType: "EVENT_SERIES",
     entityId: series.id,
+    summary: `Created series: ${series.title}`,
+    after: { title, slug },
   });
 
   revalidatePath("/admin/series");
@@ -45,11 +47,13 @@ export async function updateSeries(id: string, formData: FormData) {
     slug,
   });
 
-  await logAudit({
+  await createAuditLog({
     actorUserId: user.id,
-    action: "update",
-    entityType: "EventSeries",
+    actionType: "UPDATE",
+    entityType: "EVENT_SERIES",
     entityId: id,
+    summary: `Updated series: ${title}`,
+    after: { title, slug },
   });
 
   revalidatePath("/admin/series");
@@ -64,11 +68,12 @@ export async function deleteSeries(id: string) {
 
   await deleteSeriesInDb(id);
 
-  await logAudit({
+  await createAuditLog({
     actorUserId: user.id,
-    action: "delete",
-    entityType: "EventSeries",
+    actionType: "DELETE",
+    entityType: "EVENT_SERIES",
     entityId: id,
+    summary: `Deleted series ${id}`,
   });
 
   revalidatePath("/admin/series");

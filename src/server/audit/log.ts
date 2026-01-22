@@ -16,7 +16,7 @@ export type CreateAuditLogParams = {
   userAgent?: string;
 };
 
-export async function createAuditLog(params: CreateAuditLogParams) {
+export async function createAuditLog(params: CreateAuditLogParams, tx?: Prisma.TransactionClient) {
   try {
     const {
       actorUserId,
@@ -33,7 +33,9 @@ export async function createAuditLog(params: CreateAuditLogParams) {
       userAgent,
     } = params;
 
-    await prisma.auditLog.create({
+    const db = tx || prisma;
+
+    await db.auditLog.create({
       data: {
         actorUserId,
         actionType,

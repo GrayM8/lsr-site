@@ -1,6 +1,6 @@
 // src/server/repos/user.repo.ts
 import { prisma } from '@/server/db';
-import { logAudit } from '@/server/audit/log';
+import { createAuditLog } from '@/server/audit/log';
 
 export async function getUserById(id: string) {
   return prisma.user.findUnique({
@@ -25,12 +25,14 @@ export async function assignRole(userId: string, roleKey: string, actorId: strin
     },
   });
 
-  await logAudit({
+  await createAuditLog({
     actorUserId: actorId,
-    action: 'update',
-    entityType: 'User',
+    actionType: 'UPDATE',
+    entityType: 'USER',
     entityId: userId,
-    metaJson: JSON.stringify({ assignedRole: roleKey }),
+    targetUserId: userId,
+    summary: `Assigned role ${roleKey} to user ${userId}`,
+    metadata: { assignedRole: roleKey },
   });
 
   return result;
