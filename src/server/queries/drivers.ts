@@ -94,6 +94,11 @@ export async function getDriverStats(handle: string) {
       }
   });
 
+  // 5. Total Registrations Count
+  const totalRegistrations = await prisma.eventRegistration.count({
+      where: { userId: user.id }
+  });
+
   return {
     user,
     currentSeason: currentEntry
@@ -106,5 +111,6 @@ export async function getDriverStats(handle: string) {
     allTime: allTimeStats,
     history: raceHistory,
     eventHistory,
+    totalRegistrations,
   };
 }

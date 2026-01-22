@@ -26,8 +26,14 @@ type UpcomingRegistration = {
 export function MyUpcomingEvents({ registrations }: { registrations: any[] }) {
   if (registrations.length === 0) {
     return (
-        <div className="border border-white/10 bg-white/[0.02] p-8 text-center">
-            <p className="font-sans font-bold text-white/40 uppercase tracking-widest text-xs">No upcoming registrations</p>
+        <div className="border border-white/10 bg-white/[0.02] p-8 text-center space-y-4">
+            <p className="font-sans font-bold text-white/40 uppercase tracking-widest text-xs">No upcoming races on your schedule</p>
+            <Link 
+                href="/events" 
+                className="inline-block bg-white/5 hover:bg-lsr-orange hover:text-white text-white/60 font-black uppercase tracking-[0.1em] text-[10px] px-6 py-3 transition-all border border-white/10 hover:border-lsr-orange"
+            >
+                Browse Events
+            </Link>
         </div>
     );
   }
@@ -67,21 +73,27 @@ export function MyUpcomingEvents({ registrations }: { registrations: any[] }) {
             </Badge>
           </div>
 
-          <div className="flex flex-wrap gap-4 text-[10px] text-white/60 font-medium uppercase tracking-wider">
-            <div className="flex items-center gap-2">
-                <Calendar className="h-3 w-3 text-white/40" />
-                <span>{new Date(reg.event.startsAtUtc).toLocaleDateString()}</span>
-            </div>
-            <div className="flex items-center gap-2">
-                <Clock className="h-3 w-3 text-white/40" />
-                <span>{new Date(reg.event.startsAtUtc).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}</span>
-            </div>
-            {reg.event.venue && (
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="flex flex-wrap gap-4 text-[10px] text-white/60 font-medium uppercase tracking-wider">
                 <div className="flex items-center gap-2">
-                    <MapPin className="h-3 w-3 text-white/40" />
-                    <span>{reg.event.venue.name}</span>
+                    <Calendar className="h-3 w-3 text-white/40" />
+                    <span>{new Date(reg.event.startsAtUtc).toLocaleDateString()}</span>
                 </div>
-            )}
+                <div className="flex items-center gap-2">
+                    <Clock className="h-3 w-3 text-white/40" />
+                    <span>{new Date(reg.event.startsAtUtc).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}</span>
+                </div>
+                {reg.event.venue && (
+                    <div className="flex items-center gap-2">
+                        <MapPin className="h-3 w-3 text-white/40" />
+                        <span>{reg.event.venue.name}</span>
+                    </div>
+                )}
+            </div>
+            
+            <div className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] group-hover:text-lsr-orange transition-colors">
+                Details →
+            </div>
           </div>
         </Link>
       ))}
