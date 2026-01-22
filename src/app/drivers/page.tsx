@@ -11,6 +11,9 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: "Driver Roster",
   description: "Official entry list and driver profiles for Longhorn Sim Racing.",
+  alternates: {
+    canonical: "/drivers",
+  },
 };
 
 export const dynamic = 'force-dynamic';

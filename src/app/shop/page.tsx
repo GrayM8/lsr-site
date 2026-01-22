@@ -14,6 +14,9 @@ export const metadata: Metadata = {
     description: "Official Longhorn Sim Racing Merchandise and Team Kit.",
     type: "website",
   },
+  alternates: {
+    canonical: "/shop",
+  },
 };
 
 export default async function ShopPage() {

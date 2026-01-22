@@ -17,6 +17,9 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Lone Star Cup",
   description: "The official championship series of Longhorn Sim Racing. Join our welcoming and competitive racing community.",
+  alternates: {
+    canonical: "/lone-star-cup",
+  },
 };
 
 // Helper to fetch series with event results for podiums

@@ -12,10 +12,22 @@ import Image from "next/image";
 import Link from "next/link";
 import { getStandings } from "@/server/queries/standings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Metadata } from "next";
 
 type SeriesPageArgs = {
   params: Promise<{ slug: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: SeriesPageArgs): Promise<Metadata> {
+  const { slug } = await params;
+  return {
+    alternates: {
+      canonical: `/series/${slug}`,
+    },
+  };
+}
 
 export default async function SeriesPage({ params }: SeriesPageArgs) {
   const { slug } = await params;

@@ -8,6 +8,9 @@ import { Metadata } from "next"
 export const metadata: Metadata = {
   title: "Gallery",
   description: "Experience the intensity of Longhorn Sim Racing through our photo archive and race reels.",
+  alternates: {
+    canonical: "/gallery",
+  },
 };
 
 export default async function GalleryPage() {

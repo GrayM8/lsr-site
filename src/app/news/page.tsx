@@ -8,6 +8,9 @@ import { Metadata } from "next"
 export const metadata: Metadata = {
   title: "Team News",
   description: "Latest updates, race reports, and announcements from Longhorn Sim Racing.",
+  alternates: {
+    canonical: "/news",
+  },
 };
 
 export const revalidate = 60 // revalidate list once per min

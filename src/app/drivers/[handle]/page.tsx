@@ -14,8 +14,20 @@ import { DriverParticipation } from '@/components/drivers/profile/driver-partici
 import { DriverPerformance } from '@/components/drivers/profile/driver-performance';
 import { DriverEventHistory } from '@/components/drivers/profile/driver-event-history';
 import { DriverMetadata } from '@/components/drivers/profile/driver-metadata';
+import { Metadata } from 'next';
 
 export const revalidate = 60;
+
+export async function generateMetadata({
+  params,
+}: { params: Promise<{ handle: string }> }): Promise<Metadata> {
+  const { handle } = await params;
+  return {
+    alternates: {
+      canonical: `/drivers/${handle}`,
+    },
+  };
+}
 
 export default async function DriverProfilePage({
   params,

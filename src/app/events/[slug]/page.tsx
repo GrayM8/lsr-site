@@ -11,10 +11,22 @@ import { Button } from "@/components/ui/button";
 import { ResultsTable } from "@/components/results-table";
 import { EventRegistrationPanel } from "@/components/event-registration-panel";
 import { getSessionUser } from "@/server/auth/session";
+import { Metadata } from "next";
 
 type EventPageArgs = {
   params: Promise<{ slug: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: EventPageArgs): Promise<Metadata> {
+  const { slug } = await params;
+  return {
+    alternates: {
+      canonical: `/events/${slug}`,
+    },
+  };
+}
 
 export default async function EventPage({ params }: EventPageArgs) {
   const { slug } = await params;

@@ -14,6 +14,9 @@ import { Metadata } from "next"
 export const metadata: Metadata = {
   title: "Events Schedule",
   description: "View the official Longhorn Sim Racing event calendar, upcoming races, and past results.",
+  alternates: {
+    canonical: "/events",
+  },
 };
 
 const isLive = (event: Event) => {

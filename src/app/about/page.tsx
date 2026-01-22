@@ -5,6 +5,9 @@ import { Metadata } from "next"
 export const metadata: Metadata = {
   title: "About Us",
   description: "Learn about the mission, vision, and the student team behind Longhorn Sim Racing.",
+  alternates: {
+    canonical: "/about",
+  },
 };
 
 export default function AboutPage() {

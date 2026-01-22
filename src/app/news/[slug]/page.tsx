@@ -3,8 +3,22 @@ import { getAllPosts, getPostContent } from "@/lib/news"
 import Link from "next/link"
 
 import { Separator } from "@/components/ui/separator"
+import { Metadata } from "next"
 
-export const revalidate = 60
+export const revalidate = 60;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<RouteParams>
+}): Promise<Metadata> {
+  const { slug } = await params;
+  return {
+    alternates: {
+      canonical: `/news/${slug}`,
+    },
+  };
+}
 
 export async function generateStaticParams() {
   const posts = await getAllPosts()

@@ -8,6 +8,9 @@ import { Metadata } from "next"
 export const metadata: Metadata = {
   title: "Sponsors",
   description: "Partner with Longhorn Sim Racing to support student engineering and motorsport excellence at UT Austin.",
+  alternates: {
+    canonical: "/sponsors",
+  },
 };
 
 export default function SponsorsPage() {
