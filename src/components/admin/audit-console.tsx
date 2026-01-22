@@ -2,9 +2,10 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useDebounce } from "use-debounce";
-import { Loader2, RefreshCw, Search, Terminal, Filter, X } from "lucide-react";
+import { Loader2, RefreshCw, Search, Terminal, Filter, X, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AuditLog } from "@prisma/client";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type AuditLogWithActor = AuditLog & {
   actor: {
@@ -114,6 +115,19 @@ export function AuditConsole() {
           <div className="flex items-center gap-2 bg-black/50 px-2 py-1 rounded border border-white/10">
             <Terminal size={14} className="text-lsr-orange" />
             <span className="font-bold text-white/80">AUDIT CONSOLE</span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info size={14} className="text-white/40 hover:text-white/80 transition-colors" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs bg-black/90 border-white/10 text-white p-3">
+                  <p className="font-bold mb-1 text-lsr-orange">Audit Console</p>
+                  <p className="text-xs text-white/80">
+                    A comprehensive log of all administrative actions. This ensures accountability and transparency for changes made by officers and admins.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
           
           <div className="h-4 w-px bg-white/10 mx-2" />
