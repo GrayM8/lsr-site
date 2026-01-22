@@ -29,9 +29,9 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: { default: "Longhorn Sim Racing", template: "%s · LSR" },
+  title: { default: "Longhorn Sim Racing | UT Austin", template: "%s | LSR" },
   description: "UT Austin Longhorn Sim Racing Club",
-  metadataBase: new URL(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000"),
+  metadataBase: new URL("https://www.longhornsimracing.org"),
   openGraph: {
     type: "website",
     siteName: "Longhorn Sim Racing",
@@ -56,6 +56,7 @@ export const metadata: Metadata = {
     ],
   },
   alternates: {
+    canonical: "/",
     types: {
       "application/rss+xml": "/news/rss.xml",
     }

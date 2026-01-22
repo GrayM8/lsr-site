@@ -34,11 +34,27 @@ export default async function Home() {
 
   const galleryImages = await getAllGalleryImages()
 
-  return <HomePageClient
-    posts={posts}
-    featuredEvent={featuredEvent as Event & { venue: Venue | null; series: EventSeries | null; }}
-    upcomingEvents={upcomingEvents as (Event & { venue: Venue | null; series: EventSeries | null; })[]}
-    drivers={drivers}
-    galleryImages={galleryImages}
-  />
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Longhorn Sim Racing',
+    alternateName: 'LSR',
+    url: 'https://www.longhornsimracing.org/',
+  }
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <HomePageClient
+        posts={posts}
+        featuredEvent={featuredEvent as Event & { venue: Venue | null; series: EventSeries | null; }}
+        upcomingEvents={upcomingEvents as (Event & { venue: Venue | null; series: EventSeries | null; })[]}
+        drivers={drivers}
+        galleryImages={galleryImages}
+      />
+    </>
+  )
 }
