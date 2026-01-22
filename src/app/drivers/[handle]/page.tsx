@@ -5,10 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { BrandIcon, type SimpleIcon } from '@/components/brand-icon';
 import { siInstagram, siYoutube, siTwitch } from 'simple-icons/icons';
-import { Globe, type LucideIcon } from 'lucide-react';
+import { Globe, type LucideIcon, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getDriverStats } from "@/server/queries/drivers";
 import { DriverHistoryTable } from "@/components/driver-history-table";
+import { getCachedSessionUser } from "@/server/auth/cached-session";
+import { getUpcomingRegistrations } from "@/server/queries/events";
+import { MyUpcomingEvents } from "@/components/my-upcoming-events";
 
 export const revalidate = 60;
 
@@ -33,6 +36,12 @@ export default async function DriverProfilePage({
   if (user.status === 'deleted') return notFound();
 
   const { isOwner } = await getOwnerStatus(user.id);
+  
+  // Check if viewing own profile
+  const { user: sessionUser } = await getCachedSessionUser();
+  const isMe = sessionUser?.id === user.id;
+  
+  const upcomingRegistrations = isMe ? await getUpcomingRegistrations(user.id) : [];
 
   const initials = user.displayName
     .split(' ')
@@ -133,6 +142,22 @@ export default async function DriverProfilePage({
           {/* Left Column: Stats & Socials */}
           <div className="lg:col-span-1 space-y-12">
             
+            {/* 0. My Upcoming Events (Private) */}
+            {isMe && (
+                <div>
+                    <div className="flex items-center justify-between mb-6 border-b border-white/10 pb-4">
+                        <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal">
+                            My <span className="text-lsr-orange">Registrations</span>
+                        </h3>
+                        <div className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-white/30" title="Visible only to you">
+                            <EyeOff className="h-3 w-3" />
+                            <span>Private</span>
+                        </div>
+                    </div>
+                    <MyUpcomingEvents registrations={upcomingRegistrations} />
+                </div>
+            )}
+
             {/* 1. Comms Links (Top) */}
             <div>
               <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal mb-6 border-b border-white/10 pb-4">
