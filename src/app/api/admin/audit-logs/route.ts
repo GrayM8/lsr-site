@@ -19,8 +19,12 @@ export async function GET(req: NextRequest) {
 
   const where: Prisma.AuditLogWhereInput = {};
 
-  if (actionType) where.actionType = actionType;
-  if (entityType) where.entityType = entityType;
+  if (actionType) {
+    where.actionType = { equals: actionType, mode: "insensitive" };
+  }
+  if (entityType) {
+    where.entityType = { equals: entityType, mode: "insensitive" };
+  }
   if (actorUserId) where.actorUserId = actorUserId;
   if (search) {
     where.summary = { contains: search, mode: "insensitive" };
