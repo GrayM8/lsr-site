@@ -4,6 +4,13 @@ import { prisma } from "@/server/db"
 import { getNextEventForHomepage } from "@/server/queries/events"
 import { getAllGalleryImages } from "@/server/queries/gallery"
 import { Event, EventSeries, Venue } from "@prisma/client"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/",
+  },
+}
 
 export default async function Home() {
   const posts = await getAllPosts()
