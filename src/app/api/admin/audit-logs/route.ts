@@ -41,6 +41,14 @@ export async function GET(req: NextRequest) {
             avatarUrl: true,
           },
         },
+        targetUser: {
+          select: {
+            id: true,
+            displayName: true,
+            handle: true,
+            avatarUrl: true,
+          },
+        },
       },
     }),
     prisma.auditLog.count({ where }),

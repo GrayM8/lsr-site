@@ -131,6 +131,7 @@ model User {
   checkins               Attendance[]
   entries                Entry[]          @relation("EntryUser")
   auditLogs              AuditLog[]       @relation("AuditActor")
+  auditLogsTargeted      AuditLog[]       @relation("AuditTarget")
   provenanceCreated      Provenance[]     @relation("ProvenanceCreatedBy")
   importArtifactsCreated ImportArtifact[] @relation("ImportArtifactCreatedBy")
   mediaOwned             Media[]          @relation("MediaOwner")
@@ -188,7 +189,7 @@ model AuditLog {
   entityType  String
   entityId    String
   targetUserId String?
-  
+
   summary     String
   before      Json?
   after       Json?
@@ -198,7 +199,8 @@ model AuditLog {
   ip          String?
   userAgent   String?
 
-  actor User? @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  actor      User? @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  targetUser User? @relation("AuditTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
 
   @@index([createdAt])
   @@index([actorUserId, createdAt])

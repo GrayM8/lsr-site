@@ -13,6 +13,12 @@ type AuditLogWithActor = AuditLog & {
     handle: string;
     avatarUrl: string | null;
   } | null;
+  targetUser: {
+    id: string;
+    displayName: string;
+    handle: string;
+    avatarUrl: string | null;
+  } | null;
 };
 
 export function AuditConsole() {
@@ -176,8 +182,11 @@ export function AuditConsole() {
                     {new Date(log.createdAt).toLocaleString()}
                   </span>
                   
-                  <span className="text-lsr-orange text-xs font-bold whitespace-nowrap w-24 truncate">
+                  <span className="text-lsr-orange text-xs font-bold whitespace-nowrap w-24 truncate flex items-center gap-1">
                      {log.actor?.handle || "System"}
+                     {log.targetUser && (
+                        <span className="text-white/40 font-normal">→ {log.targetUser.handle}</span>
+                     )}
                   </span>
                   
                   <span className="text-blue-400 text-xs font-bold whitespace-nowrap w-32 truncate">
@@ -237,7 +246,19 @@ export function AuditConsole() {
                 </div>
                 <div>
                    <label className="text-xs text-white/40 uppercase font-bold block mb-1">Target User</label>
-                   <div className="text-white font-mono">{selectedLog.targetUserId || "-"}</div>
+                   <div className="text-white flex items-center gap-2">
+                      {selectedLog.targetUser ? (
+                        <>
+                          {selectedLog.targetUser.avatarUrl && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={selectedLog.targetUser.avatarUrl} alt="" className="w-5 h-5 rounded-full" />
+                          )}
+                          <span className="font-mono">{selectedLog.targetUser.displayName} (@{selectedLog.targetUser.handle})</span>
+                        </>
+                      ) : (
+                         <span className="font-mono text-white/40">-</span>
+                      )}
+                   </div>
                 </div>
              </div>
 
