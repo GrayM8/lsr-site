@@ -6,11 +6,15 @@ import { newsPostSchema, NewsPostSchema } from '@/schemas/news.schema';
 import { revalidatePath } from 'next/cache';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { slugify } from '@/lib/slug';
+import { createAuditLog } from '@/server/audit/log';
+import { getSessionUser } from '@/server/auth/session';
 
 export async function createPost(data: NewsPostSchema) {
   await requireRole(['admin', 'officer']);
   
   const validated = newsPostSchema.parse(data);
+  const { user } = await getSessionUser();
+  if (!user) throw new Error("Unauthorized");
 
   try {
     const post = await prisma.post.create({
@@ -22,6 +26,15 @@ export async function createPost(data: NewsPostSchema) {
         publishedAt: validated.publishedAt,
         authorId: validated.authorId,
       },
+    });
+
+    await createAuditLog({
+      actorUserId: user.id,
+      actionType: "CREATE",
+      entityType: "POST",
+      entityId: post.id,
+      summary: `Created news post: ${post.title}`,
+      after: { title: post.title, slug: post.slug },
     });
 
     // Handle Tags
@@ -55,6 +68,8 @@ export async function createPost(data: NewsPostSchema) {
 
 export async function updatePost(id: string, data: NewsPostSchema) {
   await requireRole(['admin', 'officer']);
+  const { user } = await getSessionUser();
+  if (!user) throw new Error("Unauthorized");
 
   const validated = newsPostSchema.parse(data);
 
@@ -75,6 +90,15 @@ export async function updatePost(id: string, data: NewsPostSchema) {
         publishedAt: validated.publishedAt,
         authorId: validated.authorId,
       },
+    });
+
+    await createAuditLog({
+      actorUserId: user.id,
+      actionType: "UPDATE",
+      entityType: "POST",
+      entityId: post.id,
+      summary: `Updated news post: ${post.title}`,
+      after: { title: post.title, slug: post.slug },
     });
 
     // Handle Tags (Sync)
