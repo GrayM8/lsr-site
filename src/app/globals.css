@@ -131,6 +131,11 @@
   100% { transform: translateX(-50%); }
 }
 
+@keyframes shimmer {
+  from { transform: translateX(100%); }
+  to { transform: translateX(-100%); }
+}
+
 /* Custom Scrollbar Styles */
 @layer base {
   ::-webkit-scrollbar {
