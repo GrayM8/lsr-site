@@ -12,13 +12,6 @@ import { getStandings } from "@/server/queries/standings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StandingsTable } from "@/components/standings-table";
 import { prisma } from "@/server/db";
-import { Info } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 // Helper to fetch series with event results for podiums
 async function getSeriesWithPodiums(slug: string) {
@@ -278,23 +271,12 @@ export default async function LoneStarCupPage() {
                     </section>
 
                     <section>
-                    <div className="flex items-center gap-3 mb-6">
-                      <h3 className="font-display font-black italic text-2xl text-white uppercase tracking-normal">
-                          Championship <span className="text-lsr-orange">Standings</span>
-                      </h3>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <Info className="h-4 w-4 text-white/40 hover:text-lsr-orange transition-colors" />
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-[300px] bg-lsr-charcoal border border-white/10 text-white/80 text-xs">
-                            <p>Only users with accounts can be shown on the standings page. Accounts must be manually linked to Assetto Corsa display names. If you are not listed, please create an account and email info@longhornsimracing.org to be added.</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
                     {currentStandings.length > 0 ? (
-                        <StandingsTable standings={currentStandings} />
+                        <StandingsTable 
+                            standings={currentStandings} 
+                            title="Championship Standings" 
+                            infoText="Only users with accounts can be shown on the standings page. Accounts must be manually linked to Assetto Corsa display names. If you are not listed, please create an account and email info@longhornsimracing.org to be added."
+                        />
                     ) : (
                         <div className="border border-white/10 bg-black/20 p-12 text-center">
                             <p className="font-sans font-bold text-white/40 uppercase tracking-widest text-sm">No Data to Display Yet</p>
@@ -392,21 +374,12 @@ export default async function LoneStarCupPage() {
 
                       {/* Standings */}
                       <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-sans font-black text-xs uppercase tracking-[0.2em] text-white/60">Final Standings</h4>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <Info className="h-3 w-3 text-white/40 hover:text-lsr-orange transition-colors" />
-                              </TooltipTrigger>
-                              <TooltipContent className="max-w-[300px] bg-lsr-charcoal border border-white/10 text-white/80 text-xs">
-                                <p>Only users with accounts can be shown on the standings page. Accounts must be manually linked to Assetto Corsa display names. If you are not listed, please create an account and email info@longhornsimracing.org to be added.</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
                         {season.standings.length > 0 ? (
-                            <StandingsTable standings={season.standings} />
+                            <StandingsTable 
+                                standings={season.standings} 
+                                title="Final Standings" 
+                                infoText="Only users with accounts can be shown on the standings page. Accounts must be manually linked to Assetto Corsa display names. If you are not listed, please create an account and email info@longhornsimracing.org to be added."
+                            />
                         ) : (
                             <div className="border border-white/10 bg-black/20 p-8 text-center">
                                 <p className="font-sans font-bold text-white/40 uppercase tracking-widest text-xs">No Data Archived</p>
