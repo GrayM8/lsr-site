@@ -3,10 +3,13 @@
 import { requireAdmin } from "@/lib/authz";
 import { prisma } from "@/server/db";
 import { revalidatePath } from "next/cache";
+import { createAuditLog } from "@/server/audit/log";
+import { getSessionUser } from "@/server/auth/session";
 
 export async function updateCarMapping(id: string, displayName: string, secondaryDisplayName: string | null) {
   const { ok } = await requireAdmin();
-  if (!ok) throw new Error("Unauthorized");
+  const { user } = await getSessionUser();
+  if (!ok || !user) throw new Error("Unauthorized");
 
   await prisma.carMapping.update({
     where: { id },
@@ -16,12 +19,22 @@ export async function updateCarMapping(id: string, displayName: string, secondar
     },
   });
 
+  await createAuditLog({
+    actorUserId: user.id,
+    actionType: "UPDATE",
+    entityType: "CAR_MAPPING",
+    entityId: id,
+    summary: `Updated car mapping for ${displayName}`,
+    after: { displayName, secondaryDisplayName },
+  });
+
   revalidatePath("/admin/cars");
 }
 
 export async function createCarMapping(gameCarName: string, displayName: string, secondaryDisplayName: string | null) {
   const { ok } = await requireAdmin();
-  if (!ok) throw new Error("Unauthorized");
+  const { user } = await getSessionUser();
+  if (!ok || !user) throw new Error("Unauthorized");
 
   const carMapping = await prisma.carMapping.create({
     data: {
@@ -35,6 +48,15 @@ export async function createCarMapping(gameCarName: string, displayName: string,
   await prisma.raceParticipant.updateMany({
     where: { carName: gameCarName },
     data: { carMappingId: carMapping.id },
+  });
+
+  await createAuditLog({
+    actorUserId: user.id,
+    actionType: "CREATE",
+    entityType: "CAR_MAPPING",
+    entityId: carMapping.id,
+    summary: `Created car mapping for ${gameCarName}`,
+    after: { gameCarName, displayName, secondaryDisplayName },
   });
 
   revalidatePath("/admin/cars");

@@ -1,6 +1,6 @@
 // src/server/payments/handler.ts
 import { prisma } from '@/server/db';
-import { logAudit } from '@/server/audit/log';
+import { createAuditLog } from '@/server/audit/log';
 import { Payment } from '@prisma/client';
 
 // This is a stub implementation. In a real app, you would pass in the full payment object from Stripe, etc.
@@ -49,12 +49,14 @@ export async function onPaymentSucceeded(payment: Payment) {
   }
 
   if (entitlement) {
-    await logAudit({
+    await createAuditLog({
       actorUserId: payment.userId,
-      action: 'payment_success',
-      entityType: 'Entitlement',
+      actionType: 'PAYMENT_SUCCESS',
+      entityType: 'ENTITLEMENT',
       entityId: entitlement.id,
-      metaJson: JSON.stringify({ paymentId: payment.id }),
+      summary: `Payment succeeded for product ${product.type}`,
+      metadata: { paymentId: payment.id, productType: product.type },
+      after: entitlement,
     });
   }
 }

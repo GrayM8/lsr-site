@@ -3,7 +3,7 @@
 import { prisma } from "@/server/db";
 import { fromZonedTime } from "date-fns-tz";
 import { getSessionUser } from "@/server/auth/session";
-import { logAudit } from "@/server/audit/log";
+import { createAuditLog } from "@/server/audit/log";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -41,11 +41,13 @@ export async function createEvent(formData: FormData) {
     },
   });
 
-  await logAudit({
+  await createAuditLog({
     actorUserId: user.id,
-    action: "create",
-    entityType: "Event",
+    actionType: "CREATE",
+    entityType: "EVENT",
     entityId: event.id,
+    summary: `Created event: ${event.title}`,
+    after: event,
   });
 
   revalidatePath("/admin/events");
@@ -71,11 +73,13 @@ export async function updateEventStatus(eventId: string, status: EventStatus, pu
     data,
   });
 
-  await logAudit({
+  await createAuditLog({
     actorUserId: user.id,
-    action: "update",
-    entityType: "Event",
+    actionType: "UPDATE",
+    entityType: "EVENT",
     entityId: eventId,
+    summary: `Updated event status to ${status}`,
+    after: data,
   });
 
   revalidatePath("/admin/events");
@@ -99,32 +103,36 @@ export async function updateEvent(id: string, formData: FormData) {
   const closesAtRaw = formData.get("registrationClosesAt") as string;
   const maxRaw = formData.get("registrationMax") as string;
 
+  const eventUpdateData = {
+    title: formData.get("title") as string,
+    slug: formData.get("slug") as string,
+    seriesId: seriesId === "" ? null : seriesId,
+    venueId: venueId === "" ? null : venueId,
+    startsAtUtc: fromZonedTime(formData.get("startsAtUtc") as string, formData.get("timezone") as string),
+    endsAtUtc: fromZonedTime(formData.get("endsAtUtc") as string, formData.get("timezone") as string),
+    timezone: formData.get("timezone") as string,
+    summary: formData.get("summary") as string,
+    description: formData.get("description") as string,
+    heroImageUrl: formData.get("heroImageUrl") as string,
+    registrationEnabled: formData.get("registrationEnabled") === "on",
+    registrationOpensAt: opensAtRaw ? fromZonedTime(opensAtRaw, formData.get("timezone") as string) : null,
+    registrationClosesAt: closesAtRaw ? fromZonedTime(closesAtRaw, formData.get("timezone") as string) : null,
+    registrationMax: maxRaw && maxRaw !== "-1" ? parseInt(maxRaw) : null,
+    registrationWaitlistEnabled: formData.get("registrationWaitlistEnabled") === "on",
+  };
+
   await prisma.event.update({
     where: { id },
-    data: {
-      title: formData.get("title") as string,
-      slug: formData.get("slug") as string,
-      seriesId: seriesId === "" ? null : seriesId,
-      venueId: venueId === "" ? null : venueId,
-      startsAtUtc: fromZonedTime(formData.get("startsAtUtc") as string, formData.get("timezone") as string),
-      endsAtUtc: fromZonedTime(formData.get("endsAtUtc") as string, formData.get("timezone") as string),
-      timezone: formData.get("timezone") as string,
-      summary: formData.get("summary") as string,
-      description: formData.get("description") as string,
-      heroImageUrl: formData.get("heroImageUrl") as string,
-      registrationEnabled: formData.get("registrationEnabled") === "on",
-      registrationOpensAt: opensAtRaw ? fromZonedTime(opensAtRaw, formData.get("timezone") as string) : null,
-      registrationClosesAt: closesAtRaw ? fromZonedTime(closesAtRaw, formData.get("timezone") as string) : null,
-      registrationMax: maxRaw && maxRaw !== "-1" ? parseInt(maxRaw) : null,
-      registrationWaitlistEnabled: formData.get("registrationWaitlistEnabled") === "on",
-    },
+    data: eventUpdateData,
   });
 
-  await logAudit({
+  await createAuditLog({
     actorUserId: user.id,
-    action: "update",
-    entityType: "Event",
+    actionType: "UPDATE",
+    entityType: "EVENT",
     entityId: id,
+    summary: `Updated event details for ${eventUpdateData.title}`,
+    after: eventUpdateData,
   });
 
   revalidatePath("/events");
@@ -142,11 +150,12 @@ export async function deleteEvent(eventId: string) {
     where: { id: eventId },
   });
 
-  await logAudit({
+  await createAuditLog({
     actorUserId: user.id,
-    action: "delete",
-    entityType: "Event",
+    actionType: "DELETE",
+    entityType: "EVENT",
     entityId: eventId,
+    summary: `Deleted event ${eventId}`,
   });
 
   revalidatePath("/admin/events");
@@ -172,25 +181,29 @@ export async function updateEventRegistrationConfig(eventId: string, formData: F
   const maxRaw = formData.get("registrationMax") as string;
   const waitlistEnabled = formData.get("registrationWaitlistEnabled") === "on";
 
+  const configData = {
+    registrationEnabled: enabled,
+    registrationOpensAt: opensAtRaw ? fromZonedTime(opensAtRaw, timezone) : null,
+    registrationClosesAt: closesAtRaw ? fromZonedTime(closesAtRaw, timezone) : null,
+    registrationMax: maxRaw && maxRaw !== "-1" ? parseInt(maxRaw) : null,
+    registrationWaitlistEnabled: waitlistEnabled,
+  };
+
   await prisma.event.update({
     where: { id: eventId },
-    data: {
-      registrationEnabled: enabled,
-      registrationOpensAt: opensAtRaw ? fromZonedTime(opensAtRaw, timezone) : null,
-      registrationClosesAt: closesAtRaw ? fromZonedTime(closesAtRaw, timezone) : null,
-      registrationMax: maxRaw && maxRaw !== "-1" ? parseInt(maxRaw) : null,
-      registrationWaitlistEnabled: waitlistEnabled,
-    },
+    data: configData,
   });
 
-  await logAudit({
+  await createAuditLog({
     actorUserId: user.id,
-    action: "update",
-    entityType: "Event",
+    actionType: "UPDATE",
+    entityType: "EVENT",
     entityId: eventId,
-    metaJson: JSON.stringify({
+    summary: `Updated registration configuration for event ${eventId}`,
+    metadata: {
       updateType: "registration_config",
-    })
+    },
+    after: configData,
   });
 
   revalidatePath(`/admin/events/${eventId}`);
@@ -229,15 +242,16 @@ export async function reorderWaitlist(eventId: string, orderedRegistrationIds: s
     }
   });
 
-  await logAudit({
+  await createAuditLog({
     actorUserId: user.id,
-    action: "update",
-    entityType: "Event",
+    actionType: "UPDATE",
+    entityType: "EVENT",
     entityId: eventId,
-    metaJson: JSON.stringify({
+    summary: `Reordered waitlist for event ${eventId}`,
+    metadata: {
       updateType: "waitlist_reorder",
       count: orderedRegistrationIds.length,
-    })
+    }
   });
 
   revalidatePath(`/admin/events/${eventId}`);
@@ -254,11 +268,13 @@ export async function removeRegistration(eventId: string, userId: string) {
     where: { eventId_userId: { eventId, userId } },
   });
 
-  await logAudit({
+  await createAuditLog({
     actorUserId: user.id,
-    action: "delete",
-    entityType: "EventRegistration",
+    actionType: "DELETE",
+    entityType: "EVENT_REGISTRATION",
     entityId: `${eventId}:${userId}`,
+    targetUserId: userId,
+    summary: `Removed registration for user ${userId} from event ${eventId}`,
   });
 
   revalidatePath(`/admin/events/${eventId}`);

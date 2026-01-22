@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createVenue as createVenueInDb, updateVenue as updateVenueInDb, deleteVenue as deleteVenueInDb } from "@/server/repos/venue.repo";
 import { getSessionUser } from "@/server/auth/session";
-import { logAudit } from "@/server/audit/log";
+import { createAuditLog } from "@/server/audit/log";
 
 export async function createVenue(formData: FormData) {
   const { user } = await getSessionUser();
@@ -44,11 +44,13 @@ export async function createVenue(formData: FormData) {
     ...(geo && { geo }),
   });
 
-  await logAudit({
+  await createAuditLog({
     actorUserId: user.id,
-    action: "create",
-    entityType: "Venue",
+    actionType: "CREATE",
+    entityType: "VENUE",
     entityId: venue.id,
+    summary: `Created venue: ${venue.name}`,
+    after: { name, addressLine1, city, state },
   });
 
   revalidatePath("/admin/venues");
@@ -92,11 +94,13 @@ export async function updateVenue(id: string, formData: FormData) {
     ...(geo && { geo }),
   });
 
-  await logAudit({
+  await createAuditLog({
     actorUserId: user.id,
-    action: "update",
-    entityType: "Venue",
+    actionType: "UPDATE",
+    entityType: "VENUE",
     entityId: id,
+    summary: `Updated venue: ${name}`,
+    after: { name, addressLine1, city, state },
   });
 
   revalidatePath("/admin/venues");
@@ -111,11 +115,12 @@ export async function deleteVenue(id: string) {
 
   await deleteVenueInDb(id);
 
-  await logAudit({
+  await createAuditLog({
     actorUserId: user.id,
-    action: "delete",
-    entityType: "Venue",
+    actionType: "DELETE",
+    entityType: "VENUE",
     entityId: id,
+    summary: `Deleted venue ${id}`,
   });
 
   revalidatePath("/admin/venues");

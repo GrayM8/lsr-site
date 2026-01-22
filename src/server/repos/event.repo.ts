@@ -3,7 +3,7 @@ import { prisma } from '@/server/db';
 import { getActiveEntitlements } from './membership.repo';
 import { getSessionUser } from '@/server/auth/session';
 import { EventEligibility, Prisma, RegistrationStatus, CheckinMethod, EventType } from '@prisma/client';
-import { logAudit } from '@/server/audit/log';
+import { createAuditLog } from '@/server/audit/log';
 
 export async function listUpcomingEvents(limit = 10) {
   return prisma.event.findMany({
@@ -105,24 +105,26 @@ export async function getEventById(id: string) {
 
 export async function createEvent(data: Prisma.EventCreateInput, actorId: string) {
   const event = await prisma.event.create({ data });
-  await logAudit({
+  await createAuditLog({
     actorUserId: actorId,
-    action: 'create',
-    entityType: 'Event',
+    actionType: 'CREATE',
+    entityType: 'EVENT',
     entityId: event.id,
-    diffJson: JSON.stringify(data),
+    summary: `Created event ${event.title}`,
+    after: data,
   });
   return event;
 }
 
 export async function updateEvent(id: string, data: Prisma.EventUpdateInput, actorId: string) {
   const event = await prisma.event.update({ where: { id }, data });
-  await logAudit({
+  await createAuditLog({
     actorUserId: actorId,
-    action: 'update',
-    entityType: 'Event',
+    actionType: 'UPDATE',
+    entityType: 'EVENT',
     entityId: event.id,
-    diffJson: JSON.stringify(data),
+    summary: `Updated event ${event.title}`,
+    after: data,
   });
   return event;
 }
@@ -188,12 +190,14 @@ export async function checkIn(eventId: string, userId: string, method: string, a
     },
   });
 
-  await logAudit({
+  await createAuditLog({
     actorUserId: actorId,
-    action: 'checkin',
-    entityType: 'Attendance',
+    actionType: 'CHECKIN',
+    entityType: 'ATTENDANCE',
     entityId: attendance.id,
-    metaJson: JSON.stringify({ eventId, userId, method }),
+    targetUserId: userId,
+    summary: `Checked in user ${userId} to event ${eventId}`,
+    metadata: { eventId, userId, method },
   });
   return attendance;
 }

@@ -1,74 +1,31 @@
-import Link from "next/link";
+import { AuditConsole } from "@/components/admin/audit-console";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 
-const adminPages = [
-  {
-    title: "Events",
-    description: "Create, edit, and manage events.",
-    href: "/admin/events",
-  },
-  {
-    title: "Series",
-    description: "Manage event series.",
-    href: "/admin/series",
-  },
-  {
-    title: "Seasons",
-    description: "Manage seasons and standings.",
-    href: "/admin/seasons",
-  },
-  {
-    title: "Venues",
-    description: "Manage venues for events.",
-    href: "/admin/venues",
-  },
-  {
-    title: "Gallery",
-    description: "Upload and manage photo gallery images.",
-    href: "/admin/gallery",
-  },
-  {
-    title: "News",
-    description: "Create and manage news articles.",
-    href: "/admin/news",
-  },
-  {
-    title: "Misc. Tools",
-    description: "Access miscellaneous administrative tools.",
-    href: "/admin/tools",
-  },
-  {
-    title: "Results",
-    description: "Upload and manage race results.",
-    href: "/admin/results",
-  },
-  {
-    title: "Driver Mappings",
-    description: "Map driver GUIDs to Users.",
-    href: "/admin/drivers",
-  },
-  {
-    title: "Car Mappings",
-    description: "Map game car names to display names.",
-    href: "/admin/cars",
-  },
-];
+export const metadata = {
+  title: "Admin Console | LSR",
+};
 
-export default function Page() {
+export default function AdminPage() {
   return (
-    <main className="mx-auto max-w-6xl p-8">
-      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {adminPages.map((page) => (
-          <Link
-            key={page.href}
-            href={page.href}
-            className="border rounded-lg p-6 hover:bg-gray-800 transition-colors"
-          >
-            <h2 className="text-xl font-bold mb-2">{page.title}</h2>
-            <p className="text-gray-400">{page.description}</p>
-          </Link>
-        ))}
+    <div className="h-full">
+      <div className="flex items-center gap-2 mb-4">
+        <h1 className="text-2xl font-bold">Admin Console</h1>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <Info size={18} className="text-white/40 hover:text-white/80 transition-colors" />
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs bg-black/90 border-white/10 text-white p-3">
+              <p className="font-bold mb-1 text-lsr-orange">Audit Console</p>
+              <p className="text-xs text-white/80">
+                A comprehensive log of all administrative actions. This ensures accountability and transparency for changes made by officers and admins.
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
-    </main>
+      <AuditConsole />
+    </div>
   );
 }

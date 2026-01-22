@@ -1,5 +1,6 @@
 import { prisma } from "@/server/db";
 import { RegistrationStatus, Prisma } from "@prisma/client";
+import { createAuditLog } from "@/server/audit/log";
 
 /**
  * Core Registration Service
@@ -270,21 +271,23 @@ export async function adminOverrideRegistration(
     }
 
     // Audit Log
-    await tx.auditLog.create({
-      data: {
-        actorUserId: adminUserId,
-        action: "registration_change",
-        entityType: "EventRegistration",
-        entityId: `${eventId}:${targetUserId}`,
-        metaJson: {
-          eventId,
-          targetUserId,
-          oldStatus: currentReg?.status || "NONE",
-          newStatus,
-          reason,
-        },
+    await createAuditLog({
+      actorUserId: adminUserId,
+      actionType: "REGISTRATION_CHANGE",
+      entityType: "EVENT_REGISTRATION",
+      entityId: currentReg?.id || "NEW",
+      targetUserId,
+      summary: `Changed registration status for ${targetUserId} to ${newStatus}`,
+      metadata: {
+        eventId,
+        targetUserId,
+        oldStatus: currentReg?.status || "NONE",
+        newStatus,
+        reason,
       },
-    });
+      before: currentReg ? { status: currentReg.status } : null,
+      after: { status: newStatus },
+    }, tx);
 
     // Reconcile: E.g., if Admin removed a REGISTERED user, auto-promote next waitlisted.
     await reconcileEvent(tx, eventId);

@@ -5,6 +5,8 @@ import { prisma } from "@/server/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { createAuditLog } from "@/server/audit/log";
+import { getSessionUser } from "@/server/auth/session";
 
 const seasonSchema = z.object({
   name: z.string().min(1),
@@ -18,7 +20,8 @@ const seasonSchema = z.object({
 
 export async function createSeason(formData: FormData) {
   const { ok } = await requireAdmin();
-  if (!ok) throw new Error("Unauthorized");
+  const { user } = await getSessionUser();
+  if (!ok || !user) throw new Error("Unauthorized");
 
   const data = seasonSchema.parse({
       name: formData.get("name"),
@@ -30,7 +33,7 @@ export async function createSeason(formData: FormData) {
       pointsRule: formData.get("pointsRule"),
   });
 
-  await prisma.season.create({
+  const season = await prisma.season.create({
     data: {
       name: data.name,
       slug: data.slug,
@@ -43,13 +46,23 @@ export async function createSeason(formData: FormData) {
     },
   });
 
+  await createAuditLog({
+    actorUserId: user.id,
+    actionType: "CREATE",
+    entityType: "SEASON",
+    entityId: season.id,
+    summary: `Created season: ${season.name}`,
+    after: data,
+  });
+
   revalidatePath("/admin/seasons");
   redirect("/admin/seasons");
 }
 
 export async function updateSeason(id: string, formData: FormData) {
     const { ok } = await requireAdmin();
-    if (!ok) throw new Error("Unauthorized");
+    const { user } = await getSessionUser();
+    if (!ok || !user) throw new Error("Unauthorized");
 
     const data = seasonSchema.parse({
         name: formData.get("name"),
@@ -74,21 +87,41 @@ export async function updateSeason(id: string, formData: FormData) {
         },
     });
 
+    await createAuditLog({
+        actorUserId: user.id,
+        actionType: "UPDATE",
+        entityType: "SEASON",
+        entityId: id,
+        summary: `Updated season: ${data.name}`,
+        after: data,
+    });
+
     revalidatePath("/admin/seasons");
     redirect("/admin/seasons");
 }
 
 export async function deleteSeason(id: string) {
     const { ok } = await requireAdmin();
-    if (!ok) throw new Error("Unauthorized");
+    const { user } = await getSessionUser();
+    if (!ok || !user) throw new Error("Unauthorized");
 
     await prisma.season.delete({ where: { id } });
+
+    await createAuditLog({
+        actorUserId: user.id,
+        actionType: "DELETE",
+        entityType: "SEASON",
+        entityId: id,
+        summary: `Deleted season ${id}`,
+    });
+
     revalidatePath("/admin/seasons");
 }
 
 export async function recomputeStandings(seasonId: string) {
     const { ok } = await requireAdmin();
-    if (!ok) throw new Error("Unauthorized");
+    const { user } = await getSessionUser();
+    if (!ok || !user) throw new Error("Unauthorized");
 
     const season = await prisma.season.findUnique({
         where: { id: seasonId },
@@ -249,6 +282,14 @@ export async function recomputeStandings(seasonId: string) {
                 });
             }
         }
+    });
+
+    await createAuditLog({
+        actorUserId: user.id,
+        actionType: "UPDATE",
+        entityType: "SEASON",
+        entityId: seasonId,
+        summary: `Recomputed standings for season ${season.name}`,
     });
 
     revalidatePath(`/admin/seasons`);

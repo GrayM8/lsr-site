@@ -5,6 +5,7 @@ import { prisma } from "@/server/db";
 import { revalidatePath } from "next/cache";
 import { getSessionUser } from "@/server/auth/session";
 import { RawResultUploadStatus } from "@prisma/client";
+import { createAuditLog } from "@/server/audit/log";
 
 export async function uploadResult(formData: FormData) {
   const { user } = await getSessionUser();
@@ -42,6 +43,15 @@ export async function uploadResult(formData: FormData) {
     include: {
       uploadedBy: true,
     },
+  });
+
+  await createAuditLog({
+    actorUserId: user.id,
+    actionType: "CREATE",
+    entityType: "RESULT_UPLOAD",
+    entityId: newResult.id,
+    summary: `Uploaded result file: ${file.name}`,
+    metadata: { filesize: file.size, sha256 },
   });
 
   revalidatePath("/admin/results");
@@ -149,6 +159,18 @@ export async function previewParseResult(uploadId: string) {
     },
   });
 
+  const { user } = await getSessionUser();
+  if (user) {
+    await createAuditLog({
+        actorUserId: user.id,
+        actionType: "UPDATE",
+        entityType: "RESULT_UPLOAD",
+        entityId: uploadId,
+        summary: `Parsed result upload: ${updatedUpload.filename}`,
+        metadata: { status: updatedUpload.status, anomalies },
+    });
+  }
+
   revalidatePath(`/admin/results/${uploadId}`);
   revalidatePath(`/admin/results`);
 
@@ -157,7 +179,8 @@ export async function previewParseResult(uploadId: string) {
 
 export async function bindEventToUpload(uploadId: string, eventId: string, pointsSystem: string | null = null) {
   const { ok } = await requireAdmin();
-  if (!ok) throw new Error("Unauthorized");
+  const { user } = await getSessionUser();
+  if (!ok || !user) throw new Error("Unauthorized");
 
   const event = await prisma.event.findUnique({ where: { id: eventId } });
   if (!event) throw new Error("Event not found");
@@ -167,12 +190,22 @@ export async function bindEventToUpload(uploadId: string, eventId: string, point
     data: { eventId, pointsSystem },
   });
 
+  await createAuditLog({
+    actorUserId: user.id,
+    actionType: "UPDATE",
+    entityType: "RESULT_UPLOAD",
+    entityId: uploadId,
+    summary: `Bound upload to event ${event.title}`,
+    metadata: { eventId, pointsSystem },
+  });
+
   revalidatePath(`/admin/results/${uploadId}`);
 }
 
 export async function deleteUpload(uploadId: string, force: boolean = false) {
   const { ok } = await requireAdmin();
-  if (!ok) throw new Error("Unauthorized");
+  const { user } = await getSessionUser();
+  if (!ok || !user) throw new Error("Unauthorized");
 
   const upload = await prisma.rawResultUpload.findUnique({
     where: { id: uploadId },
@@ -187,6 +220,14 @@ export async function deleteUpload(uploadId: string, force: boolean = false) {
 
   await prisma.rawResultUpload.delete({
     where: { id: uploadId },
+  });
+
+  await createAuditLog({
+    actorUserId: user.id,
+    actionType: "DELETE",
+    entityType: "RESULT_UPLOAD",
+    entityId: uploadId,
+    summary: `Deleted result upload ${upload.filename}`,
   });
 
   revalidatePath("/admin/results");
@@ -212,7 +253,8 @@ function calculatePoints(position: number, system: string | null): number {
 
 export async function ingestUpload(uploadId: string) {
   const { ok } = await requireAdmin();
-  if (!ok) throw new Error("Unauthorized");
+  const { user } = await getSessionUser();
+  if (!ok || !user) throw new Error("Unauthorized");
 
   const upload = await prisma.rawResultUpload.findUnique({
     where: { id: uploadId },
@@ -490,6 +532,16 @@ export async function ingestUpload(uploadId: string) {
       where: { id: uploadId },
       data: { status: "INGESTED" },
     });
+
+    await createAuditLog({
+        actorUserId: user.id,
+        actionType: "INGEST",
+        entityType: "RESULT_UPLOAD",
+        entityId: uploadId,
+        summary: `Ingested result upload ${uploadId} into event ${upload.eventId}`,
+        metadata: { eventId: upload.eventId, pointsSystem },
+    }, tx); // Pass transaction context
+
   }, {
     maxWait: 20000,
     timeout: 20000,

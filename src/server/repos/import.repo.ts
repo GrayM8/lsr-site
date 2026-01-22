@@ -1,7 +1,7 @@
 // src/server/repos/import.repo.ts
 import { prisma } from '@/server/db';
 import { Prisma, ResultSource } from '@prisma/client';
-import { logAudit } from '@/server/audit/log';
+import { createAuditLog } from '@/server/audit/log';
 
 export async function recordProvenance(
   source: ResultSource,
@@ -18,11 +18,13 @@ export async function recordProvenance(
     },
   });
 
-  await logAudit({
+  await createAuditLog({
     actorUserId: createdById,
-    action: 'import', // Or a more specific action
-    entityType: 'Provenance',
+    actionType: 'IMPORT',
+    entityType: 'PROVENANCE',
     entityId: provenance.id,
+    summary: `Imported results via ${source}`,
+    after: provenance,
   });
 
   return provenance;
@@ -45,11 +47,12 @@ export async function attachArtifact(
     },
   });
 
-  await logAudit({
+  await createAuditLog({
     actorUserId: createdById,
-    action: 'create', // Or a more specific action
-    entityType: 'ImportArtifact',
+    actionType: 'CREATE',
+    entityType: 'IMPORT_ARTIFACT',
     entityId: artifact.id,
+    summary: `Attached artifact: ${storageUrl}`,
   });
 
   return artifact;
@@ -76,12 +79,13 @@ export async function upsertResult(
     },
   });
 
-  await logAudit({
+  await createAuditLog({
     actorUserId: actorId,
-    action: 'update', // upsert is a form of update
-    entityType: 'Result',
+    actionType: 'UPDATE',
+    entityType: 'RESULT',
     entityId: result.id,
-    diffJson: JSON.stringify(data),
+    summary: `Upserted race result for entry ${entryId}`,
+    after: data,
   });
 
   return result;
