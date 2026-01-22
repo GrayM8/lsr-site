@@ -7,6 +7,8 @@ import { Event, EventSeries, Venue } from "@prisma/client"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
+  title: "Longhorn Sim Racing | UT Austin Simulation Racing",
+  description: "The official sim racing organization at UT Austin. Compete in competitive leagues, join community events, and connect with fellow motorsports enthusiasts.",
   alternates: {
     canonical: "/",
   },
