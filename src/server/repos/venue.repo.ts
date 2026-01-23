@@ -5,6 +5,13 @@ import { Prisma } from '@prisma/client';
 export async function listAllVenues() {
   return prisma.venue.findMany({
     orderBy: { name: 'asc' },
+    include: {
+      _count: {
+        select: {
+          events: true,
+        },
+      },
+    },
   });
 }
 

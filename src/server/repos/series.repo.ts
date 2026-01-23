@@ -5,6 +5,14 @@ import { Prisma } from '@prisma/client';
 export async function listAllSeries() {
   return prisma.eventSeries.findMany({
     orderBy: { title: 'asc' },
+    include: {
+      _count: {
+        select: {
+          seasons: true,
+          events: true,
+        },
+      },
+    },
   });
 }
 
