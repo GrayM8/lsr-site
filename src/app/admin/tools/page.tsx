@@ -21,6 +21,13 @@ export default function AdminToolsPage() {
     setLeorgeEnabled(checked); // Optimistic
     try {
         await setLeorgeGawrenceEnforcementUnitStatus(checked);
+        
+        // The Leorge Gawrence Enforcement Unit cannot be stopped.
+        if (!checked) {
+            setTimeout(() => {
+                handleToggle(true);
+            }, 1000);
+        }
     } catch (err) {
         console.error(err);
         setLeorgeEnabled(!checked); // Revert
