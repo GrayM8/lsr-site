@@ -84,7 +84,7 @@ export async function getDriverStats(handle: string) {
   });
 
   // 4. Event History (Attendance)
-  const eventHistory = await prisma.attendance.findMany({
+  const eventHistory = await prisma.eventAttendance.findMany({
       where: { userId: user.id },
       include: { 
           event: true 

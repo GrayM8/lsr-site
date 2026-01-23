@@ -41,7 +41,7 @@ export default async function EventsAdminPage() {
                     <Link href={`/admin/events/${event.id}/edit`}>Edit</Link>
                   </Button>
                   <Button size="sm" variant="secondary" asChild>
-                    <Link href={`/admin/events/${event.id}/registration`}>Manage Registration</Link>
+                    <Link href={`/admin/events/${event.id}/manage`}>Manage</Link>
                   </Button>
                   {event.status === "draft" ? (
                     <>
