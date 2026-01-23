@@ -2,10 +2,9 @@
 
 import { useState, useMemo } from "react";
 import { Event } from "@prisma/client";
-import { Search, Plus, Calendar, MapPin, ArrowUpDown, MoreVertical, Edit, Settings, Trash2, Eye, Terminal, ChevronUp, ChevronDown } from "lucide-react";
+import { Search, Plus, Calendar, ArrowUpDown, MoreVertical, Edit, Settings, Trash2, Eye, ChevronUp, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -14,7 +13,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { deleteEvent } from "@/app/admin/events/actions";
 import { cn } from "@/lib/utils";
 

@@ -222,6 +222,7 @@ export function SeasonsConsole({ initialSeasons }: SeasonsConsoleProps) {
                                 variant="ghost"
                                 className="h-7 w-7 text-white/20 group-hover:text-white/70 hover:!text-blue-400 hover:bg-white/10 transition-colors"
                                 title="Recompute Standings"
+                                message="Are you sure you want to recompute standings for this season? This will recalculate all driver points based on race results."
                             >
                                 <RefreshCw size={14} />
                             </ConfirmSubmitButton>
