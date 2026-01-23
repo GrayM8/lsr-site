@@ -38,6 +38,9 @@ export async function createEvent(formData: FormData) {
       registrationClosesAt: closesAtRaw ? fromZonedTime(closesAtRaw, formData.get("timezone") as string) : null,
       registrationMax: maxRaw && maxRaw !== "-1" ? parseInt(maxRaw) : null,
       registrationWaitlistEnabled: formData.get("registrationWaitlistEnabled") === "on",
+      attendanceEnabled: formData.get("attendanceEnabled") === "on",
+      attendanceOpensAt: formData.get("attendanceOpensAt") ? fromZonedTime(formData.get("attendanceOpensAt") as string, formData.get("timezone") as string) : null,
+      attendanceClosesAt: formData.get("attendanceClosesAt") ? fromZonedTime(formData.get("attendanceClosesAt") as string, formData.get("timezone") as string) : null,
     },
   });
 
@@ -119,6 +122,9 @@ export async function updateEvent(id: string, formData: FormData) {
     registrationClosesAt: closesAtRaw ? fromZonedTime(closesAtRaw, formData.get("timezone") as string) : null,
     registrationMax: maxRaw && maxRaw !== "-1" ? parseInt(maxRaw) : null,
     registrationWaitlistEnabled: formData.get("registrationWaitlistEnabled") === "on",
+    attendanceEnabled: formData.get("attendanceEnabled") === "on",
+    attendanceOpensAt: formData.get("attendanceOpensAt") ? fromZonedTime(formData.get("attendanceOpensAt") as string, formData.get("timezone") as string) : null,
+    attendanceClosesAt: formData.get("attendanceClosesAt") ? fromZonedTime(formData.get("attendanceClosesAt") as string, formData.get("timezone") as string) : null,
   };
 
   await prisma.event.update({

@@ -173,6 +173,39 @@ export function EventForm({ event, series, venues }: { event?: Event, series: Ev
             </div>
           </div>
 
+          <div className="border-t pt-4 mt-6">
+            <h3 className="text-lg font-bold mb-4">Check-in Settings</h3>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Switch id="attendanceEnabled" name="attendanceEnabled" defaultChecked={event?.attendanceEnabled ?? false} />
+                <Label htmlFor="attendanceEnabled">Enable Check-in System</Label>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="attendanceOpensAt">Check-in Opens ({timezone})</Label>
+                  <Input 
+                    id="attendanceOpensAt" 
+                    name="attendanceOpensAt" 
+                    type="datetime-local" 
+                    key={`att-open-${timezone}`}
+                    defaultValue={dateToZonedValue(event?.attendanceOpensAt, timezone)} 
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="attendanceClosesAt">Check-in Closes ({timezone})</Label>
+                  <Input 
+                    id="attendanceClosesAt" 
+                    name="attendanceClosesAt" 
+                    type="datetime-local" 
+                    key={`att-close-${timezone}`}
+                    defaultValue={dateToZonedValue(event?.attendanceClosesAt, timezone)} 
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
           <Button type="submit">{event ? "Update Event" : "Create Event"}</Button>
         </div>
       </form>
