@@ -83,13 +83,25 @@ export function EventsConsole({ initialEvents }: EventsConsoleProps) {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] border border-white/10 bg-black/40 rounded-lg overflow-hidden font-mono text-sm shadow-2xl">
+    <div className="flex flex-col h-[calc(100vh-6rem)] border border-white/10 bg-black/40 rounded-lg overflow-hidden font-mono text-sm">
       {/* Toolbar */}
       <div className="bg-white/5 p-3 border-b border-white/10 flex items-center gap-4 flex-wrap">
-        <div className="flex items-center gap-2 bg-black/50 px-3 py-1.5 rounded border border-white/10">
-          <Calendar size={14} className="text-lsr-orange" />
-          <span className="font-bold text-white/80 tracking-wider uppercase">Events</span>
-        </div>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <div className="flex items-center gap-2 bg-black/50 px-3 py-1.5 rounded border border-white/10 cursor-help">
+                <Calendar size={14} className="text-lsr-orange" />
+                <span className="font-bold text-white/80 tracking-wider uppercase">Events</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs bg-black/90 border-white/10 text-white p-3">
+              <p className="font-bold mb-1 text-lsr-orange">Events Console</p>
+              <p className="text-xs text-white/80">
+                Manage all club events including races, meetings, and social gatherings.
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
 
         <div className="h-6 w-px bg-white/10 mx-2" />
 
