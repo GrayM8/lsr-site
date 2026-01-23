@@ -48,9 +48,13 @@ enum RegistrationStatus {
 }
 
 enum CheckinMethod {
-  qr
-  manual
-  import
+  QR
+  MANUAL
+}
+
+enum AttendanceReportingMode {
+  ASSUME_REGISTERED
+  CHECKIN_REQUIRED
 }
 
 enum SessionKind {
@@ -127,9 +131,11 @@ model User {
   memberships            UserMembership[]
   posts                  Post[]           @relation("PostAuthor")
   pages                  Page[]           @relation("PageAuthor")
-  registrations          EventRegistration[] // Renamed from RSVPs
-  checkins               Attendance[]
-  entries                Entry[]          @relation("EntryUser")
+    registrations          EventRegistration[] // Renamed from RSVPs
+    attendances            EventAttendance[]   @relation("UserAttendance")
+    checkedInAttendances   EventAttendance[]   @relation("AttendanceChecker")
+    entries                Entry[]             @relation("EntryUser")
+  
   auditLogs              AuditLog[]       @relation("AuditActor")
   auditLogsTargeted      AuditLog[]       @relation("AuditTarget")
   provenanceCreated      Provenance[]     @relation("ProvenanceCreatedBy")
@@ -554,6 +560,12 @@ model Event {
   registrationMax             Int?
   registrationWaitlistEnabled Boolean   @default(false)
 
+  // Attendance Config
+  attendanceEnabled       Boolean                  @default(false)
+  attendanceOpensAt       DateTime?
+  attendanceClosesAt      DateTime?
+  attendanceReportingMode AttendanceReportingMode  @default(ASSUME_REGISTERED)
+
   // Removed old fields to avoid confusion: rsvpRequired, rsvpOpenAt, rsvpCloseAt, capacity, waitlistEnabled
 
   meetingUrl         String?
@@ -566,7 +578,7 @@ model Event {
 
   eligibility   EventEligibility?
   registrations EventRegistration[] // Renamed from rsvps
-  checkins      Attendance[]
+  attendances   EventAttendance[]
 
   rawResultUploads RawResultUpload[]
   ingestedSessions RaceSession[]
@@ -597,21 +609,17 @@ model EventEligibility {
   @@index([minRoleId])
 }
 
-// Renamed from RSVP
 model EventRegistration {
-  id              String             @id @default(uuid())
-  eventId         String
-  userId          String
-  status          RegistrationStatus
-  
-  // Waitlist Logic
-  waitlistOrder   Int?
+  id            String             @id @default(uuid())
+  eventId       String
+  userId        String
+  status        RegistrationStatus
+  waitlistOrder Int? // 1-based index for waitlist position
   promotedAt      DateTime?
-  promotionSource String? // "AUTO", "ADMIN"
-  statusReason    String?
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  promotionSource String? // e.g. "manual", "auto"
+  statusReason    String? // e.g. "Admin demote", "Capacity increase"
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -621,18 +629,22 @@ model EventRegistration {
   @@index([eventId, status, waitlistOrder])
 }
 
-model Attendance {
-  id          String         @id @default(uuid())
-  eventId     String
-  userId      String
-  checkedInAt DateTime       @default(now())
-  method      CheckinMethod?
+model EventAttendance {
+  id                String        @id @default(uuid())
+  eventId           String
+  userId            String
+  checkedInAt       DateTime      @default(now())
+  method            CheckinMethod
+  checkedInByUserId String?
+  createdAt         DateTime      @default(now())
 
-  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event           Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user            User  @relation("UserAttendance", fields: [userId], references: [id], onDelete: Cascade)
+  checkedInByUser User? @relation("AttendanceChecker", fields: [checkedInByUserId], references: [id], onDelete: SetNull)
 
   @@unique([eventId, userId])
-  @@index([eventId])
+  @@index([eventId, checkedInAt])
+  @@index([eventId, userId])
 }
 
 // ---------- Content (light CMS) ----------

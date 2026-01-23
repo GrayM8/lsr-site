@@ -182,7 +182,7 @@ export async function checkEligibility(
 }
 
 export async function checkIn(eventId: string, userId: string, method: string, actorId: string) {
-  const attendance = await prisma.attendance.create({
+  const attendance = await prisma.eventAttendance.create({
     data: {
       eventId,
       userId,
@@ -193,7 +193,7 @@ export async function checkIn(eventId: string, userId: string, method: string, a
   await createAuditLog({
     actorUserId: actorId,
     actionType: 'CHECKIN',
-    entityType: 'ATTENDANCE',
+    entityType: 'EVENT_ATTENDANCE',
     entityId: attendance.id,
     targetUserId: userId,
     summary: `Checked in user ${userId} to event ${eventId}`,

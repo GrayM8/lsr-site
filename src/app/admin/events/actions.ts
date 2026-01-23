@@ -38,6 +38,9 @@ export async function createEvent(formData: FormData) {
       registrationClosesAt: closesAtRaw ? fromZonedTime(closesAtRaw, formData.get("timezone") as string) : null,
       registrationMax: maxRaw && maxRaw !== "-1" ? parseInt(maxRaw) : null,
       registrationWaitlistEnabled: formData.get("registrationWaitlistEnabled") === "on",
+      attendanceEnabled: formData.get("attendanceEnabled") === "on",
+      attendanceOpensAt: formData.get("attendanceOpensAt") ? fromZonedTime(formData.get("attendanceOpensAt") as string, formData.get("timezone") as string) : null,
+      attendanceClosesAt: formData.get("attendanceClosesAt") ? fromZonedTime(formData.get("attendanceClosesAt") as string, formData.get("timezone") as string) : null,
     },
   });
 
@@ -119,6 +122,9 @@ export async function updateEvent(id: string, formData: FormData) {
     registrationClosesAt: closesAtRaw ? fromZonedTime(closesAtRaw, formData.get("timezone") as string) : null,
     registrationMax: maxRaw && maxRaw !== "-1" ? parseInt(maxRaw) : null,
     registrationWaitlistEnabled: formData.get("registrationWaitlistEnabled") === "on",
+    attendanceEnabled: formData.get("attendanceEnabled") === "on",
+    attendanceOpensAt: formData.get("attendanceOpensAt") ? fromZonedTime(formData.get("attendanceOpensAt") as string, formData.get("timezone") as string) : null,
+    attendanceClosesAt: formData.get("attendanceClosesAt") ? fromZonedTime(formData.get("attendanceClosesAt") as string, formData.get("timezone") as string) : null,
   };
 
   await prisma.event.update({
@@ -268,14 +274,118 @@ export async function removeRegistration(eventId: string, userId: string) {
     where: { eventId_userId: { eventId, userId } },
   });
 
-  await createAuditLog({
-    actorUserId: user.id,
-    actionType: "DELETE",
-    entityType: "EVENT_REGISTRATION",
-    entityId: `${eventId}:${userId}`,
-    targetUserId: userId,
-    summary: `Removed registration for user ${userId} from event ${eventId}`,
-  });
+    revalidatePath(`/admin/events/${eventId}`);
 
-  revalidatePath(`/admin/events/${eventId}`);
-}
+  }
+
+  
+
+  import { updateAttendanceConfig, checkInUser, removeCheckIn } from "@/server/services/attendance.service";
+
+  import { CheckinMethod } from "@prisma/client";
+
+  
+
+  export async function updateEventAttendanceConfig(eventId: string, formData: FormData) {
+
+    const { user } = await getSessionUser();
+
+    const { ok } = await requireAdmin();
+
+    if (!ok || !user) {
+
+      throw new Error("Unauthorized");
+
+    }
+
+  
+
+    const event = await prisma.event.findUnique({ where: { id: eventId }, select: { timezone: true } });
+
+    const timezone = event?.timezone || "America/Chicago";
+
+  
+
+    const enabled = formData.get("attendanceEnabled") === "on";
+
+    const opensAtRaw = formData.get("attendanceOpensAt") as string;
+
+    const closesAtRaw = formData.get("attendanceClosesAt") as string;
+
+  
+
+    await updateAttendanceConfig(
+
+      eventId,
+
+      {
+
+        attendanceEnabled: enabled,
+
+        attendanceOpensAt: opensAtRaw ? fromZonedTime(opensAtRaw, timezone) : null,
+
+        attendanceClosesAt: closesAtRaw ? fromZonedTime(closesAtRaw, timezone) : null,
+
+      },
+
+      user.id
+
+    );
+
+  
+
+    revalidatePath(`/admin/events/${eventId}/manage`);
+
+  }
+
+  
+
+  export async function manualCheckIn(eventId: string, userId: string) {
+
+    const { user } = await getSessionUser();
+
+    const { ok } = await requireAdmin();
+
+    if (!ok || !user) {
+
+      throw new Error("Unauthorized");
+
+    }
+
+  
+
+    await checkInUser(eventId, userId, "MANUAL", user.id);
+
+  
+
+    revalidatePath(`/admin/events/${eventId}/manage`);
+
+  }
+
+  
+
+  export async function manualRemoveCheckIn(eventId: string, userId: string) {
+
+    const { user } = await getSessionUser();
+
+    const { ok } = await requireAdmin();
+
+    if (!ok || !user) {
+
+      throw new Error("Unauthorized");
+
+    }
+
+  
+
+    await removeCheckIn(eventId, userId, user.id);
+
+  
+
+    revalidatePath(`/admin/events/${eventId}/manage`);
+
+  }
+
+  
+
+  
