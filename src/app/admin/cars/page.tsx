@@ -1,6 +1,6 @@
 import { prisma } from "@/server/db";
-import { CarsClient } from "./client";
 import { getUnmappedCarNames } from "./actions";
+import { CarsConsole } from "@/components/admin/cars-console";
 
 export default async function CarsPage() {
   const [mappedCars, unmappedCarNames] = await Promise.all([
@@ -11,11 +11,8 @@ export default async function CarsPage() {
   ]);
 
   return (
-    <div className="container py-10 mx-auto max-w-5xl">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Car Mappings</h1>
-      </div>
-      <CarsClient mappedCars={mappedCars} unmappedCarNames={unmappedCarNames} />
+    <div className="h-full">
+      <CarsConsole mappedCars={mappedCars} unmappedCarNames={unmappedCarNames} />
     </div>
   );
 }

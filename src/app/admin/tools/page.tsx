@@ -1,55 +1,57 @@
 "use client";
 
-import { Switch } from "@/components/ui/switch";
 import { useEffect, useState } from "react";
 import { getLeorgeGawrenceEnforcementUnitStatus, setLeorgeGawrenceEnforcementUnitStatus } from "./actions";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Switch } from "@/components/ui/switch";
+import { ToolsConsole, type Tool } from "@/components/admin/tools-console";
+import { Bot } from "lucide-react";
 
 export default function AdminToolsPage() {
-  const [enabled, setEnabled] = useState(false);
+  const [leorgeEnabled, setLeorgeEnabled] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getLeorgeGawrenceEnforcementUnitStatus().then(setEnabled);
+    getLeorgeGawrenceEnforcementUnitStatus().then((val) => {
+        setLeorgeEnabled(val);
+        setLoading(false);
+    });
   }, []);
 
   const handleToggle = async (checked: boolean) => {
-    setEnabled(checked);
-    await setLeorgeGawrenceEnforcementUnitStatus(checked);
+    setLeorgeEnabled(checked); // Optimistic
+    try {
+        await setLeorgeGawrenceEnforcementUnitStatus(checked);
+    } catch (err) {
+        console.error(err);
+        setLeorgeEnabled(!checked); // Revert
+    }
   };
 
-    return (
+  const tools: Tool[] = [
+    {
+        id: "leorge-gawrence-enforcement-unit",
+        name: "Leorge Gawrence Enforcement Unit",
+        description: "Antagonize George",
+        icon: <Bot size={16} />,
+        component: (
+            <div className="flex items-center gap-3">
+                <span className="text-[10px] font-mono text-white/40 uppercase w-6 text-right">
+                    {loading ? "..." : (leorgeEnabled ? "ON" : "OFF")}
+                </span>
+                <Switch 
+                    checked={leorgeEnabled} 
+                    onCheckedChange={handleToggle} 
+                    disabled={loading}
+                    className="data-[state=checked]:bg-lsr-orange"
+                />
+            </div>
+        )
+    }
+  ];
 
-      <main className="mx-auto max-w-6xl p-8">
-
-        <div className="flex justify-between items-center mb-6">
-
-          <h1 className="text-3xl font-bold">Misc. Tools</h1>
-
-          <Button asChild>
-
-            <Link href="/admin">Back to Admin Dashboard</Link>
-
-          </Button>
-
-        </div>
-
-        <div className="mt-4">
-
-          <div className="flex items-center space-x-2">
-
-            <Switch id="leorge-gawrence-enforcement-unit" checked={enabled} onCheckedChange={handleToggle} />
-
-            <label htmlFor="leorge-gawrence-enforcement-unit">Leorge Gawrence Enforcement Unit</label>
-
-          </div>
-
-        </div>
-
-      </main>
-
-    );
-
-  }
-
-  
+  return (
+    <div className="h-full">
+      <ToolsConsole tools={tools} />
+    </div>
+  );
+}
