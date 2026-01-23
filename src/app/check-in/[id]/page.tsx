@@ -8,7 +8,6 @@ export default async function CheckInPage({ params }: { params: Promise<{ id: st
   const { id: eventId } = await params;
 
   if (!user) {
-    // Redirect to signin with return URL
     redirect(`/auth/signin?next=/check-in/${eventId}`);
   }
 
@@ -32,42 +31,39 @@ export default async function CheckInPage({ params }: { params: Promise<{ id: st
     );
   }
 
-  // Check if already checked in
   const existing = await prisma.eventAttendance.findUnique({
     where: { eventId_userId: { eventId, userId: user.id } }
   });
 
   const now = new Date();
-  let canCheckIn = true;
-  let reason = "";
+  let status: "OPEN" | "NOT_ENABLED" | "NOT_OPEN_YET" | "CLOSED" | "ALREADY_CHECKED_IN" = "OPEN";
+  let opensAt: Date | null = null;
 
   if (existing) {
-     // If already checked in, we pass this state. Logic in view handles it.
-  } else {
-      if (!event.attendanceEnabled) {
-        canCheckIn = false;
-        reason = "Check-in is not enabled for this event.";
-      } else if (event.attendanceOpensAt && now < event.attendanceOpensAt) {
-        canCheckIn = false;
-        reason = `Check-in opens at ${event.attendanceOpensAt.toLocaleTimeString()}`;
-      } else if (event.attendanceClosesAt && now > event.attendanceClosesAt) {
-        canCheckIn = false;
-        reason = "Check-in has closed.";
-      }
+      status = "ALREADY_CHECKED_IN";
+  } else if (!event.attendanceEnabled) {
+      status = "NOT_ENABLED";
+  } else if (event.attendanceOpensAt && now < event.attendanceOpensAt) {
+      status = "NOT_OPEN_YET";
+      opensAt = event.attendanceOpensAt;
+  } else if (event.attendanceClosesAt && now > event.attendanceClosesAt) {
+      status = "CLOSED";
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-950 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-lsr-charcoal p-4">
       <CheckInView 
         eventId={event.id} 
         eventSlug={event.slug}
         eventTitle={event.title}
-        initialStatus={{
-            canCheckIn,
-            reason,
-            alreadyCheckedIn: !!existing,
-            checkedInAt: existing?.checkedInAt
-        }} 
+        status={status}
+        opensAt={opensAt?.toISOString()}
+        checkedInAt={existing?.checkedInAt.toISOString()}
+        currentUser={{
+            displayName: user.displayName,
+            handle: user.handle,
+            avatarUrl: user.avatarUrl
+        }}
       />
     </div>
   );

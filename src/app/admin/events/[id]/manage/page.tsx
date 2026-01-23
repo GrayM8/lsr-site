@@ -51,24 +51,41 @@ export default async function ManageEventPage({ params }: { params: Promise<{ id
   });
 
   return (
-    <main className="mx-auto max-w-6xl p-8 pb-32">
-      <div className="flex justify-between items-center mb-6">
+    <main className="mx-auto max-w-7xl p-6 md:p-12 pb-32">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
         <div>
-            <h1 className="text-3xl font-bold">Manage: {event.title}</h1>
-            <p className="text-muted-foreground">{event.slug}</p>
+            <div className="flex items-center gap-3 mb-2">
+                <span className="bg-lsr-orange/10 text-lsr-orange px-2 py-0.5 text-[10px] font-black uppercase tracking-widest border border-lsr-orange/20">
+                    Event Management
+                </span>
+                <span className="text-white/40 text-xs font-mono">{event.slug}</span>
+            </div>
+            <h1 className="font-display font-black italic text-3xl md:text-5xl text-white uppercase tracking-tight leading-none">
+                {event.title}
+            </h1>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
             <LiveTailButton />
-            <Button asChild variant="outline">
-                <Link href="/admin/events">Back to Events</Link>
+            <Button asChild variant="outline" className="border-white/10 hover:bg-white/5 uppercase tracking-widest text-xs font-bold h-10">
+                <Link href="/admin/events">Exit</Link>
             </Button>
         </div>
       </div>
       
-      <Tabs defaultValue="attendance" className="space-y-6">
-          <TabsList>
-              <TabsTrigger value="attendance">Attendance</TabsTrigger>
-              <TabsTrigger value="registration">Registration</TabsTrigger>
+      <Tabs defaultValue="attendance" className="space-y-8">
+          <TabsList className="w-full justify-start bg-transparent border-b border-white/10 p-0 h-auto rounded-none">
+              <TabsTrigger 
+                value="attendance" 
+                className="rounded-none border-b-2 border-transparent px-6 py-3 font-sans font-bold text-sm uppercase tracking-widest text-white/40 data-[state=active]:border-lsr-orange data-[state=active]:bg-transparent data-[state=active]:text-white transition-all hover:text-white/70"
+              >
+                Attendance
+              </TabsTrigger>
+              <TabsTrigger 
+                value="registration" 
+                className="rounded-none border-b-2 border-transparent px-6 py-3 font-sans font-bold text-sm uppercase tracking-widest text-white/40 data-[state=active]:border-lsr-orange data-[state=active]:bg-transparent data-[state=active]:text-white transition-all hover:text-white/70"
+              >
+                Registration
+              </TabsTrigger>
           </TabsList>
 
           <TabsContent value="attendance" className="space-y-8">

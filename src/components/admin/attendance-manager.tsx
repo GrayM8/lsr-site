@@ -93,19 +93,29 @@ export function AttendanceManager({
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-start">
-                <div>
-                    <h2 className="text-2xl font-bold">Attendance</h2>
-                    <p className="text-muted-foreground">
-                        {checkedIn.length} Checked In • {missing.length} Missing • {walkIns.length} Walk-ins
-                    </p>
+        <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white/[0.02] border border-white/10 p-6 flex flex-col items-center justify-center text-center">
+                    <span className="text-4xl font-display font-black italic text-white">{checkedIn.length}</span>
+                    <span className="text-[10px] font-sans font-bold uppercase tracking-widest text-white/40 mt-1">Checked In</span>
                 </div>
-                <div className="flex space-x-2">
+                <div className="bg-white/[0.02] border border-white/10 p-6 flex flex-col items-center justify-center text-center">
+                    <span className="text-4xl font-display font-black italic text-white/60">{missing.length}</span>
+                    <span className="text-[10px] font-sans font-bold uppercase tracking-widest text-white/40 mt-1">Missing</span>
+                </div>
+                <div className="bg-white/[0.02] border border-white/10 p-6 flex flex-col items-center justify-center text-center">
+                    <span className="text-4xl font-display font-black italic text-lsr-orange">{walkIns.length}</span>
+                    <span className="text-[10px] font-sans font-bold uppercase tracking-widest text-lsr-orange/60 mt-1">Walk-ins</span>
+                </div>
+            </div>
+
+            <div className="flex justify-between items-center">
+                <h3 className="font-display font-black italic text-xl uppercase text-white">Guest List</h3>
+                <div className="flex gap-2">
                     <Dialog open={qrOpen} onOpenChange={setQrOpen}>
                         <DialogTrigger asChild>
-                            <Button variant="outline">
-                                <QrCode className="mr-2 h-4 w-4" />
+                            <Button variant="outline" className="border-white/10 bg-white/5 hover:bg-white/10 text-white uppercase tracking-widest text-[10px] font-bold h-9">
+                                <QrCode className="mr-2 h-3 w-3" />
                                 Show QR
                             </Button>
                         </DialogTrigger>
@@ -134,8 +144,8 @@ export function AttendanceManager({
 
                     <Dialog>
                         <DialogTrigger asChild>
-                            <Button>
-                                <UserPlus className="mr-2 h-4 w-4" />
+                            <Button className="bg-lsr-orange hover:bg-lsr-orange/90 text-white uppercase tracking-widest text-[10px] font-bold h-9">
+                                <UserPlus className="mr-2 h-3 w-3" />
                                 Manual Check-In
                             </Button>
                         </DialogTrigger>
@@ -172,33 +182,33 @@ export function AttendanceManager({
             </div>
 
             <Tabs defaultValue="checked-in" className="w-full">
-                <TabsList>
-                    <TabsTrigger value="checked-in">Checked In ({checkedIn.length})</TabsTrigger>
-                    <TabsTrigger value="missing">Missing ({missing.length})</TabsTrigger>
-                    <TabsTrigger value="walk-ins">Walk-ins ({walkIns.length})</TabsTrigger>
+                <TabsList className="bg-white/5 border border-white/10 p-1 rounded-lg w-full justify-start h-auto">
+                    <TabsTrigger value="checked-in" className="data-[state=active]:bg-lsr-charcoal data-[state=active]:text-white text-white/50 uppercase tracking-widest text-[10px] font-bold px-4 py-2 rounded-md flex-1">Checked In ({checkedIn.length})</TabsTrigger>
+                    <TabsTrigger value="missing" className="data-[state=active]:bg-lsr-charcoal data-[state=active]:text-white text-white/50 uppercase tracking-widest text-[10px] font-bold px-4 py-2 rounded-md flex-1">Missing ({missing.length})</TabsTrigger>
+                    <TabsTrigger value="walk-ins" className="data-[state=active]:bg-lsr-charcoal data-[state=active]:text-white text-white/50 uppercase tracking-widest text-[10px] font-bold px-4 py-2 rounded-md flex-1">Walk-ins ({walkIns.length})</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="checked-in" className="border rounded-md p-0">
-                   <div className="divide-y">
+                <TabsContent value="checked-in" className="mt-4 border border-white/10 bg-white/[0.02] rounded-lg overflow-hidden">
+                   <div className="divide-y divide-white/5">
                        {checkedIn.map(record => (
-                           <div key={record.id} className="flex items-center justify-between p-3">
-                               <div className="flex items-center gap-3">
-                                   <Avatar className="h-8 w-8">
+                           <div key={record.id} className="flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors">
+                               <div className="flex items-center gap-4">
+                                   <Avatar className="h-10 w-10 border border-white/10">
                                        <AvatarImage src={record.user.avatarUrl || undefined} />
-                                       <AvatarFallback>{record.user.displayName[0]}</AvatarFallback>
+                                       <AvatarFallback className="bg-lsr-charcoal text-white/40 text-xs">{record.user.displayName[0]}</AvatarFallback>
                                    </Avatar>
                                    <div>
-                                       <div className="font-medium">{record.user.displayName}</div>
-                                       <div className="text-xs text-muted-foreground">@{record.user.handle}</div>
+                                       <div className="font-bold text-sm text-white">{record.user.displayName}</div>
+                                       <div className="text-[10px] text-white/40 uppercase tracking-wider">@{record.user.handle}</div>
                                    </div>
-                                   <span className="text-[10px] bg-secondary px-1.5 py-0.5 rounded uppercase">{record.method}</span>
+                                   <span className="text-[9px] bg-white/10 text-white/60 px-2 py-0.5 rounded-full uppercase tracking-widest border border-white/5">{record.method}</span>
                                </div>
-                               <div className="flex items-center gap-3">
-                                   <div className="text-sm text-muted-foreground">{new Date(record.checkedInAt).toLocaleTimeString()}</div>
+                               <div className="flex items-center gap-4">
+                                   <div className="text-xs font-mono text-white/40">{new Date(record.checkedInAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
                                    <Button 
                                        size="icon" 
                                        variant="ghost" 
-                                       className="h-8 w-8 text-destructive hover:text-destructive"
+                                       className="h-8 w-8 text-white/20 hover:text-red-500 hover:bg-red-500/10 transition-colors"
                                        onClick={() => manualRemoveCheckIn(eventId, record.user.id)}
                                    >
                                        <X className="h-4 w-4" />
@@ -206,55 +216,55 @@ export function AttendanceManager({
                                </div>
                            </div>
                        ))}
-                       {checkedIn.length === 0 && <div className="p-4 text-center text-muted-foreground">No check-ins yet.</div>}
+                       {checkedIn.length === 0 && <div className="p-8 text-center text-white/30 text-sm italic">No check-ins recorded yet.</div>}
                    </div>
                 </TabsContent>
 
-                <TabsContent value="missing" className="border rounded-md p-0">
-                    <div className="divide-y">
+                <TabsContent value="missing" className="mt-4 border border-white/10 bg-white/[0.02] rounded-lg overflow-hidden">
+                    <div className="divide-y divide-white/5">
                         {missing.map(reg => (
-                            <div key={reg.id} className="flex items-center justify-between p-3">
-                                <div className="flex items-center gap-3">
-                                   <Avatar className="h-8 w-8">
+                            <div key={reg.id} className="flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors">
+                                <div className="flex items-center gap-4">
+                                   <Avatar className="h-10 w-10 border border-white/10">
                                        <AvatarImage src={reg.user.avatarUrl || undefined} />
-                                       <AvatarFallback>{reg.user.displayName[0]}</AvatarFallback>
+                                       <AvatarFallback className="bg-lsr-charcoal text-white/40 text-xs">{reg.user.displayName[0]}</AvatarFallback>
                                    </Avatar>
                                    <div>
-                                       <div className="font-medium">{reg.user.displayName}</div>
-                                       <div className="text-xs text-muted-foreground">@{reg.user.handle}</div>
+                                       <div className="font-bold text-sm text-white">{reg.user.displayName}</div>
+                                       <div className="text-[10px] text-white/40 uppercase tracking-wider">@{reg.user.handle}</div>
                                    </div>
-                                    <span className="text-[10px] bg-secondary px-1.5 py-0.5 rounded uppercase">{reg.status}</span>
+                                    <span className="text-[9px] bg-white/5 text-white/40 px-2 py-0.5 rounded-full uppercase tracking-widest border border-white/5">{reg.status}</span>
                                 </div>
-                                <Button size="sm" variant="outline" onClick={() => manualCheckIn(eventId, reg.user.id)}>
+                                <Button size="sm" variant="outline" className="h-8 border-lsr-orange/50 text-lsr-orange hover:bg-lsr-orange hover:text-white uppercase tracking-widest text-[9px] font-bold" onClick={() => manualCheckIn(eventId, reg.user.id)}>
                                     <Check className="mr-2 h-3 w-3" />
                                     Check In
                                 </Button>
                             </div>
                         ))}
-                         {missing.length === 0 && <div className="p-4 text-center text-muted-foreground">Everyone registered has checked in!</div>}
+                         {missing.length === 0 && <div className="p-8 text-center text-white/30 text-sm italic">Everyone registered has checked in!</div>}
                     </div>
                 </TabsContent>
 
-                <TabsContent value="walk-ins" className="border rounded-md p-0">
-                    <div className="divide-y">
+                <TabsContent value="walk-ins" className="mt-4 border border-white/10 bg-white/[0.02] rounded-lg overflow-hidden">
+                    <div className="divide-y divide-white/5">
                         {walkIns.map(record => (
-                            <div key={record.id} className="flex items-center justify-between p-3">
-                                <div className="flex items-center gap-3">
-                                   <Avatar className="h-8 w-8">
+                            <div key={record.id} className="flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors">
+                                <div className="flex items-center gap-4">
+                                   <Avatar className="h-10 w-10 border border-white/10">
                                        <AvatarImage src={record.user.avatarUrl || undefined} />
-                                       <AvatarFallback>{record.user.displayName[0]}</AvatarFallback>
+                                       <AvatarFallback className="bg-lsr-charcoal text-white/40 text-xs">{record.user.displayName[0]}</AvatarFallback>
                                    </Avatar>
                                    <div>
-                                       <div className="font-medium">{record.user.displayName}</div>
-                                       <div className="text-xs text-muted-foreground">@{record.user.handle}</div>
+                                       <div className="font-bold text-sm text-white">{record.user.displayName}</div>
+                                       <div className="text-[10px] text-white/40 uppercase tracking-wider">@{record.user.handle}</div>
                                    </div>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="text-sm text-muted-foreground">{new Date(record.checkedInAt).toLocaleTimeString()}</div>
+                                <div className="flex items-center gap-4">
+                                    <div className="text-xs font-mono text-white/40">{new Date(record.checkedInAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
                                     <Button 
                                        size="icon" 
                                        variant="ghost" 
-                                       className="h-8 w-8 text-destructive hover:text-destructive"
+                                       className="h-8 w-8 text-white/20 hover:text-red-500 hover:bg-red-500/10 transition-colors"
                                        onClick={() => manualRemoveCheckIn(eventId, record.user.id)}
                                    >
                                        <X className="h-4 w-4" />
@@ -262,7 +272,7 @@ export function AttendanceManager({
                                 </div>
                             </div>
                         ))}
-                        {walkIns.length === 0 && <div className="p-4 text-center text-muted-foreground">No walk-ins.</div>}
+                        {walkIns.length === 0 && <div className="p-8 text-center text-white/30 text-sm italic">No walk-in attendees.</div>}
                     </div>
                 </TabsContent>
             </Tabs>
