@@ -13,11 +13,8 @@ export default async function ResultsAdminPage() {
   });
 
   return (
-    <main className="mx-auto max-w-6xl p-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Race Results</h1>
-      </div>
+    <div className="h-full">
       <ResultsAdminClient results={results} />
-    </main>
+    </div>
   );
 }
