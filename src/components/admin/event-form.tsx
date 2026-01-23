@@ -10,203 +10,268 @@ import { ImageUploader } from "@/components/image-uploader";
 import { Event, EventSeries, Venue } from "@prisma/client";
 import { useState } from "react";
 import { DEFAULT_TIMEZONE, TIMEZONES, dateToZonedValue } from "@/lib/dates";
+import { Tag, Clock, Info, Users, QrCode } from "lucide-react";
 
 export function EventForm({ event, series, venues }: { event?: Event, series: EventSeries[], venues: Venue[] }) {
-  // Initialize timezone state from event or default
   const [timezone, setTimezone] = useState<string>(event?.timezone || DEFAULT_TIMEZONE);
 
   return (
-    <div className="overflow-x-auto">
-      <form action={event ? updateEvent.bind(null, event.id) : createEvent} className="min-w-[600px]">
-        {/* Hidden input to ensure timezone is submitted even if state controls it */}
+    <div className="max-w-5xl mx-auto font-mono text-sm border border-white/10 bg-white/[0.02] p-8 md:p-12 rounded-xl shadow-2xl">
+      <form action={event ? updateEvent.bind(null, event.id) : createEvent} className="space-y-16">
         <input type="hidden" name="timezone" value={timezone} />
         
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="title">Title</label>
-            <Input id="title" name="title" defaultValue={event?.title} required />
+        {/* Basic Info */}
+        <section className="space-y-8">
+          <div className="flex items-center gap-3 border-l-2 border-lsr-orange pl-4">
+            <Tag size={16} className="text-lsr-orange/60" />
+            <h3 className="text-xs font-bold uppercase tracking-widest text-white/40">Basic Information</h3>
           </div>
-          <div>
-            <label htmlFor="slug">Slug</label>
-            <Input id="slug" name="slug" defaultValue={event?.slug} required />
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+            <div className="space-y-2">
+              <label htmlFor="title" className="text-[10px] uppercase tracking-wider text-white/60">Event Title</label>
+              <Input 
+                id="title" 
+                name="title" 
+                defaultValue={event?.title} 
+                required 
+                className="bg-transparent border-b border-white/20 border-t-0 border-x-0 rounded-none px-0 h-8 focus-visible:ring-0 focus:border-lsr-orange transition-colors font-bold text-base" 
+                placeholder="e.g. Grand Prix of Texas" 
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="slug" className="text-[10px] uppercase tracking-wider text-white/60">URL Slug</label>
+              <Input 
+                id="slug" 
+                name="slug" 
+                defaultValue={event?.slug} 
+                required 
+                className="bg-transparent border-b border-white/20 border-t-0 border-x-0 rounded-none px-0 h-8 focus-visible:ring-0 focus:border-lsr-orange transition-colors" 
+                placeholder="e.g. grand-prix-texas-2026" 
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="seriesId" className="text-[10px] uppercase tracking-wider text-white/60">Series</label>
+              <select
+                id="seriesId"
+                name="seriesId"
+                defaultValue={event?.seriesId ?? ""}
+                className="w-full h-8 bg-transparent border-b border-white/20 focus:border-lsr-orange text-white outline-none rounded-none cursor-pointer"
+              >
+                <option value="" className="bg-lsr-charcoal text-white/50">(None)</option>
+                {series.map((s) => (
+                  <option key={s.id} value={s.id} className="bg-lsr-charcoal">
+                    {s.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="venueId" className="text-[10px] uppercase tracking-wider text-white/60">Venue</label>
+              <select
+                id="venueId"
+                name="venueId"
+                defaultValue={event?.venueId ?? ""}
+                className="w-full h-8 bg-transparent border-b border-white/20 focus:border-lsr-orange text-white outline-none rounded-none cursor-pointer"
+              >
+                <option value="" className="bg-lsr-charcoal text-white/50">(None)</option>
+                {venues.map((v) => (
+                  <option key={v.id} value={v.id} className="bg-lsr-charcoal">
+                    {v.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div>
-            <label htmlFor="seriesId">Series</label>
-            <select
-              id="seriesId"
-              name="seriesId"
-              defaultValue={event?.seriesId ?? ""}
-              className="w-full p-2 border rounded-md bg-gray-800 text-white"
-            >
-              <option value="">None</option>
-              {series.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.title}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="venueId">Venue</label>
-            <select
-              id="venueId"
-              name="venueId"
-              defaultValue={event?.venueId ?? ""}
-              className="w-full p-2 border rounded-md bg-gray-800 text-white"
-            >
-              <option value="">None</option>
-              {venues.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.name}
-                </option>
-              ))}
-            </select>
+        </section>
+
+        {/* Time & Location */}
+        <section className="space-y-8">
+          <div className="flex items-center gap-3 border-l-2 border-lsr-orange pl-4">
+            <Clock size={16} className="text-lsr-orange/60" />
+            <h3 className="text-xs font-bold uppercase tracking-widest text-white/40">Schedule</h3>
           </div>
 
-          <div className="p-4 border border-white/10 rounded-md bg-white/5 space-y-4">
-            <h3 className="text-md font-bold text-white/80 uppercase tracking-widest">Time & Location</h3>
-            
-            <div>
-              <label htmlFor="timezone-select">Event Timezone</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+            <div className="space-y-2">
+              <label htmlFor="timezone-select" className="text-[10px] uppercase tracking-wider text-white/60">Timezone</label>
               <select
                 id="timezone-select"
-                // No 'name' attribute here because we use the hidden input for the form submission
                 value={timezone}
                 onChange={(e) => setTimezone(e.target.value)}
-                className="w-full p-2 border rounded-md bg-gray-800 text-white"
+                className="w-full h-8 bg-transparent border-b border-white/20 focus:border-lsr-orange text-white outline-none rounded-none cursor-pointer"
               >
                 {TIMEZONES.map((tz) => (
-                  <option key={tz.value} value={tz.value}>
+                  <option key={tz.value} value={tz.value} className="bg-lsr-charcoal">
                     {tz.label}
                   </option>
                 ))}
               </select>
             </div>
+            <div className="hidden md:block"></div> {/* Spacer */}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="startsAtUtc">Starts At ({timezone})</label>
-                <Input 
-                  id="startsAtUtc" 
-                  name="startsAtUtc" 
-                  type="datetime-local" 
-                  // Key forces re-render when timezone changes to update the displayed local time
-                  key={`start-${timezone}`} 
-                  defaultValue={dateToZonedValue(event?.startsAtUtc, timezone)} 
-                  required 
-                />
-              </div>
-              <div>
-                <label htmlFor="endsAtUtc">Ends At ({timezone})</label>
-                <Input 
-                  id="endsAtUtc" 
-                  name="endsAtUtc" 
-                  type="datetime-local" 
-                  key={`end-${timezone}`}
-                  defaultValue={dateToZonedValue(event?.endsAtUtc, timezone)} 
-                  required 
-                />
+            <div className="space-y-2">
+              <label htmlFor="startsAtUtc" className="text-[10px] uppercase tracking-wider text-white/60">Starts At</label>
+              <Input 
+                id="startsAtUtc" 
+                name="startsAtUtc" 
+                type="datetime-local" 
+                key={`start-${timezone}`} 
+                defaultValue={dateToZonedValue(event?.startsAtUtc, timezone)} 
+                required 
+                className="bg-transparent border-b border-white/20 border-t-0 border-x-0 rounded-none px-0 h-8 focus-visible:ring-0 focus:border-lsr-orange transition-colors"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="endsAtUtc" className="text-[10px] uppercase tracking-wider text-white/60">Ends At</label>
+              <Input 
+                id="endsAtUtc" 
+                name="endsAtUtc" 
+                type="datetime-local" 
+                key={`end-${timezone}`}
+                defaultValue={dateToZonedValue(event?.endsAtUtc, timezone)} 
+                required 
+                className="bg-transparent border-b border-white/20 border-t-0 border-x-0 rounded-none px-0 h-8 focus-visible:ring-0 focus:border-lsr-orange transition-colors"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Content */}
+        <section className="space-y-8">
+          <div className="flex items-center gap-3 border-l-2 border-lsr-orange pl-4">
+            <Info size={16} className="text-lsr-orange/60" />
+            <h3 className="text-xs font-bold uppercase tracking-widest text-white/40">Content</h3>
+          </div>
+
+          <div className="grid grid-cols-1 gap-8">
+            <div className="space-y-2">
+              <label htmlFor="summary" className="text-[10px] uppercase tracking-wider text-white/60">Short Summary</label>
+              <Input 
+                id="summary" 
+                name="summary" 
+                defaultValue={event?.summary ?? ""} 
+                className="bg-transparent border-b border-white/20 border-t-0 border-x-0 rounded-none px-0 h-8 focus-visible:ring-0 focus:border-lsr-orange transition-colors"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="description" className="text-[10px] uppercase tracking-wider text-white/60">Internal Description</label>
+              <Input 
+                id="description" 
+                name="description" 
+                defaultValue={event?.description ?? ""} 
+                className="bg-transparent border-b border-white/20 border-t-0 border-x-0 rounded-none px-0 h-8 focus-visible:ring-0 focus:border-lsr-orange transition-colors"
+              />
+            </div>
+            <div className="space-y-4 pt-2">
+              <label className="text-[10px] uppercase tracking-wider text-white/60 block">Hero Image</label>
+              <div className="border border-white/5 bg-black/40 p-6">
+                <ImageUploader name="heroImageUrl" defaultValue={event?.heroImageUrl} />
               </div>
             </div>
           </div>
+        </section>
 
-          <div>
-            <label htmlFor="summary">Summary</label>
-            <Input id="summary" name="summary" defaultValue={event?.summary ?? ""} />
-          </div>
-          <div>
-            <label htmlFor="description">Description <i className="text-sm text-gray-400">(for internal use)</i></label>
-            <Input id="description" name="description" defaultValue={event?.description ?? ""} />
-          </div>
-          <div>
-            <label>Hero Image</label>
-            <ImageUploader name="heroImageUrl" defaultValue={event?.heroImageUrl} />
-          </div>
-
-          <div className="border-t pt-4 mt-6">
-            <h3 className="text-lg font-bold mb-4">Registration Settings</h3>
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Switch id="registrationEnabled" name="registrationEnabled" defaultChecked={event?.registrationEnabled ?? false} />
-                <Label htmlFor="registrationEnabled">Enable Registration</Label>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="registrationOpensAt">Opens At ({timezone})</Label>
-                  <Input 
-                    id="registrationOpensAt" 
-                    name="registrationOpensAt" 
-                    type="datetime-local" 
-                    key={`reg-open-${timezone}`}
-                    defaultValue={dateToZonedValue(event?.registrationOpensAt, timezone)} 
-                  />
+        {/* Registration */}
+        <section className="space-y-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 border-l-2 border-lsr-orange pl-4">
+              <Users size={16} className="text-lsr-orange/60" />
+              <h3 className="text-xs font-bold uppercase tracking-widest text-white/40">Registration</h3>
+            </div>
+            <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2">
+                    <Label htmlFor="registrationEnabled" className="uppercase tracking-widest text-[10px] text-white/60 cursor-pointer">Enabled</Label>
+                    <Switch id="registrationEnabled" name="registrationEnabled" defaultChecked={event?.registrationEnabled ?? false} className="data-[state=checked]:bg-lsr-orange" />
                 </div>
-                <div>
-                  <Label htmlFor="registrationClosesAt">Closes At ({timezone})</Label>
-                  <Input 
-                    id="registrationClosesAt" 
-                    name="registrationClosesAt" 
-                    type="datetime-local" 
-                    key={`reg-close-${timezone}`}
-                    defaultValue={dateToZonedValue(event?.registrationClosesAt, timezone)} 
-                  />
+                <div className="flex items-center gap-2">
+                    <Label htmlFor="registrationWaitlistEnabled" className="uppercase tracking-widest text-[10px] text-white/60 cursor-pointer">Waitlist</Label>
+                    <Switch id="registrationWaitlistEnabled" name="registrationWaitlistEnabled" defaultChecked={event?.registrationWaitlistEnabled ?? false} className="data-[state=checked]:bg-lsr-orange" />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="registrationMax">Max Capacity (Leave empty for unlimited)</Label>
-                  <Input 
-                    id="registrationMax" 
-                    name="registrationMax" 
-                    type="number" 
-                    defaultValue={event?.registrationMax ?? ""} 
-                    placeholder="Unlimited"
-                  />
-                </div>
-                <div className="flex items-center space-x-2 h-full pt-6">
-                  <Switch id="registrationWaitlistEnabled" name="registrationWaitlistEnabled" defaultChecked={event?.registrationWaitlistEnabled ?? false} />
-                  <Label htmlFor="registrationWaitlistEnabled">Enable Waitlist</Label>
-                </div>
-              </div>
             </div>
           </div>
 
-          <div className="border-t pt-4 mt-6">
-            <h3 className="text-lg font-bold mb-4">Check-in Settings</h3>
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Switch id="attendanceEnabled" name="attendanceEnabled" defaultChecked={event?.attendanceEnabled ?? false} />
-                <Label htmlFor="attendanceEnabled">Enable Check-in System</Label>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+            <div className="space-y-2">
+              <label htmlFor="registrationOpensAt" className="text-[10px] uppercase tracking-wider text-white/60">Opens At</label>
+              <Input 
+                id="registrationOpensAt" 
+                name="registrationOpensAt" 
+                type="datetime-local" 
+                key={`reg-open-${timezone}`}
+                defaultValue={dateToZonedValue(event?.registrationOpensAt, timezone)} 
+                className="bg-transparent border-b border-white/20 border-t-0 border-x-0 rounded-none px-0 h-8 focus-visible:ring-0 focus:border-lsr-orange transition-colors"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="registrationClosesAt" className="text-[10px] uppercase tracking-wider text-white/60">Closes At</label>
+              <Input 
+                id="registrationClosesAt" 
+                name="registrationClosesAt" 
+                type="datetime-local" 
+                key={`reg-close-${timezone}`}
+                defaultValue={dateToZonedValue(event?.registrationClosesAt, timezone)} 
+                className="bg-transparent border-b border-white/20 border-t-0 border-x-0 rounded-none px-0 h-8 focus-visible:ring-0 focus:border-lsr-orange transition-colors"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="registrationMax" className="text-[10px] uppercase tracking-wider text-white/60">Capacity Limit</label>
+              <Input 
+                id="registrationMax" 
+                name="registrationMax" 
+                type="number" 
+                defaultValue={event?.registrationMax ?? ""} 
+                placeholder="Unlimited"
+                className="bg-transparent border-b border-white/20 border-t-0 border-x-0 rounded-none px-0 h-8 focus-visible:ring-0 focus:border-lsr-orange transition-colors w-1/2"
+              />
+            </div>
+          </div>
+        </section>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="attendanceOpensAt">Check-in Opens ({timezone})</Label>
-                  <Input 
-                    id="attendanceOpensAt" 
-                    name="attendanceOpensAt" 
-                    type="datetime-local" 
-                    key={`att-open-${timezone}`}
-                    defaultValue={dateToZonedValue(event?.attendanceOpensAt, timezone)} 
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="attendanceClosesAt">Check-in Closes ({timezone})</Label>
-                  <Input 
-                    id="attendanceClosesAt" 
-                    name="attendanceClosesAt" 
-                    type="datetime-local" 
-                    key={`att-close-${timezone}`}
-                    defaultValue={dateToZonedValue(event?.attendanceClosesAt, timezone)} 
-                  />
-                </div>
-              </div>
+        {/* Check-in */}
+        <section className="space-y-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 border-l-2 border-lsr-orange pl-4">
+              <QrCode size={16} className="text-lsr-orange/60" />
+              <h3 className="text-xs font-bold uppercase tracking-widest text-white/40">Check-in</h3>
+            </div>
+            <div className="flex items-center gap-2">
+                <Label htmlFor="attendanceEnabled" className="uppercase tracking-widest text-[10px] text-white/60 cursor-pointer">Enabled</Label>
+                <Switch id="attendanceEnabled" name="attendanceEnabled" defaultChecked={event?.attendanceEnabled ?? false} className="data-[state=checked]:bg-lsr-orange" />
             </div>
           </div>
 
-          <Button type="submit">{event ? "Update Event" : "Create Event"}</Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+            <div className="space-y-2">
+              <label htmlFor="attendanceOpensAt" className="text-[10px] uppercase tracking-wider text-white/60">Check-in Opens</label>
+              <Input 
+                id="attendanceOpensAt" 
+                name="attendanceOpensAt" 
+                type="datetime-local" 
+                key={`att-open-${timezone}`}
+                defaultValue={dateToZonedValue(event?.attendanceOpensAt, timezone)} 
+                className="bg-transparent border-b border-white/20 border-t-0 border-x-0 rounded-none px-0 h-8 focus-visible:ring-0 focus:border-lsr-orange transition-colors"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="attendanceClosesAt" className="text-[10px] uppercase tracking-wider text-white/60">Check-in Closes</label>
+              <Input 
+                id="attendanceClosesAt" 
+                name="attendanceClosesAt" 
+                type="datetime-local" 
+                key={`att-close-${timezone}`}
+                defaultValue={dateToZonedValue(event?.attendanceClosesAt, timezone)} 
+                className="bg-transparent border-b border-white/20 border-t-0 border-x-0 rounded-none px-0 h-8 focus-visible:ring-0 focus:border-lsr-orange transition-colors"
+              />
+            </div>
+          </div>
+        </section>
+
+        <div className="pt-8 flex justify-end">
+            <Button type="submit" size="lg" className="bg-lsr-orange hover:bg-lsr-orange/90 text-white font-bold uppercase tracking-widest text-xs h-12 px-12 rounded-none shadow-lg transition-all hover:scale-[1.02]">
+                {event ? "Update Event" : "Create Event"}
+            </Button>
         </div>
       </form>
     </div>

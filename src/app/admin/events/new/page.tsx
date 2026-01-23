@@ -9,7 +9,7 @@ export default async function NewEventPage() {
   ]);
 
   return (
-    <main className="mx-auto max-w-2xl p-8">
+    <main className="mx-auto max-w-4xl p-8 pb-32">
       <h1 className="text-3xl font-bold mb-6">New Event</h1>
       <div className="overflow-x-auto">
         <EventForm series={series} venues={venues} />
