@@ -21,11 +21,11 @@ function GoogleIcon({ className }: { className?: string }) {
   )
 }
 
-export function GoogleButton() {
+export function GoogleButton({ next }: { next?: string }) {
   const handle = async () => {
     const supabase = createSupabaseBrowser();
     const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
-    const redirectTo = `${origin.replace(/\/$/, '')}/auth/callback`;
+    const redirectTo = `${origin.replace(/\/$/, '')}/auth/callback${next ? `?next=${encodeURIComponent(next)}` : ''}`;
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo },
