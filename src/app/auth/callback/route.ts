@@ -37,6 +37,12 @@ export async function GET(request: Request) {
   if (error || !data.user) {
     console.error('[Auth Callback] Error exchanging code for session:', error);
     const errorMessage = error ? error.message : 'No user data';
+    
+    // Handle cross-device email verification where PKCE verifier is missing
+    if (errorMessage.includes('both auth code and code verifier should be non-empty')) {
+      return NextResponse.redirect(`${origin}/?verified=true&message=Email+verified.+Please+sign+in.`);
+    }
+
     return NextResponse.redirect(`${origin}/auth/auth-code-error?error=${errorMessage}`);
   }
 

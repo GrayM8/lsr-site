@@ -2,7 +2,7 @@
 
 import { createSupabaseBrowser } from "@/lib/supabase-browser";
 import Link from "next/link";
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import * as React from "react"
 import { useState, useTransition, useEffect } from "react"
 import {
@@ -23,6 +23,7 @@ type TabKey = "signin" | "signup"
 
 export function AuthDialog() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<TabKey>("signup")
   const [pending, startTransition] = useTransition()
@@ -42,6 +43,18 @@ export function AuthDialog() {
     window.addEventListener("open-auth-dialog", handleOpen)
     return () => window.removeEventListener("open-auth-dialog", handleOpen)
   }, [])
+
+  useEffect(() => {
+    if (searchParams?.get("verified") === "true") {
+      setOpen(true);
+      setTab("signin");
+      const msg = searchParams.get("message");
+      if (msg) {
+        // Use a small timeout to let the dialog open first or just alert
+        setTimeout(() => alert(msg), 100);
+      }
+    }
+  }, [searchParams]);
 
   function onSignup(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
