@@ -3,11 +3,47 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { prisma } from '@/server/db';
 import { User } from '@prisma/client';
+import { slugify } from '@/lib/slug';
 
 export type SessionUser = {
   user: (User & { roles: { role: { key: string } }[] }) | null;
   roles: string[];
 };
+
+async function provisionUser(authUser: any) {
+  return prisma.$transaction(async (tx) => {
+    // Double-check inside transaction to prevent race conditions
+    const existingUser = await tx.user.findUnique({ where: { id: authUser.id } });
+    if (existingUser) return existingUser;
+
+    if (!authUser.email) {
+      throw new Error('User email is missing from Supabase data.');
+    }
+
+    const displayName = authUser.user_metadata.full_name || authUser.user_metadata.displayName || authUser.email.split('@')[0];
+
+    // Create a unique handle, appending a number if necessary
+    const baseHandle = slugify(displayName);
+    let finalHandle = baseHandle;
+    let counter = 1;
+    while (await tx.user.findUnique({ where: { handle: finalHandle } })) {
+      finalHandle = `${baseHandle}-${counter}`;
+      counter++;
+    }
+
+    const newUserPayload = {
+      id: authUser.id,
+      email: authUser.email,
+      handle: finalHandle,
+      displayName: displayName,
+      avatarUrl: authUser.user_metadata.avatar_url,
+      status: 'active' as const,
+      marketingOptIn: authUser.user_metadata.marketingOptIn ?? true,
+    };
+
+    return tx.user.create({ data: newUserPayload });
+  });
+}
 
 export async function getSessionUser(): Promise<SessionUser> {
   const cookieStore = await cookies(); // await is necessary here for read-only contexts
@@ -29,7 +65,7 @@ export async function getSessionUser(): Promise<SessionUser> {
     return { user: null, roles: [] };
   }
 
-  const dbUser = await prisma.user.findUnique({
+  let dbUser = await prisma.user.findUnique({
     where: { id: authUser.id },
     include: {
       roles: {
@@ -41,6 +77,29 @@ export async function getSessionUser(): Promise<SessionUser> {
       },
     },
   });
+
+  if (!dbUser) {
+    // JIT Provisioning: Supabase user exists but Prisma user does not.
+    try {
+      await provisionUser(authUser);
+      // Re-fetch to match the expected return type with relations
+      dbUser = await prisma.user.findUnique({
+        where: { id: authUser.id },
+        include: {
+          roles: {
+            include: {
+              role: {
+                select: { key: true },
+              },
+            },
+          },
+        },
+      });
+    } catch (error) {
+      console.error('[getSessionUser] Failed to provision missing user:', error);
+      // Fallthrough to return null
+    }
+  }
 
   if (!dbUser) {
     return { user: null, roles: [] };
