@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Montserrat, Kanit } from "next/font/google"
 import { SiteHeader } from "@/components/site-header"
 import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import React from "react";
 import { SiteFooter } from "@/components/site-footer"
 import { LiveBanner } from "@/components/live-banner";
@@ -80,6 +81,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <SiteFooter />
     </ThemeProvider>
     <Analytics />
+    <SpeedInsights />
     </body>
     </html>
   )
