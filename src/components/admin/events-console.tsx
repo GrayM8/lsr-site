@@ -16,6 +16,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { deleteEvent } from "@/app/admin/events/actions";
 import { cn } from "@/lib/utils";
 import { getEffectiveEventStatus } from "@/lib/events";
+import { StatusOverrideDialog } from "@/components/admin/status-override-dialog";
 
 type EventsConsoleProps = {
   initialEvents: Event[];
@@ -156,7 +157,7 @@ export function EventsConsole({ initialEvents }: EventsConsoleProps) {
               <div className="w-24 shrink-0 text-left">Date</div>
               <div className="w-32 shrink-0 text-left">Time</div>
               <div className="w-40 shrink-0">Slug</div>
-              <div className="flex-1">Title</div>
+              <div className="flex-1 max-w-md">Title</div>
               <div className="w-24 shrink-0 text-center flex items-center justify-center gap-1">
                   Status
                   <TooltipProvider>
@@ -183,7 +184,7 @@ export function EventsConsole({ initialEvents }: EventsConsoleProps) {
                       </Tooltip>
                   </TooltipProvider>
               </div>
-              <div className="w-32 shrink-0 text-right">Actions</div>
+              <div className="w-40 shrink-0 text-right">Actions</div>
             </div>
       
             {/* List */}
@@ -231,7 +232,7 @@ export function EventsConsole({ initialEvents }: EventsConsoleProps) {
                           </div>
       
                           {/* Title */}
-                          <div className="flex-1 min-w-0">
+                          <div className="flex-1 max-w-md min-w-0">
                               <span className="font-bold text-white text-sm truncate tracking-tight">{event.title}</span>
                           </div>
       
@@ -244,7 +245,7 @@ export function EventsConsole({ initialEvents }: EventsConsoleProps) {
       
                                                                                       {/* Actions */}
       
-                                                                                      <div className="w-32 shrink-0 flex items-center justify-end gap-1">
+                                                                                      <div className="w-40 shrink-0 flex items-center justify-end gap-1">
       
                                                                                           <Button asChild size="icon" variant="ghost" className="h-7 w-7 text-white/20 group-hover:text-white/70 hover:!text-lsr-orange hover:bg-white/10 transition-colors">
       
@@ -276,7 +277,7 @@ export function EventsConsole({ initialEvents }: EventsConsoleProps) {
       
                                                                                           </Button>
       
-                                                                                          
+                                                                                          <StatusOverrideDialog event={event} />
       
                                                                                           <DropdownMenu>
       
