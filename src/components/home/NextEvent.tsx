@@ -6,6 +6,7 @@ import SectionReveal from "./SectionReveal"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Event, Venue, EventSeries } from "@prisma/client"
+import { isEventLive } from "@/lib/events"
 import { GeoPoint } from "@/types";
 
 type Props = {
@@ -13,13 +14,6 @@ type Props = {
   featuredEvent?: Event & { venue: Venue | null, series: EventSeries | null }
   upcomingEvents: (Event & { venue: Venue | null, series: EventSeries | null })[]
 }
-
-const isLive = (event: Event) => {
-  const now = new Date();
-  const start = new Date(event.startsAtUtc);
-  const end = new Date(event.endsAtUtc);
-  return start <= now && now <= end;
-};
 
 export default function NextEvent({ index, featuredEvent, upcomingEvents }: Props) {
   const nextEventDate = featuredEvent ? new Date(featuredEvent.startsAtUtc) : null
@@ -29,7 +23,7 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
   const geo = venue?.geo as GeoPoint | null
   const hasCoords = geo?.type === "Point" && geo?.coordinates?.length === 2
   const directionsUrl = hasCoords ? `https://www.google.com/maps/search/?api=1&query=${geo.coordinates[1]},${geo.coordinates[0]}` : null
-  const featuredIsLive = featuredEvent ? isLive(featuredEvent) : false;
+  const featuredIsLive = featuredEvent ? isEventLive(featuredEvent) : false;
 
   return (
     <SectionReveal index={index} className="mx-auto max-w-6xl" clipClass="rounded-none">
@@ -55,15 +49,19 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
         {featuredEvent && nextEventDate && nextEventEndDate && (
           <div className="mt-8 grid md:grid-cols-2 gap-10">
             <div className="flex flex-col justify-center">
-              <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-stretch gap-3 mb-6 h-6">
                 {featuredIsLive && (
-                  <div className="bg-red-600 text-white px-3 py-1 text-[10px] font-black uppercase tracking-widest animate-pulse">
-                    Live Now
+                  <div className="flex items-center gap-1.5 border border-red-600/30 bg-red-600/10 px-3 rounded-none">
+                      <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+                      </span>
+                      <span className="font-display font-black text-red-500 uppercase tracking-widest text-[10px] italic pt-0.5">Live Now</span>
                   </div>
                 )}
                 {featuredEvent.series && (
-                  <div className="border border-lsr-orange text-lsr-orange px-3 py-1 text-[10px] font-black uppercase tracking-widest">
-                    {featuredEvent.series.title}
+                  <div className="flex items-center border border-lsr-orange text-lsr-orange px-3 rounded-none">
+                    <span className="text-[10px] font-black uppercase tracking-widest pt-0.5">{featuredEvent.series.title}</span>
                   </div>
                 )}
               </div>
@@ -110,7 +108,7 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
               </Button>
             </div>
             
-            <div className="relative group overflow-hidden border border-white/10 bg-black">
+            <div className="relative group overflow-hidden border border-white/10 bg-black aspect-video">
               {featuredEvent.heroImageUrl ? (
                 <>
                   <Image
@@ -123,7 +121,7 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                 </>
               ) : (
-                <div className="flex items-center justify-center h-64 md:h-full bg-white/5 uppercase tracking-[0.2em] text-[10px] text-white/30 font-bold">
+                <div className="flex items-center justify-center h-full bg-white/5 uppercase tracking-[0.2em] text-[10px] text-white/30 font-bold">
                   Track Preview Unavailable
                 </div>
               )}
@@ -136,22 +134,28 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {upcomingEvents.length > 0 ? upcomingEvents.slice(0, 4).map((event) => {
               const eventDate = new Date(event.startsAtUtc)
-              const live = isLive(event);
+              const live = isEventLive(event);
               return (
                 <Link key={event.id} href={`/events/${event.slug}`} className="group block border border-white/5 bg-white/5 p-5 hover:bg-white/10 transition-all">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex flex-wrap gap-1">
+                  <div className="flex justify-between items-start mb-4 h-5">
+                    <div className="flex flex-wrap gap-1 h-full items-center">
                       {live ? (
-                        <div className="bg-red-600 text-white px-2 py-0.5 text-[8px] font-black uppercase tracking-widest">Live</div>
+                        <div className="flex items-center gap-1.5 border border-red-600/30 bg-red-600/10 px-1.5 h-full rounded-none">
+                            <span className="relative flex h-1.5 w-1.5">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-600"></span>
+                            </span>
+                            <span className="font-display font-black text-red-500 uppercase tracking-widest text-[8px] italic pt-0.5">Live</span>
+                        </div>
                       ) : (
-                        <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
+                        <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center h-full">
                           <LocalTime date={eventDate} format="short-date" />
                         </div>
                       )}
                     </div>
                     {event.series && (
-                      <div className="text-[8px] font-black text-lsr-orange uppercase tracking-widest border border-lsr-orange/30 px-1.5 py-0.5">
-                        {event.series.title}
+                      <div className="flex items-center text-[8px] font-black text-lsr-orange uppercase tracking-widest border border-lsr-orange/30 px-1.5 h-full rounded-none">
+                        <span className="pt-0.5">{event.series.title}</span>
                       </div>
                     )}
                   </div>

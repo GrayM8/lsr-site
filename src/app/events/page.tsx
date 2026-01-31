@@ -6,6 +6,7 @@ import { Calendar, Clock, MapPin, Send } from "lucide-react"
 import { LocalTime, LocalTimeRange } from "@/components/ui/local-time"
 import { getAllEvents } from "@/server/queries/events";
 import { Event, Venue, EventSeries } from "@prisma/client"
+import { isEventLive } from "@/lib/events";
 import { GeoPoint } from "@/types";
 import Image from "next/image"
 import Link from "next/link"
@@ -19,17 +20,10 @@ export const metadata: Metadata = {
   },
 };
 
-const isLive = (event: Event) => {
-  const now = new Date();
-  const start = new Date(event.startsAtUtc);
-  const end = new Date(event.endsAtUtc);
-  return start <= now && now <= end;
-};
-
 function FeaturedEventCard({ event }: { event: Event & { series: EventSeries | null, venue: Venue | null } }) {
   const startsAt = new Date(event.startsAtUtc)
   const endsAt = new Date(event.endsAtUtc)
-  const live = isLive(event);
+  const live = isEventLive(event);
 
   const venue = event.venue
   const geo = venue?.geo as GeoPoint | null
@@ -39,21 +33,33 @@ function FeaturedEventCard({ event }: { event: Event & { series: EventSeries | n
   return (
     <div className="border-l-4 border-lsr-orange bg-white/[0.03] flex flex-col md:flex-row overflow-hidden group">
       {event.heroImageUrl && (
-        <div className="md:w-3/5 relative overflow-hidden">
+        <div className="md:w-3/5 relative overflow-hidden aspect-video">
           <Image 
             src={event.heroImageUrl} 
             alt={event.title} 
             width={800} 
-            height={600} 
+            height={450} 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent md:bg-gradient-to-l md:from-black/80 md:to-transparent" />
         </div>
       )}
       <div className="p-8 md:p-10 flex-grow md:w-2/5 flex flex-col justify-center">
-        <div className="flex items-center gap-3 mb-6">
-          {live && <span className="bg-red-600 text-white px-2 py-0.5 text-[10px] font-black uppercase tracking-widest animate-pulse">Live Now</span>}
-          {event.series && <span className="border border-lsr-orange text-lsr-orange px-2 py-0.5 text-[10px] font-black uppercase tracking-widest">{event.series.title}</span>}
+        <div className="flex items-stretch gap-3 mb-6 h-6">
+          {live && (
+            <div className="flex items-center gap-1.5 border border-red-600/30 bg-red-600/10 px-2 rounded-none">
+                <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+                </span>
+                <span className="font-display font-black text-red-500 uppercase tracking-widest text-[10px] italic pt-0.5">Live Now</span>
+            </div>
+          )}
+          {event.series && (
+            <div className="flex items-center border border-lsr-orange text-lsr-orange px-2 rounded-none">
+                <span className="text-[10px] font-black uppercase tracking-widest pt-0.5">{event.series.title}</span>
+            </div>
+          )}
         </div>
         <h3 className="font-display font-black italic text-3xl md:text-4xl text-white uppercase tracking-normal leading-none mb-4">
           <Link href={`/events/${event.slug}`} className="hover:text-lsr-orange transition-colors">{event.title}</Link>
@@ -103,7 +109,7 @@ function FeaturedEventCard({ event }: { event: Event & { series: EventSeries | n
 
 function EventCard({ event }: { event: Event & { series: EventSeries | null, venue: Venue | null } }) {
   const startsAt = new Date(event.startsAtUtc)
-  const live = isLive(event);
+  const live = isEventLive(event);
 
   return (
     <div className="group border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] transition-colors flex flex-col overflow-hidden">
@@ -117,8 +123,12 @@ function EventCard({ event }: { event: Event & { series: EventSeries | null, ven
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
           />
           {live && (
-            <div className="absolute top-2 right-2 bg-red-600 text-white px-2 py-0.5 text-[8px] font-black uppercase tracking-widest shadow-lg">
-              Live
+            <div className="absolute top-2 right-2 flex items-center gap-1.5 bg-black/80 backdrop-blur-sm px-2 py-1 shadow-lg">
+                <span className="relative flex h-1.5 w-1.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-600"></span>
+                </span>
+                <span className="font-display font-black text-red-500 uppercase tracking-widest text-[8px] italic">Live</span>
             </div>
           )}
         </div>
@@ -198,7 +208,7 @@ export default async function EventsIndexPage({
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
           <div>
             <h1 className="font-display font-black italic text-5xl md:text-6xl text-white uppercase tracking-normal">
-              Race <span className="text-lsr-orange">Schedule</span>
+              The <span className="text-lsr-orange">Schedule</span>
             </h1>
             <p className="font-sans font-bold text-white/40 uppercase tracking-[0.3em] text-[10px] mt-2">Official Event Calendar</p>
           </div>

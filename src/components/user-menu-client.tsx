@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Shield } from "lucide-react";
 import { AuthDialog } from "./auth-dialog";
 import { User } from "@prisma/client";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function UserMenuClient({
                                  user,
@@ -29,10 +30,6 @@ export function UserMenuClient({
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
 
-  if (!user) {
-    return <AuthDialog />
-  }
-
   async function logout() {
     try {
       await supabase.auth.signOut()
@@ -42,11 +39,9 @@ export function UserMenuClient({
     // Re-run the current route on the server so the header updates
     router.replace(pathname ?? "/")
     router.refresh()
-    // Hard fallback in case caching interferes:
-    // setTimeout(() => window.location.reload(), 0)
   }
 
-  const initials = user.displayName
+  const initials = user?.displayName
     .split(" ")
     .map((n) => n[0])
     .slice(0, 2)
@@ -56,62 +51,86 @@ export function UserMenuClient({
   const isAdmin = roles.includes("admin") || roles.includes("officer");
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="h-10 gap-2 sm:gap-3 rounded-none border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold transition-all px-2 sm:px-4">
-          <Avatar className="h-6 w-6 rounded-none border border-white/20">
-            <AvatarImage src={user.avatarUrl ?? undefined} alt={user.displayName ?? 'User avatar'} className="rounded-none" />
-            <AvatarFallback className="text-[9px] font-black uppercase bg-lsr-orange text-white rounded-none">{initials || "U"}</AvatarFallback>
-          </Avatar>
-          <span className="hidden sm:inline truncate max-w-[10rem] font-sans text-[10px] uppercase tracking-widest">{user.displayName}</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64 bg-lsr-charcoal border-white/10 rounded-none p-2 shadow-2xl">
-        <DropdownMenuLabel className="p-4">
-          <div className="truncate font-sans font-bold text-white uppercase tracking-tight text-sm">{user.displayName}</div>
-          {user.email && <div className="text-[9px] font-bold text-white/30 uppercase tracking-widest truncate mt-1">{user.email}</div>}
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator className="bg-white/5" />
-
-        <DropdownMenuItem 
-          onSelect={() => router.push(user.handle ? `/drivers/${user.handle}` : "/drivers/me")}
-          className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
+    <AnimatePresence mode="wait" initial={false}>
+      {!user ? (
+        <motion.div 
+          key="auth-trigger"
+          layout
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.2 }}
         >
-          My driver page
-        </DropdownMenuItem>
-        <DropdownMenuItem 
-          onSelect={() => router.push("/account")}
-          className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
+          <AuthDialog />
+        </motion.div>
+      ) : (
+        <motion.div 
+          key="user-trigger"
+          layout
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.2 }}
         >
-          Account details
-        </DropdownMenuItem>
+          <DropdownMenu open={open} onOpenChange={setOpen}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="h-10 gap-2 sm:gap-3 rounded-none border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold transition-all px-2 sm:px-4">
+                <Avatar className="h-6 w-6 rounded-none border border-white/20">
+                  <AvatarImage src={user.avatarUrl ?? undefined} alt={user.displayName ?? 'User avatar'} className="rounded-none" />
+                  <AvatarFallback className="text-[9px] font-black uppercase bg-lsr-orange text-white rounded-none">{initials || "U"}</AvatarFallback>
+                </Avatar>
+                <span className="hidden sm:inline truncate max-w-[10rem] font-sans text-[10px] uppercase tracking-widest">{user.displayName}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64 bg-lsr-charcoal border-white/10 rounded-none p-2 shadow-2xl">
+              <DropdownMenuLabel className="p-4">
+                <div className="truncate font-sans font-bold text-white uppercase tracking-tight text-sm">{user.displayName}</div>
+                {user.email && <div className="text-[9px] font-bold text-white/30 uppercase tracking-widest truncate mt-1">{user.email}</div>}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-white/5" />
 
-        {isAdmin && (
-          <>
-            <DropdownMenuSeparator className="bg-white/5" />
-            <DropdownMenuLabel className="px-4 py-2 font-sans font-black text-[9px] uppercase tracking-[0.3em] text-white/20">System Admin</DropdownMenuLabel>
-            <DropdownMenuItem 
-              onSelect={() => router.push("/admin")}
-              className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
-            >
-              <Shield className="mr-2 h-3 w-3" />
-              <span>Admin Console</span>
-            </DropdownMenuItem>
-          </>
-        )}
+              <DropdownMenuItem 
+                onSelect={() => router.push(user.handle ? `/drivers/${user.handle}` : "/drivers/me")}
+                className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
+              >
+                My driver page
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onSelect={() => router.push("/account")}
+                className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
+              >
+                Account details
+              </DropdownMenuItem>
 
-        <DropdownMenuSeparator className="bg-white/5" />
+              {isAdmin && (
+                <>
+                  <DropdownMenuSeparator className="bg-white/5" />
+                  <DropdownMenuLabel className="px-4 py-2 font-sans font-black text-[9px] uppercase tracking-[0.3em] text-white/20">System Admin</DropdownMenuLabel>
+                  <DropdownMenuItem 
+                    onSelect={() => router.push("/admin")}
+                    className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
+                  >
+                    <Shield className="mr-2 h-3 w-3" />
+                    <span>Admin Console</span>
+                  </DropdownMenuItem>
+                </>
+              )}
 
-        <DropdownMenuItem
-          onSelect={(e) => {
-            e.preventDefault()
-            logout()
-          }}
-          className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-red-600 focus:text-white cursor-pointer"
-        >
-          Log out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+              <DropdownMenuSeparator className="bg-white/5" />
+
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault()
+                  logout()
+                }}
+                className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-red-600 focus:text-white cursor-pointer"
+              >
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }

@@ -1,32 +1,38 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Event } from "@prisma/client";
-import { Search, Plus, Calendar, ArrowUpDown, MoreVertical, Edit, Settings, Trash2, Eye, ChevronUp, ChevronDown } from "lucide-react";
+import { Event, EventStatus } from "@prisma/client";
+import { Search, Plus, Calendar, ArrowUpDown, MoreVertical, Edit, Settings, Trash2, Eye, ChevronUp, ChevronDown, Filter } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { deleteEvent } from "@/app/admin/events/actions";
 import { cn } from "@/lib/utils";
+import { getEffectiveEventStatus } from "@/lib/events";
+import { StatusOverrideDialog } from "@/components/admin/status-override-dialog";
 
 type EventsConsoleProps = {
   initialEvents: Event[];
 };
 
-type SortField = "startsAtUtc" | "title" | "status";
+type SortField = "startsAtUtc" | "title";
 type SortDirection = "asc" | "desc";
 
 export function EventsConsole({ initialEvents }: EventsConsoleProps) {
   const [search, setSearch] = useState("");
   const [sortField, setSortField] = useState<SortField>("startsAtUtc");
   const [sortDir, setSortDir] = useState<SortDirection>("desc");
+  const [statusFilters, setStatusFilters] = useState<EventStatus[]>([]);
 
   const SortIndicator = ({ field }: { field: SortField }) => {
     if (sortField !== field) return <ArrowUpDown size={10} className="ml-1.5 opacity-20" />;
@@ -36,7 +42,7 @@ export function EventsConsole({ initialEvents }: EventsConsoleProps) {
   const filteredAndSortedEvents = useMemo(() => {
     let result = [...initialEvents];
 
-    // Filter
+    // Search Filter
     if (search) {
       const q = search.toLowerCase();
       result = result.filter(
@@ -45,6 +51,14 @@ export function EventsConsole({ initialEvents }: EventsConsoleProps) {
           e.slug.toLowerCase().includes(q) ||
           e.status.toLowerCase().includes(q)
       );
+    }
+
+    // Status Filter
+    if (statusFilters.length > 0) {
+      result = result.filter((e) => {
+        const effectiveStatus = getEffectiveEventStatus(e);
+        return statusFilters.includes(effectiveStatus);
+      });
     }
 
     // Sort
@@ -59,7 +73,7 @@ export function EventsConsole({ initialEvents }: EventsConsoleProps) {
     });
 
     return result;
-  }, [initialEvents, search, sortField, sortDir]);
+  }, [initialEvents, search, sortField, sortDir, statusFilters]);
 
   const toggleSort = (field: SortField) => {
     if (sortField === field) {
@@ -71,13 +85,24 @@ export function EventsConsole({ initialEvents }: EventsConsoleProps) {
     }
   };
 
+  const toggleStatusFilter = (status: EventStatus) => {
+    setStatusFilters((prev) =>
+      prev.includes(status)
+        ? prev.filter((s) => s !== status)
+        : [...prev, status]
+    );
+  };
+
+  const clearStatusFilters = () => setStatusFilters([]);
+
   const statusColors: Record<string, string> = {
-    draft: "text-white/40 border-white/20 bg-white/5",
-    scheduled: "text-blue-400 border-blue-400/20 bg-blue-400/10",
-    in_progress: "text-lsr-orange border-lsr-orange/20 bg-lsr-orange/10 animate-pulse",
-    completed: "text-green-400 border-green-400/20 bg-green-400/10",
-    canceled: "text-red-400 border-red-400/20 bg-red-400/10",
-    postponed: "text-yellow-400 border-yellow-400/20 bg-yellow-400/10",
+    DRAFT: "text-white/40 border-white/20 bg-white/5",
+    PUBLISHED: "text-purple-400 border-purple-400/20 bg-purple-400/10",
+    SCHEDULED: "text-blue-400 border-blue-400/20 bg-blue-400/10",
+    IN_PROGRESS: "text-lsr-orange border-lsr-orange/20 bg-lsr-orange/10 animate-pulse",
+    COMPLETED: "text-green-400 border-green-400/20 bg-green-400/10",
+    CANCELLED: "text-red-400 border-red-400/20 bg-red-400/10",
+    POSTPONED: "text-yellow-400 border-yellow-400/20 bg-yellow-400/10",
   };
 
   return (
@@ -130,14 +155,47 @@ export function EventsConsole({ initialEvents }: EventsConsoleProps) {
             >
                 Title <SortIndicator field="title" />
             </Button>
-            <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => toggleSort("status")}
-                className={cn("text-xs uppercase tracking-wider h-8", sortField === "status" ? "text-lsr-orange bg-lsr-orange/10" : "text-white/60")}
-            >
-                Status <SortIndicator field="status" />
-            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={cn(
+                      "text-xs uppercase tracking-wider h-8 border border-transparent", 
+                      statusFilters.length > 0 ? "text-lsr-orange bg-lsr-orange/10 border-lsr-orange/20" : "text-white/60"
+                    )}
+                >
+                    <Filter size={10} className="mr-1.5" />
+                    Status {statusFilters.length > 0 && `(${statusFilters.length})`}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-black border-white/10 text-white w-48">
+                <DropdownMenuLabel className="text-xs text-white/40 uppercase tracking-widest font-bold">Filter by Status</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-white/10" />
+                {Object.values(EventStatus).map((status) => (
+                  <DropdownMenuCheckboxItem
+                    key={status}
+                    checked={statusFilters.includes(status)}
+                    onCheckedChange={() => toggleStatusFilter(status)}
+                    className="text-xs font-mono uppercase focus:bg-white/10 focus:text-white"
+                  >
+                    {status.replace("_", " ")}
+                  </DropdownMenuCheckboxItem>
+                ))}
+                {statusFilters.length > 0 && (
+                  <>
+                    <DropdownMenuSeparator className="bg-white/10" />
+                    <DropdownMenuItem 
+                      onSelect={clearStatusFilters}
+                      className="text-xs text-lsr-orange uppercase tracking-widest font-bold justify-center cursor-pointer focus:bg-lsr-orange/10 focus:text-lsr-orange"
+                    >
+                      Clear Filters
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
         </div>
 
         <div className="flex-1" />
@@ -154,19 +212,34 @@ export function EventsConsole({ initialEvents }: EventsConsoleProps) {
               <div className="w-24 shrink-0 text-left">Date</div>
               <div className="w-32 shrink-0 text-left">Time</div>
               <div className="w-40 shrink-0">Slug</div>
-              <div className="flex-1">Title</div>
+              <div className="flex-1 max-w-md">Title</div>
               <div className="w-24 shrink-0 text-center flex items-center justify-center gap-1">
                   Status
                   <TooltipProvider>
                       <Tooltip>
                           <TooltipTrigger className="cursor-help text-lsr-orange font-bold text-xs">*</TooltipTrigger>
-                          <TooltipContent className="bg-black border border-white/10 text-white text-[10px] uppercase tracking-widest font-bold p-3 max-w-xs">
-                              The status system may not be reliable at the moment.
+                          <TooltipContent className="bg-black border border-white/10 text-white p-4 max-w-xs space-y-3">
+                              <div className="space-y-1">
+                                  <p className="text-[10px] font-black text-lsr-orange uppercase tracking-widest">Visibility States</p>
+                                  <p className="text-[10px] leading-relaxed"><span className="text-white font-bold">DRAFT:</span> Completely private/hidden.</p>
+                                  <p className="text-[10px] leading-relaxed"><span className="text-white font-bold">SCHEDULED:</span> Hidden until the publication time is reached.</p>
+                                  <p className="text-[10px] leading-relaxed"><span className="text-white font-bold">PUBLISHED:</span> Publicly visible immediately.</p>
+                              </div>
+                              <div className="space-y-1">
+                                  <p className="text-[10px] font-black text-lsr-orange uppercase tracking-widest">Time-Based (Derived)</p>
+                                  <p className="text-[10px] leading-relaxed"><span className="text-white font-bold">IN PROGRESS:</span> Event is happening right now.</p>
+                                  <p className="text-[10px] leading-relaxed"><span className="text-white font-bold">COMPLETED:</span> Event has passed its end time.</p>
+                              </div>
+                              <div className="space-y-1">
+                                  <p className="text-[10px] font-black text-lsr-orange uppercase tracking-widest">Overrides</p>
+                                  <p className="text-[10px] leading-relaxed"><span className="text-white font-bold">CANCELLED:</span> Publicly marked as will not happen.</p>
+                                  <p className="text-[10px] leading-relaxed"><span className="text-white font-bold">POSTPONED:</span> Publicly marked as delayed.</p>
+                              </div>
                           </TooltipContent>
                       </Tooltip>
                   </TooltipProvider>
               </div>
-              <div className="w-32 shrink-0 text-right">Actions</div>
+              <div className="w-40 shrink-0 text-right">Actions</div>
             </div>
       
             {/* List */}
@@ -181,6 +254,7 @@ export function EventsConsole({ initialEvents }: EventsConsoleProps) {
                       const end = new Date(event.endsAtUtc);
                       const isSameDay = start.toDateString() === end.toDateString();
                       const formatTime = (d: Date) => d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                      const effectiveStatus = getEffectiveEventStatus(event);
       
                       return (
                       <div
@@ -213,30 +287,48 @@ export function EventsConsole({ initialEvents }: EventsConsoleProps) {
                           </div>
       
                           {/* Title */}
-                          <div className="flex-1 min-w-0">
+                          <div className="flex-1 max-w-md min-w-0">
                               <span className="font-bold text-white text-sm truncate tracking-tight">{event.title}</span>
                           </div>
       
                           {/* Status Column */}
                           <div className="w-24 shrink-0">
-                              <Badge variant="outline" className={cn("rounded-sm px-2 py-0.5 text-[9px] uppercase tracking-widest font-bold w-full justify-center", statusColors[event.status] || statusColors.draft)}>
-                                  {event.status.replace("_", " ")}
+                              <Badge variant="outline" className={cn("rounded-sm px-2 py-0.5 text-[9px] uppercase tracking-widest font-bold w-full justify-center", statusColors[effectiveStatus] || statusColors.DRAFT)}>
+                                  {effectiveStatus.replace("_", " ")}
                               </Badge>
                           </div>
       
                                                                                       {/* Actions */}
       
-                                                                                      <div className="w-32 shrink-0 flex items-center justify-end gap-1">
+                                                                                      <div className="w-40 shrink-0 flex items-center justify-end gap-1">
       
-                                                                                          <Button asChild size="icon" variant="ghost" className="h-7 w-7 text-white/20 group-hover:text-white/70 hover:!text-lsr-orange hover:bg-white/10 transition-colors">
-      
-                                                                                              <Link href={`/events/${event.slug}`} target="_blank" title="View Public Page">
-      
-                                                                                                  <Eye size={14} />
-      
-                                                                                              </Link>
-      
-                                                                                          </Button>
+                                                                                          <div className="flex items-center">
+                                                                                            <Button asChild size="icon" variant="ghost" className="h-7 w-7 text-white/20 group-hover:text-white/70 hover:!text-lsr-orange hover:bg-white/10 transition-colors">
+                                                                                                <Link href={`/events/${event.slug}`} target="_blank" title="View Public Page">
+                                                                                                    <Eye size={14} />
+                                                                                                </Link>
+                                                                                            </Button>
+                                                                                            {event.status === "DRAFT" && (
+                                                                                              <TooltipProvider>
+                                                                                                <Tooltip>
+                                                                                                  <TooltipTrigger className="cursor-help text-lsr-orange font-bold text-[10px] ml-[-4px] z-10">*</TooltipTrigger>
+                                                                                                  <TooltipContent className="bg-black border border-white/10 text-white text-[10px] uppercase tracking-widest font-bold p-2">
+                                                                                                    This event is a DRAFT and is not listed on the public events page.
+                                                                                                  </TooltipContent>
+                                                                                                </Tooltip>
+                                                                                              </TooltipProvider>
+                                                                                            )}
+                                                                                            {event.status === "SCHEDULED" && (
+                                                                                              <TooltipProvider>
+                                                                                                <Tooltip>
+                                                                                                  <TooltipTrigger className="cursor-help text-lsr-orange font-bold text-[10px] ml-[-4px] z-10">*</TooltipTrigger>
+                                                                                                  <TooltipContent className="bg-black border border-white/10 text-white text-[10px] uppercase tracking-widest font-bold p-2">
+                                                                                                    Not visible until {event.publishedAt ? new Date(event.publishedAt).toLocaleString() : 'TBD'} because it is SCHEDULED.
+                                                                                                  </TooltipContent>
+                                                                                                </Tooltip>
+                                                                                              </TooltipProvider>
+                                                                                            )}
+                                                                                          </div>
       
                                                                                           <Button asChild size="icon" variant="ghost" className="h-7 w-7 text-white/20 group-hover:text-white/70 hover:!text-lsr-orange hover:bg-white/10 transition-colors">
       
@@ -258,7 +350,7 @@ export function EventsConsole({ initialEvents }: EventsConsoleProps) {
       
                                                                                           </Button>
       
-                                                                                          
+                                                                                          <StatusOverrideDialog event={event} />
       
                                                                                           <DropdownMenu>
       
