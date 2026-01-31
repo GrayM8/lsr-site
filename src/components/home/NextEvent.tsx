@@ -104,7 +104,7 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
               </Button>
             </div>
             
-            <div className="relative group overflow-hidden border border-white/10 bg-black">
+            <div className="relative group overflow-hidden border border-white/10 bg-black aspect-video">
               {featuredEvent.heroImageUrl ? (
                 <>
                   <Image
@@ -117,7 +117,7 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                 </>
               ) : (
-                <div className="flex items-center justify-center h-64 md:h-full bg-white/5 uppercase tracking-[0.2em] text-[10px] text-white/30 font-bold">
+                <div className="flex items-center justify-center h-full bg-white/5 uppercase tracking-[0.2em] text-[10px] text-white/30 font-bold">
                   Track Preview Unavailable
                 </div>
               )}
