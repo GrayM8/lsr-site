@@ -208,7 +208,7 @@ export default async function EventsIndexPage({
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
           <div>
             <h1 className="font-display font-black italic text-5xl md:text-6xl text-white uppercase tracking-normal">
-              Race <span className="text-lsr-orange">Schedule</span>
+              The <span className="text-lsr-orange">Schedule</span>
             </h1>
             <p className="font-sans font-bold text-white/40 uppercase tracking-[0.3em] text-[10px] mt-2">Official Event Calendar</p>
           </div>
