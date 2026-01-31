@@ -136,6 +136,30 @@
   to { transform: translateX(-100%); }
 }
 
+/* Custom Border Animation Keyframes */
+@keyframes lsr-border-top {
+  0% { width: 0; left: 50%; opacity: 1; }
+  25% { width: 100%; left: 0; opacity: 1; }
+  75% { opacity: 1; }
+  100% { width: 100%; left: 0; opacity: 0; }
+}
+
+@keyframes lsr-border-side {
+  0% { height: 0; opacity: 1; }
+  25% { height: 0; opacity: 1; }
+  50% { height: 100%; opacity: 1; }
+  75% { opacity: 1; }
+  100% { height: 100%; opacity: 0; }
+}
+
+@keyframes lsr-border-bottom {
+  0% { width: 0; opacity: 1; }
+  50% { width: 0; opacity: 1; }
+  75% { width: 50%; opacity: 1; }
+  100% { width: 50%; opacity: 0; }
+}
+
+
 /* Custom Scrollbar Styles */
 @layer base {
   ::-webkit-scrollbar {
