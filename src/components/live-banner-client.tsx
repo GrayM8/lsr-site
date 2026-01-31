@@ -58,62 +58,128 @@ export function LiveBannerClient({ event }: Props) {
           href={`/events/${event.slug}`}
           className="block w-full relative z-10 hover:bg-white/[0.02] transition-colors"
         >
-            <div className="mx-auto max-w-6xl px-4 py-2 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-3 min-h-[48px]">
-                {/* Left side: Live indicator */}
-                <div className="flex items-center gap-3 shrink-0">
-                    <span className="relative flex h-3 w-3">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
-                    </span>
-                    <span className="font-display font-black text-red-500 uppercase tracking-[0.2em] text-sm sm:text-base italic">Live Now</span>
-                </div>
+            <div className="mx-auto max-w-6xl px-4 py-2 sm:px-6 min-h-[48px] flex items-center">
                 
-                {/* Center: Time | Title */}
-                <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 flex-1 justify-center text-center">
-                    <div className="flex items-center font-sans font-bold text-[11px] uppercase tracking-wider text-white/40">
-                        {formatTime(event.startsAtUtc)} - {formatTime(event.endsAtUtc)}
+                {/* 
+                  DESKTOP LAYOUT 
+                  Exactly preserving the previous accepted design for md+ screens
+                */}
+                <div className="hidden md:flex items-center justify-between gap-3 w-full">
+                    {/* Left side: Live indicator */}
+                    <div className="flex items-center gap-3 shrink-0">
+                        <span className="relative flex h-3 w-3">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                        </span>
+                        <span className="font-display font-black text-red-500 uppercase tracking-[0.2em] text-sm sm:text-base italic">Live Now</span>
                     </div>
                     
-                    <div className="hidden sm:block w-px h-3 bg-white/10" />
-                    
-                    <span className="font-sans font-bold text-white text-sm tracking-wide line-clamp-1">
-                        {event.title}
-                    </span>
-                </div>
+                    {/* Center: Time | Title */}
+                    <div className="flex items-center gap-4 flex-1 justify-center text-center">
+                        <div className="flex items-center font-sans font-bold text-[11px] uppercase tracking-wider text-white/40">
+                            {formatTime(event.startsAtUtc)} - {formatTime(event.endsAtUtc)}
+                        </div>
+                        
+                        <div className="w-px h-3 bg-white/10" />
+                        
+                        <span className="font-sans font-bold text-white text-sm tracking-wide line-clamp-1">
+                            {event.title}
+                        </span>
+                    </div>
 
-                {/* Right side: Actions and Dismiss */}
-                <div className="flex items-center gap-4 shrink-0" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex items-center gap-2">
-                        {event.streamUrl && (
-                            <Button asChild size="sm" variant="outline" className="h-7 text-[10px] px-3 border-white/20 text-white hover:bg-white hover:text-lsr-charcoal font-bold uppercase tracking-wider rounded-none transition-all">
-                                <Link href={event.streamUrl} target="_blank" rel="noopener noreferrer">
-                                    <Tv className="mr-1.5 h-3 w-3" />
-                                    Watch
+                    {/* Right side: Actions and Dismiss */}
+                    <div className="flex items-center gap-4 shrink-0" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center gap-2">
+                            {event.streamUrl && (
+                                <Button asChild size="sm" variant="outline" className="h-7 text-[10px] px-3 border-white/20 text-white hover:bg-white hover:text-lsr-charcoal font-bold uppercase tracking-wider rounded-none transition-all">
+                                    <Link href={event.streamUrl} target="_blank" rel="noopener noreferrer">
+                                        <Tv className="mr-1.5 h-3 w-3" />
+                                        Watch
+                                    </Link>
+                                </Button>
+                            )}
+                            
+                            <Button asChild size="sm" variant="ghost" className="h-7 text-[10px] px-3 text-white/60 hover:text-white hover:bg-white/5 font-bold uppercase tracking-wider rounded-none transition-all">
+                                <Link href={`/events/${event.slug}`}>
+                                    Details
+                                    <ArrowRight className="ml-1.5 h-3 w-3" />
                                 </Link>
                             </Button>
-                        )}
-                        
-                        <Button asChild size="sm" variant="ghost" className="h-7 text-[10px] px-3 text-white/60 hover:text-white hover:bg-white/5 font-bold uppercase tracking-wider rounded-none transition-all">
-                            <Link href={`/events/${event.slug}`}>
-                                Details
-                                <ArrowRight className="ml-1.5 h-3 w-3" />
-                            </Link>
-                        </Button>
+                        </div>
+
+                        <div className="w-px h-4 bg-white/10" />
+
+                        <button 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleDismiss();
+                            }}
+                            className="text-white/30 hover:text-white transition-colors p-1 relative z-30"
+                            aria-label="Dismiss banner"
+                        >
+                            <X className="h-4 w-4" />
+                        </button>
+                    </div>
+                </div>
+
+                {/* 
+                  MOBILE LAYOUT 
+                  Compact 2-line design for smaller screens
+                */}
+                <div className="flex md:hidden flex-col gap-2 w-full py-0.5">
+                    {/* Top Row: LIVE (Left) | Actions/Dismiss (Right) */}
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-1.5 shrink-0">
+                            <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+                            </span>
+                            <span className="font-display font-black text-red-500 uppercase tracking-widest text-[10px] italic">Live</span>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+                            {event.streamUrl && (
+                                <Button asChild size="sm" variant="outline" className="h-6 text-[9px] px-2 border-white/20 text-white hover:bg-white hover:text-lsr-charcoal font-bold uppercase tracking-wider rounded-none transition-all">
+                                    <Link href={event.streamUrl} target="_blank" rel="noopener noreferrer">
+                                        <Tv className="mr-1 h-2.5 w-2.5" />
+                                        Watch
+                                    </Link>
+                                </Button>
+                            )}
+                            
+                            <Button asChild size="sm" variant="ghost" className="h-6 text-[9px] px-2 text-white/60 hover:text-white hover:bg-white/5 font-bold uppercase tracking-wider rounded-none transition-all">
+                                <Link href={`/events/${event.slug}`}>
+                                    <ArrowRight className="h-2.5 w-2.5" />
+                                </Link>
+                            </Button>
+
+                            <button 
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleDismiss();
+                                }}
+                                className="text-white/30 hover:text-white transition-colors p-1 -mr-1 relative z-30"
+                                aria-label="Dismiss banner"
+                            >
+                                <X className="h-3.5 w-3.5" />
+                            </button>
+                        </div>
                     </div>
 
-                    <div className="hidden sm:block w-px h-4 bg-white/10" />
-
-                    <button 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleDismiss();
-                        }}
-                        className="text-white/30 hover:text-white transition-colors p-1 relative z-30"
-                        aria-label="Dismiss banner"
-                    >
-                        <X className="h-4 w-4" />
-                    </button>
+                    {/* Bottom Row: Centered Time | Title */}
+                    <div className="flex items-center justify-center gap-2 px-2 text-center overflow-hidden">
+                        <div className="font-sans font-bold text-[9px] text-white/40 uppercase tracking-wider shrink-0">
+                            {formatTime(event.startsAtUtc)} - {formatTime(event.endsAtUtc)}
+                        </div>
+                        
+                        <div className="w-px h-2 bg-white/10 shrink-0" />
+                        
+                        <span className="font-sans font-bold text-white text-[10px] tracking-wide truncate">
+                            {event.title}
+                        </span>
+                    </div>
                 </div>
             </div>
         </Link>
