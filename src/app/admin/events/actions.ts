@@ -19,28 +19,44 @@ export async function createEvent(formData: FormData) {
   const closesAtRaw = formData.get("registrationClosesAt") as string;
   const maxRaw = formData.get("registrationMax") as string;
 
+  const submitAction = formData.get("submitAction") as string;
+  const scheduleDateRaw = formData.get("scheduleDate") as string;
+  const timezone = formData.get("timezone") as string;
+
+  let status: EventStatus = "DRAFT";
+  let publishedAt: Date | null = null;
+
+  if (submitAction === "publish") {
+    status = "PUBLISHED";
+    publishedAt = new Date();
+  } else if (submitAction === "schedule") {
+    status = "SCHEDULED";
+    publishedAt = scheduleDateRaw ? fromZonedTime(scheduleDateRaw, timezone) : null;
+  }
+
   const event = await prisma.event.create({
     data: {
       title: formData.get("title") as string,
       slug: formData.get("slug") as string,
       seriesId: seriesId === "" ? null : seriesId,
       venueId: venueId === "" ? null : venueId,
-      startsAtUtc: fromZonedTime(formData.get("startsAtUtc") as string, formData.get("timezone") as string),
-      endsAtUtc: fromZonedTime(formData.get("endsAtUtc") as string, formData.get("timezone") as string),
-      timezone: formData.get("timezone") as string,
+      startsAtUtc: fromZonedTime(formData.get("startsAtUtc") as string, timezone),
+      endsAtUtc: fromZonedTime(formData.get("endsAtUtc") as string, timezone),
+      timezone: timezone,
       summary: formData.get("summary") as string,
       description: formData.get("description") as string,
       heroImageUrl: formData.get("heroImageUrl") as string,
-      status: "DRAFT",
+      status: status,
+      publishedAt: publishedAt,
       visibility: "public",
       registrationEnabled: formData.get("registrationEnabled") === "on",
-      registrationOpensAt: opensAtRaw ? fromZonedTime(opensAtRaw, formData.get("timezone") as string) : null,
-      registrationClosesAt: closesAtRaw ? fromZonedTime(closesAtRaw, formData.get("timezone") as string) : null,
+      registrationOpensAt: opensAtRaw ? fromZonedTime(opensAtRaw, timezone) : null,
+      registrationClosesAt: closesAtRaw ? fromZonedTime(closesAtRaw, timezone) : null,
       registrationMax: maxRaw && maxRaw !== "-1" ? parseInt(maxRaw) : null,
       registrationWaitlistEnabled: formData.get("registrationWaitlistEnabled") === "on",
       attendanceEnabled: formData.get("attendanceEnabled") === "on",
-      attendanceOpensAt: formData.get("attendanceOpensAt") ? fromZonedTime(formData.get("attendanceOpensAt") as string, formData.get("timezone") as string) : null,
-      attendanceClosesAt: formData.get("attendanceClosesAt") ? fromZonedTime(formData.get("attendanceClosesAt") as string, formData.get("timezone") as string) : null,
+      attendanceOpensAt: formData.get("attendanceOpensAt") ? fromZonedTime(formData.get("attendanceOpensAt") as string, timezone) : null,
+      attendanceClosesAt: formData.get("attendanceClosesAt") ? fromZonedTime(formData.get("attendanceClosesAt") as string, timezone) : null,
     },
   });
 
@@ -105,8 +121,12 @@ export async function updateEvent(id: string, formData: FormData) {
   const opensAtRaw = formData.get("registrationOpensAt") as string;
   const closesAtRaw = formData.get("registrationClosesAt") as string;
   const maxRaw = formData.get("registrationMax") as string;
+  
+  const submitAction = formData.get("submitAction") as string;
+  const scheduleDateRaw = formData.get("scheduleDate") as string;
+  const timezone = formData.get("timezone") as string;
 
-  const eventUpdateData = {
+  const eventUpdateData: any = {
     title: formData.get("title") as string,
     slug: formData.get("slug") as string,
     seriesId: seriesId === "" ? null : seriesId,
@@ -126,6 +146,19 @@ export async function updateEvent(id: string, formData: FormData) {
     attendanceOpensAt: formData.get("attendanceOpensAt") ? fromZonedTime(formData.get("attendanceOpensAt") as string, formData.get("timezone") as string) : null,
     attendanceClosesAt: formData.get("attendanceClosesAt") ? fromZonedTime(formData.get("attendanceClosesAt") as string, formData.get("timezone") as string) : null,
   };
+
+  if (submitAction === "publish") {
+    eventUpdateData.status = "PUBLISHED";
+    // Only set publishedAt if we are explicitly publishing, 
+    // but for updates we might want to check if it's already published to avoid resetting time?
+    // For now, "Publish Now" means NOW.
+    eventUpdateData.publishedAt = new Date();
+  } else if (submitAction === "schedule") {
+    eventUpdateData.status = "SCHEDULED";
+    eventUpdateData.publishedAt = scheduleDateRaw ? fromZonedTime(scheduleDateRaw, timezone) : null;
+  } else if (submitAction === "draft") {
+    eventUpdateData.status = "DRAFT";
+  }
 
   await prisma.event.update({
     where: { id },

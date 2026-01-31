@@ -10,7 +10,7 @@ import { ImageUploader } from "@/components/image-uploader";
 import { Event, EventSeries, Venue } from "@prisma/client";
 import { useState } from "react";
 import { DEFAULT_TIMEZONE, TIMEZONES, dateToZonedValue } from "@/lib/dates";
-import { Tag, Clock, Info, Users, QrCode } from "lucide-react";
+import { Tag, Clock, Info, Users, QrCode, Megaphone } from "lucide-react";
 
 export function EventForm({ event, series, venues }: { event?: Event, series: EventSeries[], venues: Venue[] }) {
   const [timezone, setTimezone] = useState<string>(event?.timezone || DEFAULT_TIMEZONE);
@@ -268,11 +268,56 @@ export function EventForm({ event, series, venues }: { event?: Event, series: Ev
           </div>
         </section>
 
-        <div className="pt-8 flex justify-end">
-            <Button type="submit" size="lg" className="bg-lsr-orange hover:bg-lsr-orange/90 text-white font-bold uppercase tracking-widest text-xs h-12 px-12 rounded-none shadow-lg transition-all hover:scale-[1.02]">
-                {event ? "Update Event" : "Create Event"}
-            </Button>
-        </div>
+        {/* Publication */}
+        <section className="space-y-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 border-l-2 border-lsr-orange pl-4">
+              <Megaphone size={16} className="text-lsr-orange/60" />
+              <h3 className="text-xs font-bold uppercase tracking-widest text-white/40">Publication</h3>
+            </div>
+            {event && (
+                <div className="flex items-center gap-3">
+                    <span className="uppercase tracking-widest text-[10px] text-white/40">Current Status</span>
+                    <span className="font-mono text-xs font-bold text-lsr-orange border border-lsr-orange/20 px-2 py-1 bg-lsr-orange/5">{event.status}</span>
+                </div>
+            )}
+          </div>
+
+          <div className="bg-white/[0.02] border border-white/5 p-6 md:p-8">
+            <div className="flex flex-col lg:flex-row items-end gap-8">
+                 <div className="flex flex-col gap-2 w-full lg:w-auto lg:flex-grow">
+                    <Label htmlFor="scheduleDate" className="uppercase tracking-widest text-[10px] text-white/40">
+                        Schedule Auto-Publish
+                    </Label>
+                    <div className="flex flex-col gap-1">
+                        <Input 
+                            type="datetime-local" 
+                            name="scheduleDate" 
+                            id="scheduleDate" 
+                            key={`pub-date-${timezone}`}
+                            defaultValue={event?.publishedAt ? dateToZonedValue(event.publishedAt, timezone) : ""}
+                            className="bg-black/20 border-white/10 h-10 text-xs focus:border-lsr-orange w-full md:w-64"
+                        />
+                        <span className="text-[10px] text-white/20">Set a future date to automatically publish.</span>
+                    </div>
+                 </div>
+
+                 <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-end">
+                    <Button type="submit" name="submitAction" value="draft" variant="ghost" className="text-white/40 hover:text-white font-bold uppercase tracking-widest text-[10px] h-10 px-4">
+                        Save as Draft
+                    </Button>
+                    
+                    <Button type="submit" name="submitAction" value="schedule" variant="outline" className="border-white/20 text-white hover:bg-white/5 hover:border-lsr-orange hover:text-lsr-orange font-bold uppercase tracking-widest text-[10px] h-10 px-6">
+                        Schedule
+                    </Button>
+
+                    <Button type="submit" name="submitAction" value="publish" className="bg-lsr-orange hover:bg-lsr-orange/90 text-white font-bold uppercase tracking-widest text-[10px] h-10 px-8 shadow-lg">
+                        {event ? "Publish / Save" : "Publish Now"}
+                    </Button>
+                 </div>
+            </div>
+          </div>
+        </section>
       </form>
     </div>
   );
