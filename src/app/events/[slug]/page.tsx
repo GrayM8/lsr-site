@@ -3,7 +3,7 @@ import { getIngestedResultsByEventId } from "@/server/queries/results";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, Send, Trophy } from "lucide-react";
+import { Calendar, Clock, MapPin, Send, Trophy, QrCode } from "lucide-react";
 import Link from "next/link";
 import { LocalTime, LocalTimeRange } from "@/components/ui/local-time";
 import { GeoPoint } from "@/types";
@@ -42,6 +42,10 @@ export default async function EventPage({ params }: EventPageArgs) {
   const startsAt = new Date(event.startsAtUtc);
   const endsAt = new Date(event.endsAtUtc);
   const isLive = isEventLive(event);
+
+  const isCheckinRequired = event.attendanceEnabled && 
+    event.attendanceReportingMode === 'CHECKIN_REQUIRED';
+
   // const isEventPassed = new Date() > endsAt; // Logic handled by registration config/snapshot
 
   const venue = event.venue;
@@ -59,12 +63,23 @@ export default async function EventPage({ params }: EventPageArgs) {
           </Link>
         </div>
 
-        <div className="border border-white/10 bg-white/[0.02] p-8 md:p-12 mb-12 relative">
-          {/* Background decorative elements */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-lsr-orange/5 -rotate-45 translate-x-16 -translate-y-16" />
+        {event.heroImageUrl && (
+          <div className="aspect-[21/9] w-full border border-white/10 bg-black relative overflow-hidden group mb-12">
+            <Image 
+              src={event.heroImageUrl} 
+              alt={event.title} 
+              width={1600} 
+              height={800} 
+              className="object-cover w-full h-full opacity-60 group-hover:opacity-80 transition-opacity duration-700" 
+            />
+            <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px] opacity-20 pointer-events-none" />
+            <div className="absolute bottom-4 right-4 bg-black/80 px-3 py-1 border border-white/10">
+              <span className="font-sans font-black text-[9px] uppercase tracking-widest text-white/50">Event Preview</span>
+            </div>
           </div>
-          
+        )}
+
+        <div className="border-l-4 border-lsr-orange bg-white/[0.02] p-8 md:p-12 mb-12 relative">
           <div className="relative grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="lg:col-span-2">
               <div className="flex flex-wrap items-center gap-3 mb-6">
@@ -90,9 +105,28 @@ export default async function EventPage({ params }: EventPageArgs) {
               <h1 className="font-display font-black italic text-4xl md:text-6xl text-white uppercase tracking-normal leading-[0.9] mb-6">
                 {event.title}
               </h1>
+
+              {isCheckinRequired && (
+                <div className="border-l border-white/10 bg-black/10 px-4 py-2 mb-8 flex items-center gap-3 max-w-2xl">
+                  <QrCode className="h-3.5 w-3.5 text-white/20 shrink-0" />
+                  <p className="font-sans font-bold text-[10px] uppercase tracking-widest text-white/30 leading-tight">
+                    <span className="text-lsr-orange/60 font-black mr-2">Note:</span>
+                    Attendance is recorded via QR Check-in at this event
+                  </p>
+                </div>
+              )}
               
               <div className="prose prose-invert prose-p:font-sans prose-p:text-white/70 prose-p:text-sm prose-p:leading-relaxed max-w-none">
                 <p>{event.summary || event.description}</p>
+              </div>
+
+              <div className="mt-10 pt-8 border-t border-white/5 space-y-4">
+                <p className="font-sans text-[11px] text-white/40 leading-relaxed max-w-2xl">
+                  Questions, comments, or concerns? Reach out to us at <Link href="mailto:info@longhornsimracing.org" className="text-white/60 hover:text-lsr-orange transition-colors border-b border-white/10 hover:border-lsr-orange">info@longhornsimracing.org</Link>.
+                </p>
+                <p className="font-sans text-[11px] text-white/40 leading-relaxed max-w-2xl">
+                  <strong className="text-white/60 uppercase tracking-widest text-[9px] mr-2">Note:</strong> Most physical events will have arranged carpooling available upon request within our <Link href="https://discord.gg/5Uv9YwpnFz" target="_blank" className="text-white/60 hover:text-lsr-orange transition-colors border-b border-white/10 hover:border-lsr-orange">Discord community</Link>.
+                </p>
               </div>
             </div>
 
@@ -164,22 +198,6 @@ export default async function EventPage({ params }: EventPageArgs) {
             </div>
           )}
         </div>
-
-        {event.heroImageUrl && (
-          <div className="aspect-[21/9] w-full border border-white/10 bg-black relative overflow-hidden group">
-            <Image 
-              src={event.heroImageUrl} 
-              alt={event.title} 
-              width={1600} 
-              height={800} 
-              className="object-cover w-full h-full opacity-60 group-hover:opacity-80 transition-opacity duration-700" 
-            />
-            <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px] opacity-20 pointer-events-none" />
-            <div className="absolute bottom-4 right-4 bg-black/80 px-3 py-1 border border-white/10">
-              <span className="font-sans font-black text-[9px] uppercase tracking-widest text-white/50">Track Preview</span>
-            </div>
-          </div>
-        )}
       </div>
     </main>
   );
