@@ -12,6 +12,7 @@ import { ResultsTable } from "@/components/results-table";
 import { EventRegistrationPanel } from "@/components/event-registration-panel";
 import { getSessionUser } from "@/server/auth/session";
 import { Metadata } from "next";
+import { isEventLive } from "@/lib/events";
 
 type EventPageArgs = {
   params: Promise<{ slug: string }>;
@@ -40,6 +41,7 @@ export default async function EventPage({ params }: EventPageArgs) {
   const raceSessions = await getIngestedResultsByEventId(event.id);
   const startsAt = new Date(event.startsAtUtc);
   const endsAt = new Date(event.endsAtUtc);
+  const isLive = isEventLive(event);
   // const isEventPassed = new Date() > endsAt; // Logic handled by registration config/snapshot
 
   const venue = event.venue;
@@ -66,6 +68,15 @@ export default async function EventPage({ params }: EventPageArgs) {
           <div className="relative grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="lg:col-span-2">
               <div className="flex flex-wrap items-center gap-3 mb-6">
+                {isLive && (
+                  <div className="flex items-center gap-1.5 border border-red-600/30 bg-red-600/10 px-2 py-0.5 rounded-none">
+                      <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+                      </span>
+                      <span className="font-display font-black text-red-500 uppercase tracking-widest text-[9px] italic">Live Now</span>
+                  </div>
+                )}
                 {event.series && (
                   <span className="bg-lsr-orange text-white px-2 py-0.5 text-[9px] font-black uppercase tracking-widest">
                     {event.series.title}

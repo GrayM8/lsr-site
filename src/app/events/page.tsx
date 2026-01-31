@@ -33,12 +33,12 @@ function FeaturedEventCard({ event }: { event: Event & { series: EventSeries | n
   return (
     <div className="border-l-4 border-lsr-orange bg-white/[0.03] flex flex-col md:flex-row overflow-hidden group">
       {event.heroImageUrl && (
-        <div className="md:w-3/5 relative overflow-hidden">
+        <div className="md:w-3/5 relative overflow-hidden aspect-video">
           <Image 
             src={event.heroImageUrl} 
             alt={event.title} 
             width={800} 
-            height={600} 
+            height={450} 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent md:bg-gradient-to-l md:from-black/80 md:to-transparent" />
