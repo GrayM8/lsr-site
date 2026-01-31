@@ -45,7 +45,8 @@ export function PublishEventFormClient({ event }: { event: Event }) {
         <div className="space-y-4">
           <h3 className="text-lg font-bold uppercase tracking-widest text-white/80 border-b border-white/10 pb-2">Publishing</h3>
           <p className="text-xs text-white/40 leading-relaxed">
-            Publishing makes the event visible to the public. You can publish immediately or schedule it for a specific time.
+            <strong>Publish Now</strong> makes the event visible immediately. <br/>
+            <strong>Schedule</strong> sets a future date/time for the event to automatically become public.
           </p>
           <Button onClick={handlePublish} className="w-full bg-lsr-orange hover:bg-lsr-orange/90 text-white font-bold uppercase tracking-widest py-6">Publish Now</Button>
           

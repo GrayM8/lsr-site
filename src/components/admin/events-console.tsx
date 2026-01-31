@@ -159,6 +159,29 @@ export function EventsConsole({ initialEvents }: EventsConsoleProps) {
               <div className="flex-1">Title</div>
               <div className="w-24 shrink-0 text-center flex items-center justify-center gap-1">
                   Status
+                  <TooltipProvider>
+                      <Tooltip>
+                          <TooltipTrigger className="cursor-help text-lsr-orange font-bold text-xs">*</TooltipTrigger>
+                          <TooltipContent className="bg-black border border-white/10 text-white p-4 max-w-xs space-y-3">
+                              <div className="space-y-1">
+                                  <p className="text-[10px] font-black text-lsr-orange uppercase tracking-widest">Visibility States</p>
+                                  <p className="text-[10px] leading-relaxed"><span className="text-white font-bold">DRAFT:</span> Completely private/hidden.</p>
+                                  <p className="text-[10px] leading-relaxed"><span className="text-white font-bold">SCHEDULED:</span> Hidden until the publication time is reached.</p>
+                                  <p className="text-[10px] leading-relaxed"><span className="text-white font-bold">PUBLISHED:</span> Publicly visible immediately.</p>
+                              </div>
+                              <div className="space-y-1">
+                                  <p className="text-[10px] font-black text-lsr-orange uppercase tracking-widest">Time-Based (Derived)</p>
+                                  <p className="text-[10px] leading-relaxed"><span className="text-white font-bold">IN PROGRESS:</span> Event is happening right now.</p>
+                                  <p className="text-[10px] leading-relaxed"><span className="text-white font-bold">COMPLETED:</span> Event has passed its end time.</p>
+                              </div>
+                              <div className="space-y-1">
+                                  <p className="text-[10px] font-black text-lsr-orange uppercase tracking-widest">Overrides</p>
+                                  <p className="text-[10px] leading-relaxed"><span className="text-white font-bold">CANCELLED:</span> Publicly marked as will not happen.</p>
+                                  <p className="text-[10px] leading-relaxed"><span className="text-white font-bold">POSTPONED:</span> Publicly marked as delayed.</p>
+                              </div>
+                          </TooltipContent>
+                      </Tooltip>
+                  </TooltipProvider>
               </div>
               <div className="w-32 shrink-0 text-right">Actions</div>
             </div>
