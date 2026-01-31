@@ -31,7 +31,7 @@ export async function createEvent(formData: FormData) {
       summary: formData.get("summary") as string,
       description: formData.get("description") as string,
       heroImageUrl: formData.get("heroImageUrl") as string,
-      status: "draft",
+      status: "DRAFT",
       visibility: "public",
       registrationEnabled: formData.get("registrationEnabled") === "on",
       registrationOpensAt: opensAtRaw ? fromZonedTime(opensAtRaw, formData.get("timezone") as string) : null,
@@ -68,7 +68,7 @@ export async function updateEventStatus(eventId: string, status: EventStatus, pu
 
   const data: { status: EventStatus; publishedAt?: Date } = {
     status,
-    publishedAt: status === EventStatus.completed ? new Date() : publishedAt,
+    publishedAt,
   };
 
   await prisma.event.update({

@@ -15,6 +15,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { deleteEvent } from "@/app/admin/events/actions";
 import { cn } from "@/lib/utils";
+import { getEffectiveEventStatus } from "@/lib/events";
 
 type EventsConsoleProps = {
   initialEvents: Event[];
@@ -72,12 +73,13 @@ export function EventsConsole({ initialEvents }: EventsConsoleProps) {
   };
 
   const statusColors: Record<string, string> = {
-    draft: "text-white/40 border-white/20 bg-white/5",
-    scheduled: "text-blue-400 border-blue-400/20 bg-blue-400/10",
-    in_progress: "text-lsr-orange border-lsr-orange/20 bg-lsr-orange/10 animate-pulse",
-    completed: "text-green-400 border-green-400/20 bg-green-400/10",
-    canceled: "text-red-400 border-red-400/20 bg-red-400/10",
-    postponed: "text-yellow-400 border-yellow-400/20 bg-yellow-400/10",
+    DRAFT: "text-white/40 border-white/20 bg-white/5",
+    PUBLISHED: "text-purple-400 border-purple-400/20 bg-purple-400/10",
+    SCHEDULED: "text-blue-400 border-blue-400/20 bg-blue-400/10",
+    IN_PROGRESS: "text-lsr-orange border-lsr-orange/20 bg-lsr-orange/10 animate-pulse",
+    COMPLETED: "text-green-400 border-green-400/20 bg-green-400/10",
+    CANCELLED: "text-red-400 border-red-400/20 bg-red-400/10",
+    POSTPONED: "text-yellow-400 border-yellow-400/20 bg-yellow-400/10",
   };
 
   return (
@@ -157,14 +159,6 @@ export function EventsConsole({ initialEvents }: EventsConsoleProps) {
               <div className="flex-1">Title</div>
               <div className="w-24 shrink-0 text-center flex items-center justify-center gap-1">
                   Status
-                  <TooltipProvider>
-                      <Tooltip>
-                          <TooltipTrigger className="cursor-help text-lsr-orange font-bold text-xs">*</TooltipTrigger>
-                          <TooltipContent className="bg-black border border-white/10 text-white text-[10px] uppercase tracking-widest font-bold p-3 max-w-xs">
-                              The status system may not be reliable at the moment.
-                          </TooltipContent>
-                      </Tooltip>
-                  </TooltipProvider>
               </div>
               <div className="w-32 shrink-0 text-right">Actions</div>
             </div>
@@ -181,6 +175,7 @@ export function EventsConsole({ initialEvents }: EventsConsoleProps) {
                       const end = new Date(event.endsAtUtc);
                       const isSameDay = start.toDateString() === end.toDateString();
                       const formatTime = (d: Date) => d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                      const effectiveStatus = getEffectiveEventStatus(event);
       
                       return (
                       <div
@@ -219,8 +214,8 @@ export function EventsConsole({ initialEvents }: EventsConsoleProps) {
       
                           {/* Status Column */}
                           <div className="w-24 shrink-0">
-                              <Badge variant="outline" className={cn("rounded-sm px-2 py-0.5 text-[9px] uppercase tracking-widest font-bold w-full justify-center", statusColors[event.status] || statusColors.draft)}>
-                                  {event.status.replace("_", " ")}
+                              <Badge variant="outline" className={cn("rounded-sm px-2 py-0.5 text-[9px] uppercase tracking-widest font-bold w-full justify-center", statusColors[effectiveStatus] || statusColors.DRAFT)}>
+                                  {effectiveStatus.replace("_", " ")}
                               </Badge>
                           </div>
       

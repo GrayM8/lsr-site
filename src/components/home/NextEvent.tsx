@@ -6,6 +6,7 @@ import SectionReveal from "./SectionReveal"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Event, Venue, EventSeries } from "@prisma/client"
+import { isEventLive } from "@/lib/events"
 import { GeoPoint } from "@/types";
 
 type Props = {
@@ -13,13 +14,6 @@ type Props = {
   featuredEvent?: Event & { venue: Venue | null, series: EventSeries | null }
   upcomingEvents: (Event & { venue: Venue | null, series: EventSeries | null })[]
 }
-
-const isLive = (event: Event) => {
-  const now = new Date();
-  const start = new Date(event.startsAtUtc);
-  const end = new Date(event.endsAtUtc);
-  return start <= now && now <= end;
-};
 
 export default function NextEvent({ index, featuredEvent, upcomingEvents }: Props) {
   const nextEventDate = featuredEvent ? new Date(featuredEvent.startsAtUtc) : null
@@ -29,7 +23,7 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
   const geo = venue?.geo as GeoPoint | null
   const hasCoords = geo?.type === "Point" && geo?.coordinates?.length === 2
   const directionsUrl = hasCoords ? `https://www.google.com/maps/search/?api=1&query=${geo.coordinates[1]},${geo.coordinates[0]}` : null
-  const featuredIsLive = featuredEvent ? isLive(featuredEvent) : false;
+  const featuredIsLive = featuredEvent ? isEventLive(featuredEvent) : false;
 
   return (
     <SectionReveal index={index} className="mx-auto max-w-6xl" clipClass="rounded-none">
@@ -136,7 +130,7 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {upcomingEvents.length > 0 ? upcomingEvents.slice(0, 4).map((event) => {
               const eventDate = new Date(event.startsAtUtc)
-              const live = isLive(event);
+              const live = isEventLive(event);
               return (
                 <Link key={event.id} href={`/events/${event.slug}`} className="group block border border-white/5 bg-white/5 p-5 hover:bg-white/10 transition-all">
                   <div className="flex justify-between items-start mb-4">

@@ -119,7 +119,7 @@ export default async function DriversIndexPage({
   const upcomingEvent = await prisma.event.findFirst({
       where: {
           startsAtUtc: { gt: now },
-          status: { not: "canceled" },
+          status: { notIn: ["DRAFT", "CANCELLED"] },
           series: {
               slug: { contains: "lone-star-cup" }
           }

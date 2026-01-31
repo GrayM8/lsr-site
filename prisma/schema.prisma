@@ -11,12 +11,13 @@ datasource db {
 
 // ---------- Enums ----------
 enum EventStatus {
-  draft
-  scheduled
-  in_progress
-  canceled
-  postponed
-  completed
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  POSTPONED
 }
 
 enum UserStatus {
@@ -551,7 +552,7 @@ model Event {
   timezone    String
 
   visibility Visibility  @default(public)
-  status     EventStatus @default(scheduled)
+  status     EventStatus @default(DRAFT)
 
   // Registration Config (Renamed/New fields)
   registrationEnabled         Boolean   @default(false)

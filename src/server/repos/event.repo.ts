@@ -24,7 +24,7 @@ export async function listActiveAndUpcomingEvents(limit = 10) {
   return prisma.event.findMany({
     where: {
       endsAtUtc: { gte: now },
-      status: { in: ['scheduled', 'in_progress'] },
+      status: { in: ['SCHEDULED', 'IN_PROGRESS', 'PUBLISHED'] },
     },
     orderBy: { startsAtUtc: 'asc' },
     take: limit,
@@ -38,7 +38,7 @@ export async function listActiveAndUpcomingEvents(limit = 10) {
 export async function listAllEvents() {
   return prisma.event.findMany({
     where: {
-      status: { not: "draft" },
+      status: { not: "DRAFT" },
     },
     orderBy: { startsAtUtc: 'asc' },
     include: {
@@ -64,7 +64,7 @@ export async function listLiveEvents() {
     where: {
       startsAtUtc: { lte: now },
       endsAtUtc: { gte: now },
-      status: { in: ['in_progress', 'scheduled'] },
+      status: { in: ['IN_PROGRESS', 'SCHEDULED', 'PUBLISHED'] },
     },
   });
 }

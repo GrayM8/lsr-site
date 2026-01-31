@@ -6,6 +6,7 @@ import { Calendar, Clock, MapPin, Send } from "lucide-react"
 import { LocalTime, LocalTimeRange } from "@/components/ui/local-time"
 import { getAllEvents } from "@/server/queries/events";
 import { Event, Venue, EventSeries } from "@prisma/client"
+import { isEventLive } from "@/lib/events";
 import { GeoPoint } from "@/types";
 import Image from "next/image"
 import Link from "next/link"
@@ -19,17 +20,10 @@ export const metadata: Metadata = {
   },
 };
 
-const isLive = (event: Event) => {
-  const now = new Date();
-  const start = new Date(event.startsAtUtc);
-  const end = new Date(event.endsAtUtc);
-  return start <= now && now <= end;
-};
-
 function FeaturedEventCard({ event }: { event: Event & { series: EventSeries | null, venue: Venue | null } }) {
   const startsAt = new Date(event.startsAtUtc)
   const endsAt = new Date(event.endsAtUtc)
-  const live = isLive(event);
+  const live = isEventLive(event);
 
   const venue = event.venue
   const geo = venue?.geo as GeoPoint | null
@@ -103,7 +97,7 @@ function FeaturedEventCard({ event }: { event: Event & { series: EventSeries | n
 
 function EventCard({ event }: { event: Event & { series: EventSeries | null, venue: Venue | null } }) {
   const startsAt = new Date(event.startsAtUtc)
-  const live = isLive(event);
+  const live = isEventLive(event);
 
   return (
     <div className="group border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] transition-colors flex flex-col overflow-hidden">

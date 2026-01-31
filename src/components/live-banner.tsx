@@ -1,9 +1,13 @@
 import { getLiveEvents } from "@/server/queries/events";
 import Link from "next/link";
 import { Event } from "@prisma/client";
+import { isEventLive } from "@/lib/events";
 
 export async function LiveBanner() {
-  const liveEvents = await getLiveEvents();
+  const allLiveEvents = await getLiveEvents();
+  
+  // Apply our source of truth logic to ensure consistency
+  const liveEvents = allLiveEvents.filter(event => isEventLive(event));
 
   if (liveEvents.length === 0) {
     return null;
