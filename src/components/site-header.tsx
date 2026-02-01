@@ -17,6 +17,7 @@ import { ChevronDown, Menu, ShoppingCart } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { User } from "@prisma/client"
 import { useCart } from "@/lib/shopify/CartContext"
+import { WishlistIndicator } from "@/components/shop/WishlistIndicator"
 
 export function SiteHeader({ user, roles }: { user: User | null, roles: string[] }) {
   const pathname = usePathname()
@@ -97,6 +98,7 @@ export function SiteHeader({ user, roles }: { user: User | null, roles: string[]
 
           {/* User menu */}
           <div className="flex items-center gap-4">
+            <WishlistIndicator />
             {/* Cart indicator - only show on shop pages or when cart has items */}
             {showCart && (
               <Link
