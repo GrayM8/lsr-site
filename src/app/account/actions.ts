@@ -18,6 +18,37 @@ export async function updateMarketingOptIn(formData: FormData) {
   revalidatePath('/account');
 }
 
+export async function updateNotificationPreferences(formData: FormData) {
+  const user = await requireUser();
+
+  const emailRegistration = formData.get('emailRegistration') === 'on';
+  const emailWaitlistPromotion = formData.get('emailWaitlistPromotion') === 'on';
+  const emailEventReminder = formData.get('emailEventReminder') === 'on';
+  const emailEventPosted = formData.get('emailEventPosted') === 'on';
+  const emailResultsPosted = formData.get('emailResultsPosted') === 'on';
+
+  await prisma.notificationPreference.upsert({
+    where: { userId: user.id },
+    update: {
+      emailRegistration,
+      emailWaitlistPromotion,
+      emailEventReminder,
+      emailEventPosted,
+      emailResultsPosted,
+    },
+    create: {
+      userId: user.id,
+      emailRegistration,
+      emailWaitlistPromotion,
+      emailEventReminder,
+      emailEventPosted,
+      emailResultsPosted,
+    },
+  });
+
+  revalidatePath('/account');
+}
+
 export async function retireAccount() {
   const user = await requireUser();
 
