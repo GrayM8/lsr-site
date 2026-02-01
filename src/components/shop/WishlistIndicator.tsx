@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Heart } from "lucide-react";
 import { getWishlist } from "@/lib/shopify/wishlist";
 import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function WishlistIndicator() {
   const [wishlistCount, setWishlistCount] = useState(0);
@@ -24,20 +25,32 @@ export function WishlistIndicator() {
   }, []);
 
   // Show indicator if on shop pages OR if there are items in the wishlist
-  if (!isShopPage && wishlistCount === 0) return null;
+  const shouldShow = isShopPage || wishlistCount > 0;
 
   return (
-    <Link
-      href="/shop/wishlist"
-      className="relative text-white/70 hover:text-lsr-orange transition-colors p-2"
-      aria-label={`Wishlist with ${wishlistCount} items`}
-    >
-      <Heart className={`h-5 w-5 ${wishlistCount > 0 ? "fill-white/10" : ""}`} />
-      {wishlistCount > 0 && (
-        <span className="absolute -top-0.5 -right-0.5 bg-lsr-orange/80 text-white text-[8px] font-bold rounded-full h-4 w-4 flex items-center justify-center animate-in zoom-in-50 duration-200">
-          {wishlistCount > 99 ? '99+' : wishlistCount}
-        </span>
+    <AnimatePresence>
+      {shouldShow && (
+        <motion.div
+          layout
+          initial={{ opacity: 0, scale: 0.5, width: 0 }}
+          animate={{ opacity: 1, scale: 1, width: "auto" }}
+          exit={{ opacity: 0, scale: 0.5, width: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <Link
+            href="/shop/wishlist"
+            className="relative text-white/70 hover:text-lsr-orange transition-colors p-2 block"
+            aria-label={`Wishlist with ${wishlistCount} items`}
+          >
+            <Heart className={`h-5 w-5 ${wishlistCount > 0 ? "fill-white/10" : ""}`} />
+            {wishlistCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 bg-lsr-orange/80 text-white text-[8px] font-bold rounded-full h-4 w-4 flex items-center justify-center animate-in zoom-in-50 duration-200">
+                {wishlistCount > 99 ? '99+' : wishlistCount}
+              </span>
+            )}
+          </Link>
+        </motion.div>
       )}
-    </Link>
+    </AnimatePresence>
   );
 }

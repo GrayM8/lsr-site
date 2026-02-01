@@ -3,6 +3,7 @@
 import { useCart } from "@/lib/shopify/CartContext";
 import { Price } from "./Price";
 import Image from "next/image";
+import Link from "next/link";
 import { Loader2, Trash2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyCartState } from "./EmptyCartState";
@@ -26,27 +27,33 @@ export function CartView() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
       <div className="lg:col-span-2 space-y-6">
         {cart.lines.map((line) => (
-          <div key={line.id} className="flex gap-4 md:gap-6 border border-white/5 bg-white/[0.03] p-4 items-center">
-             <div className="relative h-20 w-20 md:h-24 md:w-24 flex-shrink-0 bg-white/5 border border-white/5">
+          <div key={line.id} className="flex gap-4 md:gap-6 border border-white/5 bg-white/[0.03] p-4 items-center group">
+             <Link 
+                href={`/shop/products/${line.merchandise.product.handle}`}
+                className="relative h-20 w-20 md:h-24 md:w-24 flex-shrink-0 bg-white/5 border border-white/5 overflow-hidden block"
+             >
                 {line.merchandise.product.featuredImage && (
                     <Image
                         src={line.merchandise.product.featuredImage.url}
                         alt={line.merchandise.product.featuredImage.altText || line.merchandise.product.title}
                         fill
-                        className="object-cover"
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                 )}
-             </div>
+             </Link>
              
              <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-start mb-1">
-                    <h3 className="font-sans font-bold text-white text-sm md:text-base truncate pr-4">
+                    <Link 
+                        href={`/shop/products/${line.merchandise.product.handle}`}
+                        className="font-sans font-bold text-white text-sm md:text-base truncate pr-4 hover:text-lsr-orange transition-colors"
+                    >
                         {line.merchandise.product.title}
-                    </h3>
+                    </Link>
                     <Price price={line.cost.totalAmount} className="font-sans font-bold text-white text-sm md:text-base" />
                 </div>
                 <p className="text-white/40 text-xs font-bold uppercase tracking-wider mb-4">
-                    {line.merchandise.title}
+                    {line.merchandise.title !== "Default Title" ? line.merchandise.title : ""}
                 </p>
                 
                 <div className="flex items-center gap-4">

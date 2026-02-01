@@ -18,6 +18,7 @@ import { usePathname } from "next/navigation"
 import { User } from "@prisma/client"
 import { useCart } from "@/lib/shopify/CartContext"
 import { WishlistIndicator } from "@/components/shop/WishlistIndicator"
+import { motion, AnimatePresence } from "framer-motion"
 
 export function SiteHeader({ user, roles }: { user: User | null, roles: string[] }) {
   const pathname = usePathname()
@@ -100,20 +101,30 @@ export function SiteHeader({ user, roles }: { user: User | null, roles: string[]
           <div className="flex items-center gap-4">
             <WishlistIndicator />
             {/* Cart indicator - only show on shop pages or when cart has items */}
-            {showCart && (
-              <Link
-                href="/shop/cart"
-                className="relative text-white/70 hover:text-lsr-orange transition-colors p-2"
-                aria-label={`Shopping cart with ${cartCount} items`}
-              >
-                <ShoppingCart className="h-5 w-5" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-lsr-orange text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center animate-in zoom-in-50 duration-200">
-                    {cartCount > 99 ? '99+' : cartCount}
-                  </span>
-                )}
-              </Link>
-            )}
+            <AnimatePresence>
+              {showCart && (
+                <motion.div
+                  layout
+                  initial={{ opacity: 0, scale: 0.5, width: 0 }}
+                  animate={{ opacity: 1, scale: 1, width: "auto" }}
+                  exit={{ opacity: 0, scale: 0.5, width: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Link
+                    href="/shop/cart"
+                    className="relative text-white/70 hover:text-lsr-orange transition-colors p-2 block"
+                    aria-label={`Shopping cart with ${cartCount} items`}
+                  >
+                    <ShoppingCart className="h-5 w-5" />
+                    {cartCount > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 bg-lsr-orange text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center animate-in zoom-in-50 duration-200">
+                        {cartCount > 99 ? '99+' : cartCount}
+                      </span>
+                    )}
+                  </Link>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <UserMenuClient user={user} roles={roles} />
             
