@@ -21,7 +21,9 @@ import { useCart } from "@/lib/shopify/CartContext"
 export function SiteHeader({ user, roles }: { user: User | null, roles: string[] }) {
   const pathname = usePathname()
   const isHome = pathname === "/"
+  const isShopPage = pathname.startsWith("/shop")
   const { cartCount } = useCart()
+  const showCart = cartCount > 0 || isShopPage
 
   return (
     <header className="sticky top-0 z-50 bg-lsr-charcoal/95 backdrop-blur-md border-b border-white/5">
@@ -53,10 +55,6 @@ export function SiteHeader({ user, roles }: { user: User | null, roles: string[]
         <div className="flex items-center gap-6">
           {/* Desktop navigation links */}
           <div className="hidden md:flex items-center gap-8 font-sans font-bold text-[10px] uppercase tracking-[0.25em] text-white/70">
-            <Link href="/news" className="hover:text-lsr-orange transition-colors relative group/link">
-              News
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-lsr-orange transition-all group-hover/link:w-full" />
-            </Link>
             <Link href="/events" className="hover:text-lsr-orange transition-colors relative group/link">
               Events
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-lsr-orange transition-all group-hover/link:w-full" />
@@ -80,6 +78,9 @@ export function SiteHeader({ user, roles }: { user: User | null, roles: string[]
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-lsr-charcoal border-white/10 rounded-none p-2 min-w-[160px]">
                 <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
+                  <Link href="/news" className="font-sans font-bold text-[9px] uppercase tracking-widest py-2">News</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
                   <Link href="/about" className="font-sans font-bold text-[9px] uppercase tracking-widest py-2">About</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="focus:bg-lsr-orange focus:text-white rounded-none cursor-pointer">
@@ -96,19 +97,21 @@ export function SiteHeader({ user, roles }: { user: User | null, roles: string[]
 
           {/* User menu */}
           <div className="flex items-center gap-4">
-            {/* Cart indicator */}
-            <Link
-              href="/shop/cart"
-              className="relative text-white/70 hover:text-lsr-orange transition-colors p-2"
-              aria-label={`Shopping cart with ${cartCount} items`}
-            >
-              <ShoppingCart className="h-5 w-5" />
-              {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-lsr-orange text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center animate-in zoom-in-50 duration-200">
-                  {cartCount > 99 ? '99+' : cartCount}
-                </span>
-              )}
-            </Link>
+            {/* Cart indicator - only show on shop pages or when cart has items */}
+            {showCart && (
+              <Link
+                href="/shop/cart"
+                className="relative text-white/70 hover:text-lsr-orange transition-colors p-2"
+                aria-label={`Shopping cart with ${cartCount} items`}
+              >
+                <ShoppingCart className="h-5 w-5" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-lsr-orange text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center animate-in zoom-in-50 duration-200">
+                    {cartCount > 99 ? '99+' : cartCount}
+                  </span>
+                )}
+              </Link>
+            )}
 
             <UserMenuClient user={user} roles={roles} />
             
