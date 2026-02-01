@@ -13,6 +13,7 @@ import { EventRegistrationPanel } from "@/components/event-registration-panel";
 import { getSessionUser } from "@/server/auth/session";
 import { Metadata } from "next";
 import { isEventLive } from "@/lib/events";
+import { StreamPlayer } from "@/components/stream-player";
 
 type EventPageArgs = {
   params: Promise<{ slug: string }>;
@@ -83,24 +84,24 @@ export default async function EventPage({ params }: EventPageArgs) {
           <div className="relative grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="lg:col-span-2">
               <div className="flex flex-wrap items-center gap-3 mb-6">
-                {isLive && (
-                  <div className="flex items-center gap-1.5 border border-red-600/30 bg-red-600/10 px-2 py-0.5 rounded-none">
-                      <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
-                      </span>
-                      <span className="font-display font-black text-red-500 uppercase tracking-widest text-[9px] italic">Live Now</span>
-                  </div>
-                )}
-                {event.series && (
-                  <span className="bg-lsr-orange text-white px-2 py-0.5 text-[9px] font-black uppercase tracking-widest">
-                    {event.series.title}
+                  {isLive && (
+                    <div className="flex items-center gap-1.5 border border-red-600/30 bg-red-600/10 px-2 py-0.5 rounded-none">
+                        <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+                        </span>
+                        <span className="font-display font-black text-red-500 uppercase tracking-widest text-[9px] italic">Live Now</span>
+                    </div>
+                  )}
+                  {event.series && (
+                    <span className="bg-lsr-orange text-white px-2 py-0.5 text-[9px] font-black uppercase tracking-widest">
+                      {event.series.title}
+                    </span>
+                  )}
+                  <span className="border border-white/20 text-white/60 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest">
+                    Official Session
                   </span>
-                )}
-                <span className="border border-white/20 text-white/60 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest">
-                  Official Session
-                </span>
-              </div>
+                </div>
               
               <h1 className="font-display font-black italic text-4xl md:text-6xl text-white uppercase tracking-normal leading-[0.9] mb-6">
                 {event.title}
@@ -131,6 +132,11 @@ export default async function EventPage({ params }: EventPageArgs) {
             </div>
 
             <div className="lg:col-span-1">
+              {isLive && event.streamUrl && (
+                <div className="mb-6">
+                  <StreamPlayer streamUrl={event.streamUrl} />
+                </div>
+              )}
               <div className="bg-black border border-white/10 p-6 space-y-6">
                 <h3 className="font-sans font-black text-xs uppercase tracking-[0.2em] text-white/30 border-b border-white/10 pb-4">
                   Session Logistics

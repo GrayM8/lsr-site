@@ -170,6 +170,17 @@ export function EventForm({ event, series, venues }: { event?: Event, series: Ev
                 <ImageUploader name="heroImageUrl" defaultValue={event?.heroImageUrl} />
               </div>
             </div>
+
+            <div className="space-y-2">
+              <label htmlFor="streamUrl" className="text-[10px] uppercase tracking-wider text-white/60">Stream URL</label>
+              <Input
+                id="streamUrl"
+                name="streamUrl"
+                defaultValue={event?.streamUrl ?? ""}
+                className="bg-transparent border-b border-white/20 border-t-0 border-x-0 rounded-none px-0 h-8 focus-visible:ring-0 focus:border-lsr-orange transition-colors"
+                placeholder="https://twitch.tv/..."
+              />
+            </div>
           </div>
         </section>
 
