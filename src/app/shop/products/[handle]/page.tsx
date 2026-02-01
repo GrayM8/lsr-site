@@ -5,6 +5,8 @@ import { ProductDetails } from "@/components/shop/ProductDetails";
 import { RecentlyViewed } from "@/components/shop/RecentlyViewed";
 import { Breadcrumbs } from "@/components/shop/Breadcrumbs";
 import { Metadata } from "next";
+import { hasOnDemandBoilerplate, ON_DEMAND_TEXT } from "@/lib/product-content";
+import { PackageOpen } from "lucide-react";
 
 export async function generateMetadata({
   params,
@@ -78,11 +80,17 @@ export default async function ProductPage({
   }));
 
   // Determine selected variant based on searchParams, or default to first
+  // We mirror the logic in VariantSelector: if a param is missing, assume the first value (default).
+  const effectiveSelections: Record<string, string> = {};
+  options.forEach(opt => {
+      const key = opt.name.toLowerCase();
+      const val = resolvedSearchParams[key];
+      const strVal = Array.isArray(val) ? val[0] : val;
+      effectiveSelections[opt.name] = strVal || opt.values[0];
+  });
+
   const selectedVariant = product.variants.find(variant => 
-    variant.selectedOptions.every(opt => {
-        const paramValue = resolvedSearchParams[opt.name.toLowerCase()];
-        return paramValue === opt.value;
-    })
+    variant.selectedOptions.every(opt => effectiveSelections[opt.name] === opt.value)
   ) || product.variants[0];
 
   return (
@@ -100,8 +108,20 @@ export default async function ProductPage({
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
             {/* Gallery */}
-            <div>
+            <div className="space-y-6">
                 <ProductGallery images={product.images} />
+                
+                {hasOnDemandBoilerplate(product.descriptionHtml) && (
+                    <div className="hidden lg:flex gap-4 p-5 border border-white/10 bg-white/[0.02]">
+                        <PackageOpen className="w-5 h-5 text-lsr-orange shrink-0 mt-0.5" />
+                        <div className="space-y-2">
+                            <h4 className="font-display font-black uppercase text-xs tracking-widest text-white/80">Made to Order</h4>
+                            <p className="text-[11px] text-white/50 font-sans leading-relaxed">
+                                {ON_DEMAND_TEXT}
+                            </p>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Details */}

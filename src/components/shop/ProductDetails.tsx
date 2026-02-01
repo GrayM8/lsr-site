@@ -9,6 +9,8 @@ import { AnimatedPrice } from "./Price";
 import { RecentlyViewed, useTrackProductView } from "./RecentlyViewed";
 import { SizeGuide } from "./SizeGuide";
 import { WishlistButton } from "./WishlistButton";
+import { cleanProductDescription, hasOnDemandBoilerplate, ON_DEMAND_TEXT } from "@/lib/product-content";
+import { PackageOpen } from "lucide-react";
 
 interface ProductDetailsProps {
   product: Product;
@@ -25,6 +27,9 @@ export function ProductDetails({
 
   // Track this product view
   useTrackProductView(product);
+  
+  const cleanedDescriptionHtml = cleanProductDescription(product.descriptionHtml);
+  const showOnDemandNote = hasOnDemandBoilerplate(product.descriptionHtml);
 
   return (
     <>
@@ -60,7 +65,7 @@ export function ProductDetails({
             {/* Show size guide for products with size options */}
             {options.some((opt) =>
               opt.name.toLowerCase().includes("size")
-            ) && <SizeGuide productType={product.productType} />}
+            ) && <SizeGuide descriptionHtml={product.descriptionHtml} />}
           </div>
 
           <div ref={addToCartRef} className="pt-4 border-t border-white/10">
@@ -74,14 +79,26 @@ export function ProductDetails({
           </div>
 
           <div className="prose prose-invert prose-sm text-white/60 font-sans leading-relaxed">
-            {product.descriptionHtml ? (
+            {cleanedDescriptionHtml ? (
               <div
-                dangerouslySetInnerHTML={{ __html: product.descriptionHtml }}
+                dangerouslySetInnerHTML={{ __html: cleanedDescriptionHtml }}
               />
             ) : (
               <p>{product.description}</p>
             )}
           </div>
+
+          {showOnDemandNote && (
+            <div className="lg:hidden mt-8 pt-8 border-t border-white/10 flex gap-4">
+               <PackageOpen className="w-5 h-5 text-lsr-orange shrink-0 mt-0.5" />
+               <div className="space-y-2">
+                   <h4 className="font-display font-black uppercase text-xs tracking-widest text-white/80">Made to Order</h4>
+                   <p className="text-[11px] text-white/50 font-sans leading-relaxed">
+                       {ON_DEMAND_TEXT}
+                   </p>
+               </div>
+            </div>
+          )}
         </div>
       </div>
 
