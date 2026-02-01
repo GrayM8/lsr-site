@@ -13,13 +13,15 @@ import {
   DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { ChevronDown, Menu } from "lucide-react"
+import { ChevronDown, Menu, ShoppingCart } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { User } from "@prisma/client"
+import { useCart } from "@/lib/shopify/CartContext"
 
 export function SiteHeader({ user, roles }: { user: User | null, roles: string[] }) {
   const pathname = usePathname()
   const isHome = pathname === "/"
+  const { cartCount } = useCart()
 
   return (
     <header className="sticky top-0 z-50 bg-lsr-charcoal/95 backdrop-blur-md border-b border-white/5">
@@ -94,6 +96,20 @@ export function SiteHeader({ user, roles }: { user: User | null, roles: string[]
 
           {/* User menu */}
           <div className="flex items-center gap-4">
+            {/* Cart indicator */}
+            <Link
+              href="/shop/cart"
+              className="relative text-white/70 hover:text-lsr-orange transition-colors p-2"
+              aria-label={`Shopping cart with ${cartCount} items`}
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-lsr-orange text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center animate-in zoom-in-50 duration-200">
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
+            </Link>
+
             <UserMenuClient user={user} roles={roles} />
             
             {/* Mobile hamburger menu */}

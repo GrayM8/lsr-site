@@ -1,9 +1,9 @@
 import { getProductByHandle } from "@/lib/shopify/catalog";
 import { notFound } from "next/navigation";
 import { ProductGallery } from "@/components/shop/ProductGallery";
-import { VariantSelector } from "@/components/shop/VariantSelector";
-import { Price } from "@/components/shop/Price";
-import { AddToCartButton } from "@/components/shop/AddToCartButton";
+import { ProductDetails } from "@/components/shop/ProductDetails";
+import { RecentlyViewed } from "@/components/shop/RecentlyViewed";
+import { Breadcrumbs } from "@/components/shop/Breadcrumbs";
 import { Metadata } from "next";
 
 export async function generateMetadata({
@@ -88,6 +88,16 @@ export default async function ProductPage({
   return (
     <div className="px-6 md:px-8 pb-10 md:pb-14 pt-10">
       <div className="max-w-6xl mx-auto">
+        <Breadcrumbs
+          items={[
+            { label: "Shop", href: "/shop" },
+            ...(product.productType
+              ? [{ label: product.productType }]
+              : []),
+            { label: product.title },
+          ]}
+        />
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
             {/* Gallery */}
             <div>
@@ -95,39 +105,15 @@ export default async function ProductPage({
             </div>
 
             {/* Details */}
-            <div className="flex flex-col">
-                 <h1 className="font-display font-black italic text-4xl md:text-5xl uppercase tracking-normal mb-4 leading-none">
-                    {product.title}
-                </h1>
-                
-                <div className="mb-8 flex items-baseline gap-4">
-                     <Price 
-                        price={selectedVariant?.price || product.priceRange.minVariantPrice} 
-                        className="text-2xl md:text-3xl font-sans font-bold text-lsr-orange"
-                        currencyCodeClassName="text-sm text-white/40 ml-1"
-                    />
-                </div>
-
-                <div className="space-y-8 flex-1">
-                    <VariantSelector variants={product.variants} options={options} />
-                    
-                    <div className="pt-4 border-t border-white/10">
-                         <AddToCartButton 
-                            variant={selectedVariant}
-                            availableForSale={selectedVariant?.availableForSale && product.availableForSale} 
-                         />
-                    </div>
-
-                    <div className="prose prose-invert prose-sm text-white/60 font-sans leading-relaxed">
-                        {product.descriptionHtml ? (
-                             <div dangerouslySetInnerHTML={{ __html: product.descriptionHtml }} />
-                        ) : (
-                            <p>{product.description}</p>
-                        )}
-                    </div>
-                </div>
-            </div>
+            <ProductDetails
+              product={product}
+              selectedVariant={selectedVariant}
+              options={options}
+            />
         </div>
+
+        {/* Recently Viewed */}
+        <RecentlyViewed currentHandle={handle} />
       </div>
     </div>
   );

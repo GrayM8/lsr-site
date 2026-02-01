@@ -19,7 +19,7 @@ export function StreamPlayer({ streamUrl }: { streamUrl: string }) {
         src={embedUrl}
         className="w-full h-full"
         allowFullScreen
-        allow="autoplay *; fullscreen *; encrypted-media *; picture-in-picture *"
+        allow="autoplay; fullscreen; picture-in-picture; encrypted-media; accelerometer; gyroscope; clipboard-write"
       />
     </div>
   );

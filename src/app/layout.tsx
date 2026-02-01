@@ -9,6 +9,8 @@ import React from "react";
 import { SiteFooter } from "@/components/site-footer"
 import { LiveBanner } from "@/components/live-banner";
 import { getCachedSessionUser } from "@/server/auth/cached-session";
+import { Toaster } from "@/components/ui/sonner";
+import { CartProvider } from "@/lib/shopify/CartContext";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -75,10 +77,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     >
     <body className="min-h-dvh flex flex-col font-sans">
     <ThemeProvider>
-      <LiveBanner />
-      <SiteHeader user={user} roles={roles} />
+      <CartProvider>
+        <LiveBanner />
+        <SiteHeader user={user} roles={roles} />
         <main className="flex-1">{children}</main>
-      <SiteFooter />
+        <SiteFooter />
+        <Toaster position="bottom-right" />
+      </CartProvider>
     </ThemeProvider>
     <Analytics />
     <SpeedInsights />

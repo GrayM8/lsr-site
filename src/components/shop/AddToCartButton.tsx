@@ -1,67 +1,28 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { ProductVariant } from "@/lib/shopify/types";
-import { getStoredCartId, setStoredCartId } from "@/lib/shopify/cartStorage";
-import { Loader2 } from "lucide-react"; // Assuming lucide-react is available given shadcn/ui usually uses it
-
+import { useCart } from "@/lib/shopify/CartContext";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function AddToCartButton({
   variant,
   availableForSale,
+  productTitle,
 }: {
   variant: ProductVariant;
   availableForSale: boolean;
+  productTitle?: string;
 }) {
-  const [isPending, setIsPending] = useState(false);
-  const router = useRouter();
+  const { addToCart, isUpdating } = useCart();
 
   const handleAddToCart = async () => {
-    setIsPending(true);
-    try {
-      let cartId = getStoredCartId();
-      
-      if (!cartId) {
-        // Create new cart
-        const res = await fetch("/api/shopify/cart/create", { method: "POST" });
-        const data = await res.json();
-        if (data.ok && data.cart) {
-          cartId = data.cart.id;
-          setStoredCartId(cartId!);
-        } else {
-            console.error("Failed to create cart", data.error);
-            // Handle error (maybe toast)
-            setIsPending(false);
-            return;
-        }
-      }
-
-      // Add line
-      const res = await fetch("/api/shopify/cart/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          cartId,
-          merchandiseId: variant.id,
-          quantity: 1,
-        }),
-      });
-
-      const data = await res.json();
-      if (data.ok) {
-        router.push("/shop/cart"); // or open drawer
-      } else {
-         console.error("Failed to add to cart", data.error);
-      }
-
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsPending(false);
-    }
+    const variantTitle = variant.title !== "Default Title" ? variant.title : undefined;
+    const title = [productTitle, variantTitle].filter(Boolean).join(" - ");
+    await addToCart(variant.id, 1, title || undefined);
   };
+
+  const isPending = isUpdating;
   
   const isEnabled = process.env.NEXT_PUBLIC_SHOP_ENABLED === "true";
 

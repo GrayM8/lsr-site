@@ -1,7 +1,6 @@
 import { getProducts } from "@/lib/shopify/catalog";
-import Link from "next/link";
 import Image from "next/image";
-import { ProductGrid } from "@/components/shop/ProductGrid";
+import { FilterableProductGrid } from "@/components/shop/FilterableProductGrid";
 import { Metadata } from "next";
 
 const SHOP_ENABLED = process.env.NEXT_PUBLIC_SHOP_ENABLED === "true";
@@ -93,7 +92,7 @@ export default async function ShopPage() {
 
         <div className="px-6 md:px-8">
             <div className="mx-auto max-w-6xl">
-                <ProductGrid products={allProducts} />
+                <FilterableProductGrid products={allProducts} />
             </div>
         </div>
     </div>

@@ -1,93 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getStoredCartId, clearStoredCartId } from "@/lib/shopify/cartStorage";
-import { Cart } from "@/lib/shopify/types";
+import { useCart } from "@/lib/shopify/CartContext";
 import { Price } from "./Price";
-import Link from "next/link";
 import Image from "next/image";
 import { Loader2, Trash2, ArrowRight } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { EmptyCartState } from "./EmptyCartState";
 
 export function CartView() {
-  const [cart, setCart] = useState<Cart | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const router = useRouter();
-
-  useEffect(() => {
-    const fetchCart = async () => {
-      const cartId = getStoredCartId();
-      if (!cartId) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const res = await fetch("/api/shopify/cart/get", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cartId }),
-        });
-        const data = await res.json();
-        if (data.ok && data.cart) {
-          setCart(data.cart);
-        } else {
-          // If cart not found (expired), clear storage
-          clearStoredCartId();
-          setCart(null);
-        }
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCart();
-  }, []);
-
-  const removeItem = async (lineId: string) => {
-    if (!cart) return;
-    setIsUpdating(true);
-    try {
-      const res = await fetch("/api/shopify/cart/remove", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cartId: cart.id, lineId }),
-      });
-      const data = await res.json();
-      if (data.ok && data.cart) {
-        setCart(data.cart);
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-  
-  const updateQuantity = async (lineId: string, quantity: number) => {
-    if (!cart) return;
-    if (quantity < 1) return;
-    setIsUpdating(true);
-    try {
-        const res = await fetch("/api/shopify/cart/update", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ cartId: cart.id, lineId, quantity }),
-        });
-        const data = await res.json();
-        if (data.ok && data.cart) {
-            setCart(data.cart);
-        }
-    } catch (e) {
-        console.error(e);
-    } finally {
-        setIsUpdating(false);
-    }
-  }
+  const { cart, isLoading, isUpdating, updateQuantity, removeItem } = useCart();
 
   if (isLoading) {
     return (
@@ -98,18 +19,7 @@ export function CartView() {
   }
 
   if (!cart || cart.lines.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <h2 className="font-display font-black italic text-3xl uppercase tracking-normal mb-4">Your cart is empty</h2>
-        <p className="text-white/60 mb-8 font-sans">Looks like you haven't added any gear yet.</p>
-        <Link 
-            href="/shop"
-            className="inline-block bg-white text-lsr-charcoal font-black uppercase tracking-[0.2em] px-8 py-4 hover:bg-lsr-orange hover:text-white transition-all"
-        >
-            Start Shopping
-        </Link>
-      </div>
-    );
+    return <EmptyCartState />;
   }
 
   return (
