@@ -4,6 +4,12 @@ import { User, UserRole, Role, UserStatus } from '@prisma/client';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type DriverHeroProps = {
   user: User & { roles: (UserRole & { role: Role })[] };
@@ -113,17 +119,33 @@ export function DriverHero({ user, isOwner, totalRegistrations }: DriverHeroProp
 
         {isOwner && (
           <div className="hidden md:block absolute top-0 right-0 p-8 z-20">
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className={cn(
-                "rounded-none border-white/20 hover:bg-white hover:text-lsr-charcoal font-bold uppercase tracking-widest text-[10px] h-10 bg-lsr-charcoal/80 backdrop-blur-sm",
-                !user.bio && "border-lsr-orange/50 shadow-[0_0_15px_rgba(255,128,0,0.3)] animate-pulse"
-              )}
-            >
-              <Link href={`/drivers/${user.handle}/edit`}>Edit Profile</Link>
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    asChild
+                    size="sm"
+                    className={cn(
+                      "rounded-none font-bold uppercase tracking-widest text-[10px] h-10 transition-all border-0",
+                      "bg-lsr-orange text-white hover:bg-white hover:text-lsr-charcoal",
+                      !user.bio && "relative overflow-hidden"
+                    )}
+                  >
+                    <Link href={`/drivers/${user.handle}/edit`}>
+                      <span className="relative z-10">Edit Profile</span>
+                      {!user.bio && (
+                        <span className="absolute inset-0 animate-shine bg-gradient-to-r from-transparent via-white/50 to-transparent" />
+                      )}
+                    </Link>
+                  </Button>
+                </TooltipTrigger>
+                {!user.bio && (
+                  <TooltipContent className="bg-lsr-orange text-white border-none rounded-none text-xs font-bold uppercase tracking-wider">
+                    <p>Complete your profile to stand out on the grid!</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
           </div>
         )}
       </div>
