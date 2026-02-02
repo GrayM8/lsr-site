@@ -1,0 +1,32 @@
+name: Process Notifications
+
+on:
+  schedule:
+    # Run every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+    # Allow manual triggering from GitHub Actions UI
+
+jobs:
+  process-notifications:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger notification processing
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X GET "${SITE_URL}/api/cron/notifications" \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "Content-Type: application/json")
+
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+
+          echo "Response: $body"
+          echo "HTTP Status: $http_code"
+
+          if [ "$http_code" -ne 200 ]; then
+            echo "::error::Cron request failed with status $http_code"
+            exit 1
+          fi

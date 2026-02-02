@@ -8,7 +8,7 @@ export const maxDuration = 60; // Allow up to 60 seconds for the cron job
 
 /**
  * Cron job to process scheduled notifications and create event reminders.
- * Should be called every 15 minutes by Vercel Cron.
+ * Called every 15 minutes by GitHub Actions (see .github/workflows/notification-cron.yml).
  */
 export async function GET(request: Request) {
   // Verify cron secret in production
