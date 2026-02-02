@@ -312,7 +312,7 @@ export async function markAllNotificationsAsRead(userId: string): Promise<void> 
 }
 
 /**
- * Get unread notification count for a user.
+ * Get unread notification count for a user (excludes dismissed).
  */
 export async function getUnreadNotificationCount(userId: string): Promise<number> {
   return prisma.notification.count({
@@ -321,12 +321,14 @@ export async function getUnreadNotificationCount(userId: string): Promise<number
       channel: "IN_APP",
       status: "SENT",
       readAt: null,
+      dismissedAt: null,
     },
   });
 }
 
 /**
  * Get recent notifications for a user (for the bell dropdown).
+ * Excludes dismissed notifications.
  */
 export async function getRecentNotifications(
   userId: string,
@@ -348,6 +350,7 @@ export async function getRecentNotifications(
       userId,
       channel: "IN_APP",
       status: "SENT",
+      dismissedAt: null,
     },
     select: {
       id: true,
@@ -365,31 +368,41 @@ export async function getRecentNotifications(
 }
 
 /**
- * Delete a notification (user-side, no audit logging).
+ * Dismiss a notification (soft delete - user-side, no audit logging).
+ * The notification remains in the database for admin visibility.
  */
-export async function deleteNotification(
+export async function dismissNotification(
   notificationId: string,
   userId: string
 ): Promise<boolean> {
-  const result = await prisma.notification.deleteMany({
+  const result = await prisma.notification.updateMany({
     where: {
       id: notificationId,
       userId,
       channel: "IN_APP",
+      dismissedAt: null,
+    },
+    data: {
+      dismissedAt: new Date(),
     },
   });
   return result.count > 0;
 }
 
 /**
- * Delete all read notifications for a user.
+ * Dismiss all read notifications for a user (soft delete).
+ * The notifications remain in the database for admin visibility.
  */
-export async function deleteAllReadNotifications(userId: string): Promise<number> {
-  const result = await prisma.notification.deleteMany({
+export async function dismissAllReadNotifications(userId: string): Promise<number> {
+  const result = await prisma.notification.updateMany({
     where: {
       userId,
       channel: "IN_APP",
       readAt: { not: null },
+      dismissedAt: null,
+    },
+    data: {
+      dismissedAt: new Date(),
     },
   });
   return result.count;

@@ -15,6 +15,8 @@ import {
   XCircle,
   Clock,
   Trash2,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { retryFailedNotification, deleteNotificationAdmin } from "../actions";
 
@@ -156,9 +158,23 @@ export function NotificationActivity({
                   <span className="text-xs">Email</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-1 text-white/60">
-                  <Bell className="h-3 w-3" />
-                  <span className="text-xs">In-App</span>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 text-white/60">
+                    <Bell className="h-3 w-3" />
+                    <span className="text-xs">In-App</span>
+                  </div>
+                  <span title={notification.readAt ? "Read" : "Unread"}>
+                    {notification.readAt ? (
+                      <Eye className="h-3 w-3 text-green-500" />
+                    ) : (
+                      <EyeOff className="h-3 w-3 text-white/30" />
+                    )}
+                  </span>
+                  {notification.dismissedAt && (
+                    <span title="Dismissed by user">
+                      <Trash2 className="h-3 w-3 text-yellow-500" />
+                    </span>
+                  )}
                 </div>
               )}
             </div>
@@ -209,6 +225,47 @@ export function NotificationActivity({
                     <p className="text-sm text-red-400 font-mono">
                       {notification.emailError}
                     </p>
+                  </div>
+                )}
+                {notification.channel === "IN_APP" && (
+                  <div className="grid grid-cols-2 gap-4 p-3 bg-white/[0.02] border border-white/5">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mb-1">
+                        Read Status
+                      </p>
+                      <div className="flex items-center gap-2">
+                        {notification.readAt ? (
+                          <>
+                            <Eye className="h-4 w-4 text-green-500" />
+                            <span className="text-sm text-green-500">
+                              Read {format(new Date(notification.readAt), "MMM d, h:mm a")}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <EyeOff className="h-4 w-4 text-white/40" />
+                            <span className="text-sm text-white/40">Unread</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mb-1">
+                        Dismissed
+                      </p>
+                      <div className="flex items-center gap-2">
+                        {notification.dismissedAt ? (
+                          <>
+                            <Trash2 className="h-4 w-4 text-yellow-500" />
+                            <span className="text-sm text-yellow-500">
+                              Dismissed {format(new Date(notification.dismissedAt), "MMM d, h:mm a")}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-sm text-white/40">Not dismissed</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
                 <div className="flex items-center gap-2">

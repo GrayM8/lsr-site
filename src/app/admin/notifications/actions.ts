@@ -121,13 +121,18 @@ export async function sendCustomNotification(formData: FormData) {
   if (!res.ok) throw new Error("Unauthorized");
 
   const recipientType = formData.get("recipientType") as string;
-  const userId = formData.get("userId") as string | null;
+  const userIdsJson = formData.get("userIds") as string | null;
   const title = formData.get("title") as string;
   const body = formData.get("body") as string;
   const actionUrl = (formData.get("actionUrl") as string) || undefined;
+  const actionText = (formData.get("actionText") as string) || undefined;
   const sendInApp = formData.get("sendInApp") === "on";
   const sendEmail = formData.get("sendEmail") === "on";
   const scheduledFor = formData.get("scheduledFor") as string | null;
+
+  // Build metadata for email template customization
+  const metadata: Record<string, unknown> = {};
+  if (actionText) metadata.actionText = actionText;
 
   const channels: NotificationChannel[] = [];
   if (sendInApp) channels.push("IN_APP");
@@ -143,31 +148,41 @@ export async function sendCustomNotification(formData: FormData) {
 
   const scheduledDate = scheduledFor ? new Date(scheduledFor) : undefined;
 
-  if (recipientType === "single" && userId) {
-    const targetUser = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { displayName: true },
+  if ((recipientType === "single" || recipientType === "multiple") && userIdsJson) {
+    const userIds: string[] = JSON.parse(userIdsJson);
+
+    if (userIds.length === 0) {
+      throw new Error("At least one recipient is required");
+    }
+
+    const targetUsers = await prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, displayName: true },
     });
 
-    await sendNotification({
-      userId,
+    await sendBulkNotification({
+      userIds,
       type: "CUSTOM",
       title,
       body,
       actionUrl,
       channels,
       scheduledFor: scheduledDate,
+      metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
     });
 
+    const userNames = targetUsers.map((u) => u.displayName).join(", ");
     await createAuditLog({
       actorUserId: res.user.id,
       actionType: "CREATE",
       entityType: "NOTIFICATION",
-      entityId: "custom",
-      targetUserId: userId,
-      summary: `Sent custom notification "${title}" to ${targetUser?.displayName ?? userId}`,
+      entityId: userIds.length === 1 ? "custom" : "multi",
+      targetUserId: userIds.length === 1 ? userIds[0] : undefined,
+      summary: userIds.length === 1
+        ? `Sent custom notification "${title}" to ${userNames}`
+        : `Sent custom notification "${title}" to ${userIds.length} users: ${userNames}`,
       after: { title, body, channels, scheduledFor: scheduledDate?.toISOString() },
-      metadata: { recipientType: "single", actionUrl },
+      metadata: { recipientType, recipientCount: userIds.length, userIds, actionUrl },
     });
   } else if (recipientType === "all") {
     const users = await prisma.user.findMany({
@@ -182,6 +197,7 @@ export async function sendCustomNotification(formData: FormData) {
       actionUrl,
       channels,
       scheduledFor: scheduledDate,
+      metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
     });
 
     await createAuditLog({

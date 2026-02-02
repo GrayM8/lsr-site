@@ -58,14 +58,17 @@ function registrationConfirmedTemplate(
     ? format(new Date(event.startsAt), "EEEE, MMMM d 'at' h:mm a")
     : "";
 
+  const textColor = "#b3b3b3";
+  const accentColor = "#ff6b00";
+
   return baseTemplate({
     previewText: `You're registered for ${event?.title ?? "the event"}!`,
     title: "You're In!",
     body: `
-      <p>Your registration has been confirmed!</p>
-      ${event ? `<p><strong>${event.title}</strong></p>` : ""}
-      ${eventDate ? `<p>${eventDate}</p>` : ""}
-      <p>${notification.body}</p>
+      <p style="margin:0 0 16px 0;color:${textColor};">Your registration has been confirmed!</p>
+      ${event ? `<p style="margin:0 0 8px 0;color:#ffffff;font-weight:700;font-size:18px;">${event.title}</p>` : ""}
+      ${eventDate ? `<p style="margin:0 0 16px 0;color:${accentColor};font-weight:600;">${eventDate}</p>` : ""}
+      <p style="margin:0;color:${textColor};">${notification.body}</p>
     `,
     actionUrl: notification.actionUrl,
     actionText: "View Event Details",
@@ -78,14 +81,17 @@ function waitlistPromotedTemplate(
 ): { html: string; text: string } {
   const event = notification.metadata as EventData | undefined;
 
+  const textColor = "#b3b3b3";
+  const accentColor = "#ff6b00";
+
   return baseTemplate({
     previewText: `A spot opened up for ${event?.title ?? "the event"}!`,
     title: "You've Been Promoted!",
     body: `
-      <p>Great news! A spot has opened up and you've been moved from the waitlist.</p>
-      ${event ? `<p><strong>${event.title}</strong></p>` : ""}
-      <p>${notification.body}</p>
-      <p style="color: #ff6b00; font-weight: bold;">You are now registered for this event.</p>
+      <p style="margin:0 0 16px 0;color:${textColor};">Great news! A spot has opened up and you've been moved from the waitlist.</p>
+      ${event ? `<p style="margin:0 0 16px 0;color:#ffffff;font-weight:700;font-size:18px;">${event.title}</p>` : ""}
+      <p style="margin:0 0 16px 0;color:${textColor};">${notification.body}</p>
+      <p style="margin:0;color:${accentColor};font-weight:700;">You are now registered for this event.</p>
     `,
     actionUrl: notification.actionUrl,
     actionText: "View Event Details",
@@ -101,14 +107,17 @@ function eventReminderTemplate(
     ? format(new Date(event.startsAt), "EEEE, MMMM d 'at' h:mm a")
     : "";
 
+  const textColor = "#b3b3b3";
+  const accentColor = "#ff6b00";
+
   return baseTemplate({
     previewText: `Reminder: ${event?.title ?? "Event"} starts tomorrow!`,
     title: "Event Tomorrow!",
     body: `
-      <p>This is a reminder that you're registered for an event starting in less than 24 hours.</p>
-      ${event ? `<p><strong>${event.title}</strong></p>` : ""}
-      ${eventDate ? `<p>${eventDate}</p>` : ""}
-      <p>${notification.body}</p>
+      <p style="margin:0 0 16px 0;color:${textColor};">This is a reminder that you're registered for an event starting in less than 24 hours.</p>
+      ${event ? `<p style="margin:0 0 8px 0;color:#ffffff;font-weight:700;font-size:18px;">${event.title}</p>` : ""}
+      ${eventDate ? `<p style="margin:0 0 16px 0;color:${accentColor};font-weight:600;">${eventDate}</p>` : ""}
+      <p style="margin:0;color:${textColor};">${notification.body}</p>
     `,
     actionUrl: notification.actionUrl,
     actionText: "View Event Details",
@@ -124,14 +133,17 @@ function eventPostedTemplate(
     ? format(new Date(event.startsAt), "EEEE, MMMM d 'at' h:mm a")
     : "";
 
+  const textColor = "#b3b3b3";
+  const accentColor = "#ff6b00";
+
   return baseTemplate({
     previewText: `New event: ${event?.title ?? "Check it out"}!`,
     title: "New Event Posted!",
     body: `
-      <p>A new event has been published that might interest you.</p>
-      ${event ? `<p><strong>${event.title}</strong></p>` : ""}
-      ${eventDate ? `<p>${eventDate}</p>` : ""}
-      <p>${notification.body}</p>
+      <p style="margin:0 0 16px 0;color:${textColor};">A new event has been published that might interest you.</p>
+      ${event ? `<p style="margin:0 0 8px 0;color:#ffffff;font-weight:700;font-size:18px;">${event.title}</p>` : ""}
+      ${eventDate ? `<p style="margin:0 0 16px 0;color:${accentColor};font-weight:600;">${eventDate}</p>` : ""}
+      <p style="margin:0;color:${textColor};">${notification.body}</p>
     `,
     actionUrl: notification.actionUrl,
     actionText: "View Event",
@@ -144,18 +156,21 @@ function resultsPostedTemplate(
 ): { html: string; text: string } {
   const result = notification.metadata as ResultData | undefined;
 
+  const textColor = "#b3b3b3";
+  const accentColor = "#ff6b00";
+
   return baseTemplate({
     previewText: `Results are in for ${result?.eventTitle ?? "the race"}!`,
     title: "Results Posted!",
     body: `
-      <p>The results for a recent event have been posted.</p>
-      ${result?.eventTitle ? `<p><strong>${result.eventTitle}</strong></p>` : ""}
+      <p style="margin:0 0 16px 0;color:${textColor};">The results for a recent event have been posted.</p>
+      ${result?.eventTitle ? `<p style="margin:0 0 16px 0;color:#ffffff;font-weight:700;font-size:18px;">${result.eventTitle}</p>` : ""}
       ${
         result?.position
-          ? `<p>Your finish: <strong style="color: #ff6b00;">P${result.position}</strong>${result.points ? ` (${result.points} points)` : ""}</p>`
+          ? `<p style="margin:0 0 16px 0;color:${textColor};">Your finish: <strong style="color:${accentColor};">P${result.position}</strong>${result.points ? ` (${result.points} points)` : ""}</p>`
           : ""
       }
-      <p>${notification.body}</p>
+      <p style="margin:0;color:${textColor};">${notification.body}</p>
     `,
     actionUrl: notification.actionUrl,
     actionText: "View Full Results",
@@ -166,11 +181,52 @@ function resultsPostedTemplate(
 function customNotificationTemplate(
   notification: NotificationTemplateData
 ): { html: string; text: string } {
+  const metadata = notification.metadata as {
+    actionText?: string;
+    signature?: string;
+    greeting?: string;
+  } | undefined;
+
+  // Colors matching the base template
+  const textColor = "#b3b3b3";
+  const textMuted = "#808080";
+  const borderColor = "#404040";
+
+  // Process body text: handle line breaks, preserve paragraphs
+  const processedBody = notification.body
+    .split(/\n\n+/) // Split on double newlines (paragraphs)
+    .map((para) => para.trim())
+    .filter((para) => para.length > 0)
+    .map((para) => {
+      // Convert single newlines to <br> within paragraphs
+      const withBreaks = para.replace(/\n/g, "<br>");
+      return `<p style="margin:0 0 16px 0;color:${textColor};">${withBreaks}</p>`;
+    })
+    .join("");
+
+  // Build the body HTML with inline styles
+  const signature = metadata?.signature || "The LSR Team";
+  const bodyHtml = `
+    ${metadata?.greeting ? `<p style="margin:0 0 16px 0;color:${textColor};">${metadata.greeting}</p>` : ""}
+    ${processedBody}
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:24px;">
+      <tr>
+        <td style="padding-top:16px;border-top:1px solid ${borderColor};">
+          <p style="margin:0;color:${textMuted};">— ${signature}</p>
+        </td>
+      </tr>
+    </table>
+  `;
+
+  // Determine action button text
+  const actionText = metadata?.actionText || (notification.actionUrl ? "View Details" : undefined);
+
   return baseTemplate({
     previewText: notification.title,
     title: notification.title,
-    body: `<p>${notification.body.replace(/\n/g, "</p><p>")}</p>`,
+    body: bodyHtml,
     actionUrl: notification.actionUrl,
-    actionText: notification.actionUrl ? "Learn More" : undefined,
+    actionText,
+    footerText: "You're receiving this message from Longhorn Sim Racing.",
   });
 }

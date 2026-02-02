@@ -25,6 +25,7 @@ export default async function NotificationsPage({
         userId: user.id,
         channel: "IN_APP",
         status: "SENT",
+        dismissedAt: null,
       },
       select: {
         id: true,
@@ -45,6 +46,7 @@ export default async function NotificationsPage({
         userId: user.id,
         channel: "IN_APP",
         status: "SENT",
+        dismissedAt: null,
       },
     }),
   ]);

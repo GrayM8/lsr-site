@@ -62,35 +62,35 @@ export function NotificationList({
     }
   };
 
-  const deleteNotification = async (id: string) => {
+  const dismissNotification = async (id: string) => {
     setDeletingId(id);
     try {
       await fetch("/api/notifications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "delete", notificationId: id }),
+        body: JSON.stringify({ action: "dismiss", notificationId: id }),
       });
       setNotifications((prev) => prev.filter((n) => n.id !== id));
       router.refresh();
     } catch (error) {
-      console.error("Failed to delete notification:", error);
+      console.error("Failed to dismiss notification:", error);
     } finally {
       setDeletingId(null);
     }
   };
 
-  const clearAllRead = async () => {
+  const dismissAllRead = async () => {
     setClearingRead(true);
     try {
       await fetch("/api/notifications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "deleteAllRead" }),
+        body: JSON.stringify({ action: "dismissAllRead" }),
       });
       setNotifications((prev) => prev.filter((n) => !n.readAt));
       router.refresh();
     } catch (error) {
-      console.error("Failed to clear read notifications:", error);
+      console.error("Failed to dismiss read notifications:", error);
     } finally {
       setClearingRead(false);
     }
@@ -149,7 +149,7 @@ export function NotificationList({
           )}
           {readCount > 0 && (
             <Button
-              onClick={clearAllRead}
+              onClick={dismissAllRead}
               disabled={clearingRead}
               variant="ghost"
               size="sm"
@@ -235,12 +235,12 @@ export function NotificationList({
                       </button>
                     )}
                     <button
-                      onClick={() => deleteNotification(notification.id)}
+                      onClick={() => dismissNotification(notification.id)}
                       disabled={deletingId === notification.id}
                       className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-white/40 hover:text-red-500 transition-colors disabled:opacity-50"
                     >
                       <Trash2 className="h-3 w-3" />
-                      Delete
+                      Dismiss
                     </button>
                   </div>
                 </div>

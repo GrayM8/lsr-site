@@ -12,9 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Send, User, Users, Search, Loader2 } from "lucide-react";
+import { Send, User, Users, Search, Loader2, X, UserPlus } from "lucide-react";
 import { sendCustomNotification, searchUsers } from "../actions";
-import { useDebounce } from "use-debounce";
 import { toast } from "sonner";
 
 type UserResult = {
@@ -26,54 +25,60 @@ type UserResult = {
 
 export function NotificationComposer() {
   const [isPending, startTransition] = useTransition();
-  const [recipientType, setRecipientType] = useState<"single" | "all">("single");
-  const [selectedUser, setSelectedUser] = useState<UserResult | null>(null);
+  const [recipientType, setRecipientType] = useState<"single" | "multiple" | "all">("single");
+  const [selectedUsers, setSelectedUsers] = useState<UserResult[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<UserResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [debouncedQuery] = useDebounce(searchQuery, 300);
 
   const [sendInApp, setSendInApp] = useState(true);
   const [sendEmail, setSendEmail] = useState(true);
-
-  // Search users when query changes
-  useState(() => {
-    if (debouncedQuery.length >= 2) {
-      setIsSearching(true);
-      searchUsers(debouncedQuery)
-        .then(setSearchResults)
-        .finally(() => setIsSearching(false));
-    } else {
-      setSearchResults([]);
-    }
-  });
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
     if (query.length >= 2) {
       setIsSearching(true);
       const results = await searchUsers(query);
-      setSearchResults(results);
+      // Filter out already selected users
+      const filtered = results.filter(
+        (user) => !selectedUsers.some((s) => s.id === user.id)
+      );
+      setSearchResults(filtered);
       setIsSearching(false);
     } else {
       setSearchResults([]);
     }
   };
 
+  const addUser = (user: UserResult) => {
+    if (recipientType === "single") {
+      setSelectedUsers([user]);
+    } else {
+      setSelectedUsers((prev) => [...prev, user]);
+    }
+    setSearchQuery("");
+    setSearchResults([]);
+  };
+
+  const removeUser = (userId: string) => {
+    setSelectedUsers((prev) => prev.filter((u) => u.id !== userId));
+  };
+
   const handleSubmit = async (formData: FormData) => {
     formData.set("recipientType", recipientType);
-    if (selectedUser) {
-      formData.set("userId", selectedUser.id);
+    if (selectedUsers.length > 0) {
+      formData.set("userIds", JSON.stringify(selectedUsers.map((u) => u.id)));
     }
 
     startTransition(async () => {
       try {
         await sendCustomNotification(formData);
-        toast.success("Notification sent successfully");
+        const count = recipientType === "all" ? "all members" : `${selectedUsers.length} user(s)`;
+        toast.success(`Notification sent to ${count}`);
         // Reset form
-        setSelectedUser(null);
+        setSelectedUsers([]);
         setSearchQuery("");
-      } catch (error) {
+      } catch {
         toast.error("Failed to send notification");
       }
     });
@@ -90,7 +95,14 @@ export function NotificationComposer() {
 
           <Select
             value={recipientType}
-            onValueChange={(v) => setRecipientType(v as "single" | "all")}
+            onValueChange={(v) => {
+              setRecipientType(v as "single" | "multiple" | "all");
+              // Clear selection when switching types
+              if (v === "all") setSelectedUsers([]);
+              if (v === "single" && selectedUsers.length > 1) {
+                setSelectedUsers(selectedUsers.slice(0, 1));
+              }
+            }}
           >
             <SelectTrigger className="rounded-none bg-white/5 border-white/10 text-white">
               <SelectValue />
@@ -100,6 +112,12 @@ export function NotificationComposer() {
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   Single User
+                </div>
+              </SelectItem>
+              <SelectItem value="multiple" className="rounded-none">
+                <div className="flex items-center gap-2">
+                  <UserPlus className="h-4 w-4" />
+                  Multiple Users
                 </div>
               </SelectItem>
               <SelectItem value="all" className="rounded-none">
@@ -112,62 +130,82 @@ export function NotificationComposer() {
           </Select>
 
           {/* User Search */}
-          {recipientType === "single" && (
-            <div className="relative">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
-                <Input
-                  type="text"
-                  placeholder="Search by name, email, or handle..."
-                  value={searchQuery}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  className="rounded-none bg-white/5 border-white/10 text-white pl-10"
-                />
-                {isSearching && (
-                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40 animate-spin" />
-                )}
-              </div>
-
-              {/* Search Results Dropdown */}
-              {searchResults.length > 0 && !selectedUser && (
-                <div className="absolute z-10 w-full mt-1 bg-lsr-charcoal border border-white/10 max-h-48 overflow-y-auto">
-                  {searchResults.map((user) => (
-                    <button
+          {(recipientType === "single" || recipientType === "multiple") && (
+            <div className="space-y-3">
+              {/* Selected Users */}
+              {selectedUsers.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {selectedUsers.map((user) => (
+                    <div
                       key={user.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedUser(user);
-                        setSearchQuery("");
-                        setSearchResults([]);
-                      }}
-                      className="w-full px-4 py-2 text-left hover:bg-white/5 flex flex-col"
+                      className="flex items-center gap-2 px-3 py-1.5 bg-lsr-orange/10 border border-lsr-orange/30"
                     >
-                      <span className="text-sm text-white">{user.displayName}</span>
-                      <span className="text-xs text-white/40">
-                        {user.email} &bull; @{user.handle}
-                      </span>
-                    </button>
+                      <div className="flex flex-col">
+                        <span className="text-sm text-white leading-tight">
+                          {user.displayName}
+                        </span>
+                        <span className="text-[10px] text-white/50 leading-tight">
+                          {user.email}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeUser(user.id)}
+                        className="text-white/50 hover:text-red-500 transition-colors"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
                   ))}
                 </div>
               )}
 
-              {/* Selected User */}
-              {selectedUser && (
-                <div className="mt-2 p-3 bg-lsr-orange/10 border border-lsr-orange/30 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-white">{selectedUser.displayName}</p>
-                    <p className="text-xs text-white/60">{selectedUser.email}</p>
+              {/* Search Input - show if multiple or if single with no selection */}
+              {(recipientType === "multiple" || selectedUsers.length === 0) && (
+                <div className="relative">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+                    <Input
+                      type="text"
+                      placeholder={
+                        recipientType === "multiple"
+                          ? "Search to add users..."
+                          : "Search by name, email, or handle..."
+                      }
+                      value={searchQuery}
+                      onChange={(e) => handleSearch(e.target.value)}
+                      className="rounded-none bg-white/5 border-white/10 text-white pl-10"
+                    />
+                    {isSearching && (
+                      <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40 animate-spin" />
+                    )}
                   </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedUser(null)}
-                    className="rounded-none hover:bg-white/10"
-                  >
-                    Change
-                  </Button>
+
+                  {/* Search Results Dropdown */}
+                  {searchResults.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-lsr-charcoal border border-white/10 max-h-48 overflow-y-auto">
+                      {searchResults.map((user) => (
+                        <button
+                          key={user.id}
+                          type="button"
+                          onClick={() => addUser(user)}
+                          className="w-full px-4 py-2 text-left hover:bg-white/5 flex flex-col"
+                        >
+                          <span className="text-sm text-white">{user.displayName}</span>
+                          <span className="text-xs text-white/40">
+                            {user.email} &bull; @{user.handle}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
+              )}
+
+              {recipientType === "multiple" && selectedUsers.length > 0 && (
+                <p className="text-xs text-white/40">
+                  {selectedUsers.length} user{selectedUsers.length !== 1 ? "s" : ""} selected
+                </p>
               )}
             </div>
           )}
@@ -257,15 +295,22 @@ export function NotificationComposer() {
           >
             Action URL (Optional)
           </Label>
-          <Input
-            id="actionUrl"
-            name="actionUrl"
-            type="url"
-            placeholder="/events/my-event"
-            className="rounded-none bg-white/5 border-white/10 text-white"
-          />
+          <div className="grid md:grid-cols-2 gap-4">
+            <Input
+              id="actionUrl"
+              name="actionUrl"
+              placeholder="/events/my-event"
+              className="rounded-none bg-white/5 border-white/10 text-white"
+            />
+            <Input
+              id="actionText"
+              name="actionText"
+              placeholder="Button text (default: View Details)"
+              className="rounded-none bg-white/5 border-white/10 text-white"
+            />
+          </div>
           <p className="text-xs text-white/40">
-            Link to navigate when the notification is clicked
+            Link and button text for the email call-to-action
           </p>
         </div>
 
@@ -295,7 +340,7 @@ export function NotificationComposer() {
         disabled={
           isPending ||
           (!sendInApp && !sendEmail) ||
-          (recipientType === "single" && !selectedUser)
+          ((recipientType === "single" || recipientType === "multiple") && selectedUsers.length === 0)
         }
         className="rounded-none bg-lsr-orange text-white hover:bg-white hover:text-lsr-charcoal font-bold uppercase tracking-widest text-[10px] h-12 px-8"
       >
