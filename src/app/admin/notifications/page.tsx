@@ -9,6 +9,7 @@ import { NotificationActivity } from "./_components/notification-activity";
 import { NotificationScheduled } from "./_components/notification-scheduled";
 import { NotificationComposer } from "./_components/notification-composer";
 import { NotificationSettings } from "./_components/notification-settings";
+import { NotificationCleanup } from "./_components/notification-cleanup";
 import { Bell, Send, Clock, Settings } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -99,8 +100,9 @@ export default async function AdminNotificationsPage() {
           <NotificationComposer />
         </TabsContent>
 
-        <TabsContent value="settings" className="mt-6">
+        <TabsContent value="settings" className="mt-6 space-y-6">
           <NotificationSettings settings={emailSettings} />
+          <NotificationCleanup />
         </TabsContent>
       </Tabs>
     </div>

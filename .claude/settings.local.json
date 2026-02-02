@@ -7,7 +7,8 @@
       "Bash(npx next build:*)",
       "Bash(npx prisma db push:*)",
       "Bash(npx prisma generate:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npm run lint)"
     ]
   }
 }

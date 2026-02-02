@@ -4,6 +4,8 @@ import {
   getRecentNotifications,
   getUnreadNotificationCount,
   markAllNotificationsAsRead,
+  deleteNotification,
+  deleteAllReadNotifications,
 } from "@/server/services/notification.service";
 
 export async function GET() {
@@ -27,11 +29,21 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { action } = body;
+  const { action, notificationId } = body;
 
   if (action === "markAllRead") {
     await markAllNotificationsAsRead(user.id);
     return NextResponse.json({ success: true });
+  }
+
+  if (action === "delete" && notificationId) {
+    const deleted = await deleteNotification(notificationId, user.id);
+    return NextResponse.json({ success: deleted });
+  }
+
+  if (action === "deleteAllRead") {
+    const count = await deleteAllReadNotifications(user.id);
+    return NextResponse.json({ success: true, deletedCount: count });
   }
 
   return NextResponse.json({ error: "Invalid action" }, { status: 400 });

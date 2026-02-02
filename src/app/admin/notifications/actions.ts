@@ -11,6 +11,7 @@ import {
 } from "@/server/services/notification.service";
 import { setSystemSetting, getSystemSetting, SETTINGS } from "@/lib/email/settings";
 import { NotificationChannel } from "@prisma/client";
+import { createAuditLog } from "@/server/audit/log";
 
 export async function getNotificationStats() {
   const res = await requireAdmin();
@@ -63,7 +64,27 @@ export async function cancelScheduledNotification(notificationId: string) {
   const res = await requireAdmin();
   if (!res.ok) throw new Error("Unauthorized");
 
+  const notification = await prisma.notification.findUnique({
+    where: { id: notificationId },
+    include: { user: { select: { id: true, displayName: true } } },
+  });
+
   await cancelNotification(notificationId);
+
+  if (notification) {
+    await createAuditLog({
+      actorUserId: res.user.id,
+      actionType: "CANCEL",
+      entityType: "NOTIFICATION",
+      entityId: notificationId,
+      targetUserId: notification.userId,
+      summary: `Cancelled scheduled notification "${notification.title}" for ${notification.user.displayName}`,
+      before: { status: notification.status },
+      after: { status: "CANCELLED" },
+      metadata: { type: notification.type, channel: notification.channel },
+    });
+  }
+
   revalidatePath("/admin/notifications");
 }
 
@@ -71,7 +92,27 @@ export async function retryFailedNotification(notificationId: string) {
   const res = await requireAdmin();
   if (!res.ok) throw new Error("Unauthorized");
 
+  const notification = await prisma.notification.findUnique({
+    where: { id: notificationId },
+    include: { user: { select: { id: true, displayName: true } } },
+  });
+
   await retryNotification(notificationId);
+
+  if (notification) {
+    await createAuditLog({
+      actorUserId: res.user.id,
+      actionType: "RETRY",
+      entityType: "NOTIFICATION",
+      entityId: notificationId,
+      targetUserId: notification.userId,
+      summary: `Retried failed notification "${notification.title}" for ${notification.user.displayName}`,
+      before: { status: "FAILED", error: notification.emailError },
+      after: { status: "PENDING" },
+      metadata: { type: notification.type, channel: notification.channel },
+    });
+  }
+
   revalidatePath("/admin/notifications");
 }
 
@@ -103,6 +144,11 @@ export async function sendCustomNotification(formData: FormData) {
   const scheduledDate = scheduledFor ? new Date(scheduledFor) : undefined;
 
   if (recipientType === "single" && userId) {
+    const targetUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { displayName: true },
+    });
+
     await sendNotification({
       userId,
       type: "CUSTOM",
@@ -111,6 +157,17 @@ export async function sendCustomNotification(formData: FormData) {
       actionUrl,
       channels,
       scheduledFor: scheduledDate,
+    });
+
+    await createAuditLog({
+      actorUserId: res.user.id,
+      actionType: "CREATE",
+      entityType: "NOTIFICATION",
+      entityId: "custom",
+      targetUserId: userId,
+      summary: `Sent custom notification "${title}" to ${targetUser?.displayName ?? userId}`,
+      after: { title, body, channels, scheduledFor: scheduledDate?.toISOString() },
+      metadata: { recipientType: "single", actionUrl },
     });
   } else if (recipientType === "all") {
     const users = await prisma.user.findMany({
@@ -125,6 +182,16 @@ export async function sendCustomNotification(formData: FormData) {
       actionUrl,
       channels,
       scheduledFor: scheduledDate,
+    });
+
+    await createAuditLog({
+      actorUserId: res.user.id,
+      actionType: "CREATE",
+      entityType: "NOTIFICATION",
+      entityId: "bulk",
+      summary: `Sent bulk notification "${title}" to ${users.length} active members`,
+      after: { title, body, channels, scheduledFor: scheduledDate?.toISOString() },
+      metadata: { recipientType: "all", recipientCount: users.length, actionUrl },
     });
   }
 
@@ -154,10 +221,25 @@ export async function updateEmailSettings(formData: FormData) {
   const enabled = formData.get("enabled") === "on";
   const fromAddress = formData.get("fromAddress") as string;
 
+  const [prevEnabled, prevFromAddress] = await Promise.all([
+    getSystemSetting<boolean>(SETTINGS.EMAIL_ENABLED),
+    getSystemSetting<string>(SETTINGS.EMAIL_FROM),
+  ]);
+
   await Promise.all([
     setSystemSetting(SETTINGS.EMAIL_ENABLED, enabled),
     setSystemSetting(SETTINGS.EMAIL_FROM, fromAddress),
   ]);
+
+  await createAuditLog({
+    actorUserId: res.user.id,
+    actionType: "UPDATE",
+    entityType: "NOTIFICATION_SETTINGS",
+    entityId: "email",
+    summary: `Updated email notification settings`,
+    before: { enabled: prevEnabled ?? true, fromAddress: prevFromAddress },
+    after: { enabled, fromAddress },
+  });
 
   revalidatePath("/admin/notifications");
 }
@@ -185,4 +267,91 @@ export async function searchUsers(query: string) {
     },
     take: 10,
   });
+}
+
+export async function deleteNotificationAdmin(notificationId: string) {
+  const res = await requireAdmin();
+  if (!res.ok) throw new Error("Unauthorized");
+
+  const notification = await prisma.notification.findUnique({
+    where: { id: notificationId },
+    include: { user: { select: { id: true, displayName: true } } },
+  });
+
+  if (!notification) {
+    throw new Error("Notification not found");
+  }
+
+  await prisma.notification.delete({
+    where: { id: notificationId },
+  });
+
+  await createAuditLog({
+    actorUserId: res.user.id,
+    actionType: "DELETE",
+    entityType: "NOTIFICATION",
+    entityId: notificationId,
+    targetUserId: notification.userId,
+    summary: `Deleted notification "${notification.title}" for ${notification.user.displayName}`,
+    before: {
+      type: notification.type,
+      title: notification.title,
+      status: notification.status,
+      channel: notification.channel,
+    },
+  });
+
+  revalidatePath("/admin/notifications");
+}
+
+export type BulkDeleteFilter = {
+  status?: "SENT" | "FAILED" | "CANCELLED" | "PENDING";
+  olderThanDays?: number;
+};
+
+export async function bulkDeleteNotifications(filter: BulkDeleteFilter) {
+  const res = await requireAdmin();
+  if (!res.ok) throw new Error("Unauthorized");
+
+  const where: {
+    status?: "SENT" | "FAILED" | "CANCELLED" | "PENDING";
+    createdAt?: { lt: Date };
+  } = {};
+
+  if (filter.status) {
+    where.status = filter.status;
+  }
+
+  if (filter.olderThanDays) {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - filter.olderThanDays);
+    where.createdAt = { lt: cutoffDate };
+  }
+
+  const count = await prisma.notification.count({ where });
+
+  if (count === 0) {
+    return { deletedCount: 0 };
+  }
+
+  await prisma.notification.deleteMany({ where });
+
+  const filterDescription = [
+    filter.status ? `status: ${filter.status}` : null,
+    filter.olderThanDays ? `older than ${filter.olderThanDays} days` : null,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  await createAuditLog({
+    actorUserId: res.user.id,
+    actionType: "BULK_DELETE",
+    entityType: "NOTIFICATION",
+    entityId: "bulk",
+    summary: `Bulk deleted ${count} notifications (${filterDescription})`,
+    metadata: { filter, deletedCount: count },
+  });
+
+  revalidatePath("/admin/notifications");
+  return { deletedCount: count };
 }

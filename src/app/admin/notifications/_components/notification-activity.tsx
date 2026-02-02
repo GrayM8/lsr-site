@@ -14,8 +14,9 @@ import {
   CheckCircle,
   XCircle,
   Clock,
+  Trash2,
 } from "lucide-react";
-import { retryFailedNotification } from "../actions";
+import { retryFailedNotification, deleteNotificationAdmin } from "../actions";
 
 type NotificationWithUser = Notification & {
   user: { id: string; displayName: string; email: string };
@@ -28,6 +29,7 @@ export function NotificationActivity({
 }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [retrying, setRetrying] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   const handleRetry = async (id: string) => {
     setRetrying(id);
@@ -35,6 +37,16 @@ export function NotificationActivity({
       await retryFailedNotification(id);
     } finally {
       setRetrying(null);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this notification?")) return;
+    setDeleting(id);
+    try {
+      await deleteNotificationAdmin(id);
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -199,24 +211,43 @@ export function NotificationActivity({
                     </p>
                   </div>
                 )}
-                {notification.status === "FAILED" && (
+                <div className="flex items-center gap-2">
+                  {notification.status === "FAILED" && (
+                    <Button
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRetry(notification.id);
+                      }}
+                      disabled={retrying === notification.id}
+                      className="rounded-none bg-lsr-orange text-white hover:bg-white hover:text-lsr-charcoal text-[10px] uppercase tracking-widest"
+                    >
+                      {retrying === notification.id ? (
+                        <RefreshCw className="h-3 w-3 animate-spin mr-2" />
+                      ) : (
+                        <RefreshCw className="h-3 w-3 mr-2" />
+                      )}
+                      Retry
+                    </Button>
+                  )}
                   <Button
                     size="sm"
+                    variant="ghost"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleRetry(notification.id);
+                      handleDelete(notification.id);
                     }}
-                    disabled={retrying === notification.id}
-                    className="rounded-none bg-lsr-orange text-white hover:bg-white hover:text-lsr-charcoal text-[10px] uppercase tracking-widest"
+                    disabled={deleting === notification.id}
+                    className="rounded-none text-white/50 hover:text-red-500 hover:bg-red-500/10 text-[10px] uppercase tracking-widest"
                   >
-                    {retrying === notification.id ? (
-                      <RefreshCw className="h-3 w-3 animate-spin mr-2" />
+                    {deleting === notification.id ? (
+                      <Trash2 className="h-3 w-3 animate-pulse mr-2" />
                     ) : (
-                      <RefreshCw className="h-3 w-3 mr-2" />
+                      <Trash2 className="h-3 w-3 mr-2" />
                     )}
-                    Retry
+                    Delete
                   </Button>
-                )}
+                </div>
               </div>
             </div>
           )}

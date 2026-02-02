@@ -965,6 +965,7 @@ model Notification {
   scheduledFor    DateTime?           // Null = send immediately
   sentAt          DateTime?
   readAt          DateTime?           // For in-app only
+  dismissedAt     DateTime?           // User dismissed/hid notification (soft delete)
 
   // For email tracking
   emailMessageId  String?             // Resend message ID
@@ -976,6 +977,7 @@ model Notification {
   user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, channel, readAt])
+  @@index([userId, channel, dismissedAt])
   @@index([status, scheduledFor])
   @@index([type, createdAt])
 }

@@ -363,3 +363,34 @@ export async function getRecentNotifications(
     take: limit,
   });
 }
+
+/**
+ * Delete a notification (user-side, no audit logging).
+ */
+export async function deleteNotification(
+  notificationId: string,
+  userId: string
+): Promise<boolean> {
+  const result = await prisma.notification.deleteMany({
+    where: {
+      id: notificationId,
+      userId,
+      channel: "IN_APP",
+    },
+  });
+  return result.count > 0;
+}
+
+/**
+ * Delete all read notifications for a user.
+ */
+export async function deleteAllReadNotifications(userId: string): Promise<number> {
+  const result = await prisma.notification.deleteMany({
+    where: {
+      userId,
+      channel: "IN_APP",
+      readAt: { not: null },
+    },
+  });
+  return result.count;
+}
