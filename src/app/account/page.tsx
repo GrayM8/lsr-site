@@ -1,18 +1,34 @@
 import { redirect } from 'next/navigation';
 import { getCachedSessionUser } from '@/server/auth/cached-session';
-import { updateMarketingOptIn, retireAccount, deleteAccount } from './actions';
+import { updateMarketingOptIn, updateNotificationPreferences, retireAccount, deleteAccount } from './actions';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { MarketingToggle } from '@/components/marketing-toggle';
 import { ConfirmSubmitButton } from '@/components/confirm-submit-button';
+import { NotificationPreferences } from '@/components/notification-preferences';
+import { prisma } from '@/server/db';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AccountPage() {
   const { user } = await getCachedSessionUser();
   if (!user) redirect('/login');
+
+  // Fetch notification preferences
+  const notificationPrefs = await prisma.notificationPreference.findUnique({
+    where: { userId: user.id },
+  });
+
+  // Default preferences if none exist
+  const preferences = notificationPrefs ?? {
+    emailRegistration: true,
+    emailWaitlistPromotion: true,
+    emailEventReminder: false,
+    emailEventPosted: false,
+    emailResultsPosted: false,
+  };
 
   return (
     <main className="bg-lsr-charcoal text-white min-h-screen pt-20 pb-20">
@@ -53,14 +69,16 @@ export default async function AccountPage() {
           </div>
         </section>
 
-        {/* MARKETING TOGGLE */}
+        {/* COMMUNICATION PREFERENCES */}
         <section className="space-y-6">
-          <h2 className="font-sans font-bold text-xs text-lsr-orange uppercase tracking-[0.2em]">Preferences</h2>
+          <h2 className="font-sans font-bold text-xs text-lsr-orange uppercase tracking-[0.2em]">Communication Preferences</h2>
+
+          {/* Master Email Toggle */}
           <form action={updateMarketingOptIn} className="rounded-none border border-white/5 bg-white/[0.03] p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <h3 className="font-display font-bold italic text-xl text-white uppercase tracking-tight">Marketing Opt-in</h3>
+              <h3 className="font-display font-bold italic text-xl text-white uppercase tracking-tight">Email Notifications</h3>
               <p className="font-sans text-sm text-white/50 mt-2 max-w-md">
-                Receive news and event updates. You can change this anytime.
+                Enable email notifications and marketing updates. Turning this off disables all emails.
               </p>
             </div>
             <div className="flex items-center gap-6">
@@ -72,6 +90,25 @@ export default async function AccountPage() {
                 Save
               </Button>
             </div>
+          </form>
+
+          {/* Granular Notification Preferences */}
+          <form action={updateNotificationPreferences} className="rounded-none border border-white/5 bg-white/[0.03] p-8">
+            <div className="mb-6">
+              <h3 className="font-display font-bold italic text-xl text-white uppercase tracking-tight">Notification Types</h3>
+              <p className="font-sans text-sm text-white/50 mt-2 max-w-md">
+                Choose which email notifications you want to receive.
+                {!user.marketingOptIn && (
+                  <span className="block mt-2 text-lsr-orange">
+                    Enable email notifications above to customize these settings.
+                  </span>
+                )}
+              </p>
+            </div>
+            <NotificationPreferences
+              preferences={preferences}
+              disabled={!user.marketingOptIn}
+            />
           </form>
         </section>
 

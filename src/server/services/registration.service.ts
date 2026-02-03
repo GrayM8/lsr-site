@@ -1,6 +1,8 @@
 import { prisma } from "@/server/db";
 import { RegistrationStatus, Prisma } from "@prisma/client";
 import { createAuditLog } from "@/server/audit/log";
+import { sendNotification } from "@/server/services/notification.service";
+import { format } from "date-fns";
 
 /**
  * Core Registration Service
@@ -15,17 +17,19 @@ import { createAuditLog } from "@/server/audit/log";
  * 
  * Must be called within a transaction where the Event is locked.
  */
-async function reconcileEvent(tx: Prisma.TransactionClient, eventId: string) {
+async function reconcileEvent(tx: Prisma.TransactionClient, eventId: string): Promise<string[]> {
   const event = await tx.event.findUnique({ where: { id: eventId } });
   if (!event) throw new Error("Event not found during reconciliation");
 
-  // If no limit, everyone should be registered. 
+  const promotedUserIds: string[] = [];
+
+  // If no limit, everyone should be registered.
   // (In practice, if we switch from Limited to Unlimited, we might want to promote everyone)
   if (event.registrationMax === null) {
     const waitlisted = await tx.eventRegistration.findMany({
       where: { eventId, status: "WAITLISTED" },
     });
-    
+
     for (const reg of waitlisted) {
       await tx.eventRegistration.update({
         where: { id: reg.id },
@@ -36,8 +40,9 @@ async function reconcileEvent(tx: Prisma.TransactionClient, eventId: string) {
           waitlistOrder: null, // Clear waitlist order
         },
       });
+      promotedUserIds.push(reg.userId);
     }
-    return;
+    return promotedUserIds;
   }
 
   // Limited Capacity
@@ -67,8 +72,11 @@ async function reconcileEvent(tx: Prisma.TransactionClient, eventId: string) {
           waitlistOrder: null,
         },
       });
+      promotedUserIds.push(reg.userId);
     }
   }
+
+  return promotedUserIds;
 }
 
 /**
@@ -79,7 +87,7 @@ export async function registerForEvent(
   eventId: string,
   intent: "YES" | "NO"
 ) {
-  return await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     // 1. Lock the Event row to ensure sequential processing of capacity
     // This prevents race conditions where multiple users grab the last spot.
     await tx.$executeRaw`SELECT 1 FROM "Event" WHERE id = ${eventId} FOR UPDATE`;
@@ -105,6 +113,9 @@ export async function registerForEvent(
       where: { eventId_userId: { eventId, userId } },
     });
 
+    // Track promoted users for notifications
+    let promotedUserIds: string[] = [];
+
     // 4. Handle "NO" (Not Attending)
     if (intent === "NO") {
       if (currentReg) {
@@ -117,10 +128,10 @@ export async function registerForEvent(
             // We keep the record to track they explicitly said NO
           },
         });
-        
+
         // If they were registered, we must reconcile to potentially promote someone
         if (currentReg.status === "REGISTERED") {
-          await reconcileEvent(tx, eventId);
+          promotedUserIds = await reconcileEvent(tx, eventId);
         }
       } else {
         // Create explicit NO record
@@ -132,11 +143,11 @@ export async function registerForEvent(
           },
         });
       }
-      return { status: "NOT_ATTENDING" };
+      return { status: "NOT_ATTENDING" as const, event, promotedUserIds };
     }
 
     // 5. Handle "YES" (Registering)
-    
+
     // Determine Target Status based on Capacity
     let targetStatus: RegistrationStatus = "REGISTERED";
     let waitlistOrder: number | null = null;
@@ -148,14 +159,14 @@ export async function registerForEvent(
 
       // Check if user is ALREADY registered, they take up a slot, so count remains same for them
       const isAlreadyRegistered = currentReg?.status === "REGISTERED";
-      
+
       if (!isAlreadyRegistered && registeredCount >= event.registrationMax) {
         // Full -> Waitlist
         if (!event.registrationWaitlistEnabled) {
           throw new Error("Event is full and waitlist is disabled.");
         }
         targetStatus = "WAITLISTED";
-        
+
         // Calculate new Waitlist Order (Append to end)
         // We get the max order currently in DB
         const maxOrderAgg = await tx.eventRegistration.aggregate({
@@ -173,7 +184,7 @@ export async function registerForEvent(
       // The logic above says: if space available -> REGISTERED.
       // If user is currently WAITLISTED and space opened up, they should have been auto-promoted.
       // But if they weren't (race condition), we re-evaluate here.
-      
+
       // Preservation of Waitlist Position:
       // If user is WAITLISTED and stays WAITLISTED, keep order.
       if (currentReg.status === "WAITLISTED" && targetStatus === "WAITLISTED") {
@@ -205,10 +216,55 @@ export async function registerForEvent(
     // Actually, if we just took a spot, reconcile does nothing.
     // If we joined waitlist, reconcile does nothing.
     // But good practice to call it to catch edge cases.
-    await reconcileEvent(tx, eventId);
+    promotedUserIds = await reconcileEvent(tx, eventId);
 
-    return { status: targetStatus };
+    return { status: targetStatus, event, promotedUserIds };
   });
+
+  // Send notifications after transaction commits (fire and forget)
+  try {
+    // Notify the registering user if they got registered
+    if (result.status === "REGISTERED") {
+      const eventDate = format(result.event.startsAtUtc, "EEEE, MMMM d 'at' h:mm a");
+      sendNotification({
+        userId,
+        type: "REGISTRATION_CONFIRMED",
+        title: `You're registered for ${result.event.title}!`,
+        body: `See you on ${eventDate}.`,
+        actionUrl: `/events/${result.event.slug}`,
+        channels: ["IN_APP", "EMAIL"],
+        metadata: {
+          eventId,
+          title: result.event.title,
+          startsAt: result.event.startsAtUtc,
+          slug: result.event.slug,
+        },
+      }).catch((err) => console.error("[Notification] Failed to send registration notification:", err));
+    }
+
+    // Notify users who got promoted from waitlist
+    for (const promotedUserId of result.promotedUserIds) {
+      sendNotification({
+        userId: promotedUserId,
+        type: "WAITLIST_PROMOTED",
+        title: `You're in! Promoted from waitlist`,
+        body: `A spot opened up for ${result.event.title}.`,
+        actionUrl: `/events/${result.event.slug}`,
+        channels: ["IN_APP", "EMAIL"],
+        metadata: {
+          eventId,
+          title: result.event.title,
+          startsAt: result.event.startsAtUtc,
+          slug: result.event.slug,
+        },
+      }).catch((err) => console.error("[Notification] Failed to send waitlist promotion notification:", err));
+    }
+  } catch (err) {
+    // Don't fail the registration if notifications fail
+    console.error("[Notification] Error sending notifications:", err);
+  }
+
+  return { status: result.status };
 }
 
 /**
@@ -223,9 +279,12 @@ export async function adminOverrideRegistration(
   newStatus: RegistrationStatus,
   reason?: string
 ) {
-  return await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     // Lock Event
     await tx.$executeRaw`SELECT 1 FROM "Event" WHERE id = ${eventId} FOR UPDATE`;
+
+    const event = await tx.event.findUnique({ where: { id: eventId } });
+    if (!event) throw new Error("Event not found");
 
     const currentReg = await tx.eventRegistration.findUnique({
       where: { eventId_userId: { eventId, userId: targetUserId } },
@@ -245,25 +304,27 @@ export async function adminOverrideRegistration(
       }
     }
 
+    const wasPromotedByAdmin = newStatus === "REGISTERED" && currentReg?.status !== "REGISTERED";
+
     const data: Prisma.EventRegistrationUncheckedCreateInput = {
       eventId,
       userId: targetUserId,
       status: newStatus,
       waitlistOrder,
       statusReason: reason,
-      promotionSource: newStatus === "REGISTERED" && currentReg?.status !== "REGISTERED" ? "ADMIN" : undefined,
-      promotedAt: newStatus === "REGISTERED" && currentReg?.status !== "REGISTERED" ? new Date() : undefined,
+      promotionSource: wasPromotedByAdmin ? "ADMIN" : undefined,
+      promotedAt: wasPromotedByAdmin ? new Date() : undefined,
     };
 
     if (currentReg) {
       await tx.eventRegistration.update({
         where: { id: currentReg.id },
         data: {
-            status: newStatus,
-            waitlistOrder: newStatus === "WAITLISTED" ? waitlistOrder : null,
-            statusReason: reason,
-            promotionSource: data.promotionSource,
-            promotedAt: data.promotedAt,
+          status: newStatus,
+          waitlistOrder: newStatus === "WAITLISTED" ? waitlistOrder : null,
+          statusReason: reason,
+          promotionSource: data.promotionSource,
+          promotedAt: data.promotedAt,
         },
       });
     } else {
@@ -271,27 +332,77 @@ export async function adminOverrideRegistration(
     }
 
     // Audit Log
-    await createAuditLog({
-      actorUserId: adminUserId,
-      actionType: "REGISTRATION_CHANGE",
-      entityType: "EVENT_REGISTRATION",
-      entityId: currentReg?.id || "NEW",
-      targetUserId,
-      summary: `Changed registration status for ${targetUserId} to ${newStatus}`,
-      metadata: {
-        eventId,
+    await createAuditLog(
+      {
+        actorUserId: adminUserId,
+        actionType: "REGISTRATION_CHANGE",
+        entityType: "EVENT_REGISTRATION",
+        entityId: currentReg?.id || "NEW",
         targetUserId,
-        oldStatus: currentReg?.status || "NONE",
-        newStatus,
-        reason,
+        summary: `Changed registration status for ${targetUserId} to ${newStatus}`,
+        metadata: {
+          eventId,
+          targetUserId,
+          oldStatus: currentReg?.status || "NONE",
+          newStatus,
+          reason,
+        },
+        before: currentReg ? { status: currentReg.status } : null,
+        after: { status: newStatus },
       },
-      before: currentReg ? { status: currentReg.status } : null,
-      after: { status: newStatus },
-    }, tx);
+      tx
+    );
 
     // Reconcile: E.g., if Admin removed a REGISTERED user, auto-promote next waitlisted.
-    await reconcileEvent(tx, eventId);
+    const promotedUserIds = await reconcileEvent(tx, eventId);
+
+    return { event, wasPromotedByAdmin, promotedUserIds };
   });
+
+  // Send notifications after transaction commits (fire and forget)
+  try {
+    // Notify user if they were promoted by admin
+    if (result.wasPromotedByAdmin) {
+      sendNotification({
+        userId: targetUserId,
+        type: "WAITLIST_PROMOTED",
+        title: `You're in! Promoted from waitlist`,
+        body: `An admin has registered you for ${result.event.title}.`,
+        actionUrl: `/events/${result.event.slug}`,
+        channels: ["IN_APP", "EMAIL"],
+        metadata: {
+          eventId,
+          title: result.event.title,
+          startsAt: result.event.startsAtUtc,
+          slug: result.event.slug,
+        },
+      }).catch((err) =>
+        console.error("[Notification] Failed to send admin promotion notification:", err)
+      );
+    }
+
+    // Notify users who got auto-promoted from waitlist
+    for (const promotedUserId of result.promotedUserIds) {
+      sendNotification({
+        userId: promotedUserId,
+        type: "WAITLIST_PROMOTED",
+        title: `You're in! Promoted from waitlist`,
+        body: `A spot opened up for ${result.event.title}.`,
+        actionUrl: `/events/${result.event.slug}`,
+        channels: ["IN_APP", "EMAIL"],
+        metadata: {
+          eventId,
+          title: result.event.title,
+          startsAt: result.event.startsAtUtc,
+          slug: result.event.slug,
+        },
+      }).catch((err) =>
+        console.error("[Notification] Failed to send waitlist promotion notification:", err)
+      );
+    }
+  } catch (err) {
+    console.error("[Notification] Error sending notifications:", err);
+  }
 }
 
 /**

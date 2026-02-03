@@ -14,7 +14,8 @@ import {
   FileSpreadsheet,
   Users,
   Car,
-  List
+  List,
+  Bell
 } from "lucide-react";
 
 const navItems = [
@@ -26,6 +27,7 @@ const navItems = [
   { title: "Venues", href: "/admin/venues", icon: MapPin },
   { title: "Gallery", href: "/admin/gallery", icon: ImageIcon },
   { title: "News", href: "/admin/news", icon: Newspaper },
+  { title: "Notifications", href: "/admin/notifications", icon: Bell },
   { title: "Driver Mappings", href: "/admin/drivers", icon: Users },
   { title: "Car Mappings", href: "/admin/cars", icon: Car },
   { title: "Misc. Tools", href: "/admin/tools", icon: Wrench },
