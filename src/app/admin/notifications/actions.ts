@@ -27,7 +27,7 @@ export async function getNotificationStats() {
   return { total, pending, sent, failed };
 }
 
-export async function getRecentNotifications(limit = 50) {
+export async function getRecentNotifications(limit = 20, skip = 0) {
   const res = await requireAdmin();
   if (!res.ok) throw new Error("Unauthorized");
 
@@ -39,6 +39,7 @@ export async function getRecentNotifications(limit = 50) {
     },
     orderBy: { createdAt: "desc" },
     take: limit,
+    skip: skip,
   });
 }
 
