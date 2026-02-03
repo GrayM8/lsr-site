@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Shield } from "lucide-react";
+import { Shield, User as UserIcon, Settings, LogOut } from "lucide-react";
 import { AuthDialog } from "./auth-dialog";
 import { User } from "@prisma/client";
 import { motion, AnimatePresence } from "framer-motion";
@@ -93,27 +93,25 @@ export function UserMenuClient({
                 onSelect={() => router.push(user.handle ? `/drivers/${user.handle}` : "/drivers/me")}
                 className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
               >
-                My driver page
+                <UserIcon className="mr-2 h-3 w-3" />
+                <span>My driver page</span>
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onSelect={() => router.push("/account")}
                 className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
               >
-                Account details
+                <Settings className="mr-2 h-3 w-3" />
+                <span>Account Settings</span>
               </DropdownMenuItem>
 
               {isAdmin && (
-                <>
-                  <DropdownMenuSeparator className="bg-white/5" />
-                  <DropdownMenuLabel className="px-4 py-2 font-sans font-black text-[9px] uppercase tracking-[0.3em] text-white/20">System Admin</DropdownMenuLabel>
-                  <DropdownMenuItem 
-                    onSelect={() => router.push("/admin")}
-                    className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
-                  >
-                    <Shield className="mr-2 h-3 w-3" />
-                    <span>Admin Console</span>
-                  </DropdownMenuItem>
-                </>
+                <DropdownMenuItem 
+                  onSelect={() => router.push("/admin")}
+                  className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
+                >
+                  <Shield className="mr-2 h-3 w-3" />
+                  <span>Admin Console</span>
+                </DropdownMenuItem>
               )}
 
               <DropdownMenuSeparator className="bg-white/5" />
@@ -125,7 +123,8 @@ export function UserMenuClient({
                 }}
                 className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-red-600 focus:text-white cursor-pointer"
               >
-                Log out
+                <LogOut className="mr-2 h-3 w-3" />
+                <span>Log out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

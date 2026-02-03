@@ -35,7 +35,7 @@ export default async function AccountPage() {
       <div className="mx-auto max-w-4xl px-6 md:px-8 space-y-12">
         <div>
           <h1 className="font-display font-black italic text-4xl md:text-6xl text-white uppercase tracking-normal">
-            Account <span className="text-lsr-orange">Details</span>
+            Account <span className="text-lsr-orange">Settings</span>
           </h1>
           <p className="font-sans font-medium text-white/60 mt-4 max-w-2xl leading-relaxed">
             Manage your driver profile, preferences, and account settings.
@@ -44,7 +44,7 @@ export default async function AccountPage() {
 
         <div className="w-full h-px bg-white/5" />
 
-        {/* ACCOUNT DETAILS */}
+        {/* ACCOUNT SETTINGS */}
         <section className="space-y-6">
           <h2 className="font-sans font-bold text-xs text-lsr-orange uppercase tracking-[0.2em]">Profile Information</h2>
           <div className="rounded-none border border-white/5 bg-white/[0.03] p-8">
