@@ -37,102 +37,105 @@ export default async function DriversIndexPage({
     where: {
       status: { not: 'deleted' },
     },
-    include: { roles: { include: { role: true } } },
+    include: {
+      roles: { include: { role: true } },
+      memberships: { include: { tier: true } }
+    },
   });
 
   // Calculate All Time Points
   const driverIds = allDrivers.map(d => d.id);
   const pointsData = await prisma.entry.groupBy({
-      by: ['userId'],
-      _sum: { totalPoints: true },
-      where: { userId: { in: driverIds } }
+    by: ['userId'],
+    _sum: { totalPoints: true },
+    where: { userId: { in: driverIds } }
   });
-  
+
   const pointsMap = new Map(pointsData.map(p => [p.userId, p._sum.totalPoints || 0]));
-  
+
   // Sort by All Time Points Descending to assign Rank
   const rankedDrivers = allDrivers.map(d => ({
-      ...d,
-      allTimePoints: pointsMap.get(d.id) || 0
+    ...d,
+    allTimePoints: pointsMap.get(d.id) || 0
   })).sort((a, b) => {
-      if (b.allTimePoints !== a.allTimePoints) return b.allTimePoints - a.allTimePoints;
-      return a.displayName.localeCompare(b.displayName);
+    if (b.allTimePoints !== a.allTimePoints) return b.allTimePoints - a.allTimePoints;
+    return a.displayName.localeCompare(b.displayName);
   }).map((d, index) => ({
-      ...d,
-      rank: index + 1
+    ...d,
+    rank: index + 1
   }));
 
   // Apply Filters (Search & Roles) on the Ranked List
   const filteredDrivers = rankedDrivers.filter(d => {
-      // Search Filter
-      if (q) {
-          const matchesName = d.displayName.toLowerCase().includes(q);
-          const matchesHandle = d.handle.toLowerCase().includes(q);
-          if (!matchesName && !matchesHandle) return false;
-      }
+    // Search Filter
+    if (q) {
+      const matchesName = d.displayName.toLowerCase().includes(q);
+      const matchesHandle = d.handle.toLowerCase().includes(q);
+      if (!matchesName && !matchesHandle) return false;
+    }
 
-      // Role Filter
-      if (selectedRoles.length > 0) {
-          const hasRole = d.roles.some(r => selectedRoles.includes(r.role.key as RoleCode));
-          if (!hasRole) return false;
-      }
+    // Role Filter
+    if (selectedRoles.length > 0) {
+      const hasRole = d.roles.some(r => selectedRoles.includes(r.role.key as RoleCode));
+      if (!hasRole) return false;
+    }
 
-      return true;
+    return true;
   });
 
   const now = new Date();
 
   // Fetch Latest Result Event
   const latestEvent = await prisma.event.findFirst({
-      where: {
-          ingestedSessions: {
-              some: {
-                  sessionType: "RACE",
-                  results: { some: {} }
-              }
-          }
-      },
-      orderBy: { startsAtUtc: 'desc' },
-      include: {
-          series: true,
-          round: { include: { season: true } },
-          ingestedSessions: {
-              where: { sessionType: "RACE" },
-              orderBy: { startedAt: 'desc' },
-              take: 1,
-              include: {
-                  results: {
-                      orderBy: { position: 'asc' },
-                      take: 3,
-                      include: {
-                          participant: {
-                              include: { user: true }
-                          }
-                      }
-                  }
-              }
-          }
+    where: {
+      ingestedSessions: {
+        some: {
+          sessionType: "RACE",
+          results: { some: {} }
+        }
       }
+    },
+    orderBy: { startsAtUtc: 'desc' },
+    include: {
+      series: true,
+      round: { include: { season: true } },
+      ingestedSessions: {
+        where: { sessionType: "RACE" },
+        orderBy: { startedAt: 'desc' },
+        take: 1,
+        include: {
+          results: {
+            orderBy: { position: 'asc' },
+            take: 3,
+            include: {
+              participant: {
+                include: { user: true }
+              }
+            }
+          }
+        }
+      }
+    }
   });
 
   // Fetch Upcoming Event
   const upcomingEvent = await prisma.event.findFirst({
-      where: {
-          startsAtUtc: { gt: now },
-          status: { notIn: ["DRAFT", "CANCELLED"] },
-          series: {
-              slug: { contains: "lone-star-cup" }
-          }
-      },
-      orderBy: { startsAtUtc: 'asc' },
-      include: {
-          series: true,
-          round: { include: { season: true } },
-          ingestedSessions: {
-             // Included to satisfy type, returns empty usually
-             include: { results: { include: { participant: { include: { user: true } } } } }
-          }
+    where: {
+      startsAtUtc: { gt: now },
+      status: { notIn: ["DRAFT", "CANCELLED"] },
+      series: {
+        slug: { contains: "lone-star-cup" }
       }
+    },
+    orderBy: { startsAtUtc: 'asc' },
+    include: {
+      series: true,
+      round: { include: { season: true } },
+      ingestedSessions: {
+        // Included to satisfy type, returns empty usually
+        include: { results: { include: { participant: { include: { user: true } } } } }
+      }
+    }
   });
 
   return (

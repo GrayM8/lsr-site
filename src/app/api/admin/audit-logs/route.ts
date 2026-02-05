@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/server/db";
-import { requireAdmin } from "@/lib/authz";
+import { requireOfficer } from "@/server/auth/guards";
 import { Prisma } from "@prisma/client";
 
 export async function GET(req: NextRequest) {
-  const auth = await requireAdmin();
-  if (!auth.ok) {
+  try {
+    await requireOfficer();
+  } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 

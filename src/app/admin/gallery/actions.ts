@@ -2,14 +2,11 @@
 
 import { prisma } from '@/server/db';
 import { revalidatePath } from 'next/cache';
-import { requireAdmin } from '@/lib/authz';
+import { requireOfficer } from '@/server/auth/guards';
 import { createAuditLog } from '@/server/audit/log';
-import { getSessionUser } from '@/server/auth/session';
 
 export async function createImage(publicId: string) {
-  await requireAdmin();
-  const { user } = await getSessionUser();
-  if (!user) throw new Error("Unauthorized");
+  const user = await requireOfficer();
 
   const newImage = await prisma.galleryImage.create({
     data: {
@@ -32,9 +29,7 @@ export async function createImage(publicId: string) {
 }
 
 export async function updateImageOrder(images: { id: string; order: number }[]) {
-  await requireAdmin();
-  const { user } = await getSessionUser();
-  if (!user) throw new Error("Unauthorized");
+  const user = await requireOfficer();
 
   const transactions = images.map((image) =>
     prisma.galleryImage.update({
@@ -58,9 +53,7 @@ export async function updateImageOrder(images: { id: string; order: number }[]) 
 }
 
 export async function deleteImage(id: string) {
-  await requireAdmin();
-  const { user } = await getSessionUser();
-  if (!user) throw new Error("Unauthorized");
+  const user = await requireOfficer();
 
   await prisma.galleryImage.delete({ where: { id } });
 
@@ -77,9 +70,7 @@ export async function deleteImage(id: string) {
 }
 
 export async function updateImageCredit(id: string, creditName: string | null, creditUrl: string | null) {
-  await requireAdmin();
-  const { user } = await getSessionUser();
-  if (!user) throw new Error("Unauthorized");
+  const user = await requireOfficer();
 
   await prisma.galleryImage.update({
     where: { id },

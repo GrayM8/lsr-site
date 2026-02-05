@@ -9,6 +9,7 @@ import React from "react";
 import { SiteFooter } from "@/components/site-footer"
 import { LiveBanner } from "@/components/live-banner";
 import { getCachedSessionUser } from "@/server/auth/cached-session";
+import { prisma } from "@/server/db";
 import { Toaster } from "@/components/ui/sonner";
 import { CartProvider } from "@/lib/shopify/CartContext";
 
@@ -68,6 +69,18 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { user, roles } = await getCachedSessionUser();
 
+  let activeTierKey: string | null = null;
+  if (user) {
+    const activeMembership = await prisma.userMembership.findFirst({
+      where: {
+        userId: user.id,
+        OR: [{ validTo: null }, { validTo: { gt: new Date() } }],
+      },
+      include: { tier: { select: { key: true } } },
+    });
+    activeTierKey = activeMembership?.tier.key ?? null;
+  }
+
   return (
     <html
       lang="en"
@@ -79,7 +92,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <ThemeProvider>
       <CartProvider>
         <LiveBanner />
-        <SiteHeader user={user} roles={roles} />
+        <SiteHeader user={user} roles={roles} activeTierKey={activeTierKey} />
         <main className="flex-1">{children}</main>
         <SiteFooter />
         <Toaster position="bottom-right" />

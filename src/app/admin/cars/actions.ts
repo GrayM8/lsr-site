@@ -1,21 +1,18 @@
 "use server";
 
-import { requireAdmin } from "@/lib/authz";
+import { requireOfficer } from "@/server/auth/guards";
 import { prisma } from "@/server/db";
 import { revalidatePath } from "next/cache";
 import { createAuditLog } from "@/server/audit/log";
-import { getSessionUser } from "@/server/auth/session";
 
 export async function updateCarMapping(id: string, displayName: string, secondaryDisplayName: string | null) {
-  const { ok } = await requireAdmin();
-  const { user } = await getSessionUser();
-  if (!ok || !user) throw new Error("Unauthorized");
+  const user = await requireOfficer();
 
   await prisma.carMapping.update({
     where: { id },
-    data: { 
+    data: {
         displayName,
-        secondaryDisplayName: secondaryDisplayName || null 
+        secondaryDisplayName: secondaryDisplayName || null
     },
   });
 
@@ -32,9 +29,7 @@ export async function updateCarMapping(id: string, displayName: string, secondar
 }
 
 export async function createCarMapping(gameCarName: string, displayName: string, secondaryDisplayName: string | null) {
-  const { ok } = await requireAdmin();
-  const { user } = await getSessionUser();
-  if (!ok || !user) throw new Error("Unauthorized");
+  const user = await requireOfficer();
 
   const carMapping = await prisma.carMapping.create({
     data: {
@@ -63,8 +58,7 @@ export async function createCarMapping(gameCarName: string, displayName: string,
 }
 
 export async function getUnmappedCarNames() {
-    const { ok } = await requireAdmin();
-    if (!ok) return []; // Or throw
+    await requireOfficer();
 
     // distinct carNames where carMappingId is null
     const results = await prisma.raceParticipant.findMany({

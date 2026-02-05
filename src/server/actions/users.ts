@@ -1,0 +1,132 @@
+"use server";
+
+import { prisma } from "@/server/db";
+import { requireOfficer, requireSystemAdmin } from "@/server/auth/guards";
+import { revalidatePath } from "next/cache";
+
+export type UpdateUserPayload = {
+    officerTitle: string | null;
+    roleKeys: string[];
+    activeMembershipTierKey: string | null; // e.g. "LSR_MEMBER"
+    activeMembershipValidTo: Date | null;
+};
+
+export async function updateUser(userId: string, payload: UpdateUserPayload) {
+    const currentUser = await requireOfficer();
+
+    // 1. Fetch target user to check for Officer protection
+    const targetUser = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { roles: { include: { role: true } } },
+    });
+
+    if (!targetUser) {
+        throw new Error("User not found");
+    }
+
+    const isTargetOfficer = targetUser.roles.some((r) => ["admin", "officer"].includes(r.role.key));
+    const isTargetAdmin = targetUser.roles.some((r) => r.role.key === "admin");
+    const isCurrentSystemAdmin = await prisma.userRole.count({
+        where: { userId: currentUser.id, role: { key: "admin" } }
+    }).then(c => c > 0);
+
+
+    // PROTECTION: Only Admins can edit Admins/Officers roles
+    // If the target IS an officer/admin, and the current user is NOT an admin, fail.
+    if ((isTargetOfficer || isTargetAdmin) && !isCurrentSystemAdmin) {
+        // Exception: Officer editing THEMSELVES? (Maybe allow title, but usually not roles)
+        // For now, strict: Officers cannot edit other Officers or Admins.
+        throw new Error("Only Administrators can modify Officer/Admin accounts.");
+    }
+
+    // Also prevent Officer from PROMOTING someone to Officer/Admin
+    const isPromotingToOfficer = payload.roleKeys.some(k => ["admin", "officer"].includes(k));
+    if (isPromotingToOfficer && !isCurrentSystemAdmin) {
+        throw new Error("Only Administrators can promote users to Officer roles.");
+    }
+
+    // 2. Update Basic Info (Title)
+    await prisma.user.update({
+        where: { id: userId },
+        data: {
+            officerTitle: payload.officerTitle || null,
+        },
+    });
+
+    // 3. Update Roles
+    // We strictly set roles to match payload.roleKeys
+    // First, get all role definitions to map keys to IDs
+    const allRoles = await prisma.role.findMany();
+    const roleIdsToSet = allRoles
+        .filter((r) => payload.roleKeys.includes(r.key))
+        .map((r) => r.id);
+
+    // Transaction for role swap
+    await prisma.$transaction(async (tx) => {
+        // Delete existing roles
+        await tx.userRole.deleteMany({
+            where: { userId },
+        });
+        // Insert new roles
+        if (roleIdsToSet.length > 0) {
+            await tx.userRole.createMany({
+                data: roleIdsToSet.map((roleId) => ({
+                    userId,
+                    roleId,
+                })),
+            });
+        }
+    });
+
+    // 4. Update Membership
+    // This logic is simplified: "Active Membership" overrides any existing active ones.
+    // We upsert a membership for the chosen tier.
+    if (payload.activeMembershipTierKey) {
+        const tier = await prisma.membershipTier.findUnique({ where: { key: payload.activeMembershipTierKey } });
+        if (tier) {
+            // Logic: "Upsert" a valid membership.
+            // Since (userId, tierId, validFrom) is unique, it's tricky to pure upsert if validFrom changes.
+            // Simplified: Create new if not exists, or update most recent.
+            // OR: Just create a new one valid from NOW to payload.validTo.
+
+            // Better approach for this MVP:
+            // Find if they have an active membership of this tier.
+            // If so, update validTo.
+            // If not, create new.
+
+            const now = new Date();
+            const existing = await prisma.userMembership.findFirst({
+                where: {
+                    userId,
+                    tierId: tier.id,
+                    validFrom: { lte: now },
+                    OR: [
+                        { validTo: null },
+                        { validTo: { gte: now } }
+                    ]
+                },
+                orderBy: { validFrom: 'desc' }
+            });
+
+            if (existing) {
+                await prisma.userMembership.update({
+                    where: { id: existing.id },
+                    data: { validTo: payload.activeMembershipValidTo }
+                });
+            } else {
+                await prisma.userMembership.create({
+                    data: {
+                        userId,
+                        tierId: tier.id,
+                        validFrom: now,
+                        validTo: payload.activeMembershipValidTo
+                    }
+                });
+            }
+        }
+    }
+
+    revalidatePath(`/admin/users/${userId}/edit`);
+    revalidatePath(`/admin/users`);
+    revalidatePath(`/drivers/${targetUser.handle}`);
+}

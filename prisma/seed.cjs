@@ -10,32 +10,55 @@ const prisma = new PrismaClient();
 
 async function main() {
   // ---- Roles ----
-  await prisma.role.upsert({
-    where: { key: "member" },
-    update: {},
-    create: { key: "member", description: "General member" },
-  });
+  // Permission roles
   await prisma.role.upsert({
     where: { key: "officer" },
-    update: { description: "Officer" },
-    create: { key: "officer", description: "Officer" },
+    update: { description: "Officer - Admin console access" },
+    create: { key: "officer", description: "Officer - Admin console access" },
   });
   await prisma.role.upsert({
     where: { key: "admin" },
-    update: { description: "Site Admin" },
-    create: { key: "admin", description: "Site Admin" },
+    update: { description: "Admin - Full system access" },
+    create: { key: "admin", description: "Admin - Full system access" },
+  });
+
+  // Participation roles (display badges)
+  await prisma.role.upsert({
+    where: { key: "lsc_driver" },
+    update: { description: "Lone Star Cup Driver" },
+    create: { key: "lsc_driver", description: "Lone Star Cup Driver" },
+  });
+  await prisma.role.upsert({
+    where: { key: "collegiate_driver" },
+    update: { description: "Collegiate Series Driver" },
+    create: { key: "collegiate_driver", description: "Collegiate Series Driver" },
+  });
+
+  // Clean up old roles that are no longer used
+  await prisma.role.deleteMany({
+    where: { key: { in: ["member", "competition"] } },
   });
 
   // ---- Membership tiers ----
   await prisma.membershipTier.upsert({
     where: { key: "GENERAL" },
-    update: {},
-    create: { key: "GENERAL", label: "General (no dues paid)" },
+    update: { label: "General Member" },
+    create: { key: "GENERAL", label: "General Member" },
   });
   await prisma.membershipTier.upsert({
     where: { key: "LSR_MEMBER" },
-    update: {},
-    create: { key: "LSR_MEMBER", label: "LSR Member (annual dues paid)" },
+    update: { label: "LSR Member" },
+    create: { key: "LSR_MEMBER", label: "LSR Member" },
+  });
+  await prisma.membershipTier.upsert({
+    where: { key: "ALUMNI" },
+    update: { label: "Alumni" },
+    create: { key: "ALUMNI", label: "Alumni" },
+  });
+  await prisma.membershipTier.upsert({
+    where: { key: "PARTNER" },
+    update: { label: "Partner" },
+    create: { key: "PARTNER", label: "Partner" },
   });
 
   // ---- League: Lone Star Cup ----
@@ -46,7 +69,7 @@ async function main() {
       name: "Lone Star Cup",
       slug: "lone-star-cup",
       descriptionMd: "Flagship in-house league for LSR.",
-      visibility: "public", // Prisma enum as string
+      visibility: "public",
     },
   });
 

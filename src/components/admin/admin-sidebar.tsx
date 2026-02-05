@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 
 const navItems = [
+  { title: "User Management", href: "/admin/users", icon: Users },
   { title: "Audit Console", href: "/admin", icon: List },
   { title: "Events", href: "/admin/events", icon: Calendar },
   { title: "Results", href: "/admin/results", icon: FileSpreadsheet },
@@ -42,10 +43,10 @@ export function AdminSidebar() {
         <h2 className="text-lg font-bold text-white/80 px-4 mb-4">Admin</h2>
         <nav className="space-y-1">
           {navItems.map((item) => {
-            const isActive = item.href === "/admin" 
-              ? pathname === "/admin" 
+            const isActive = item.href === "/admin"
+              ? pathname === "/admin"
               : pathname.startsWith(item.href);
-              
+
             return (
               <Link
                 key={item.href}
