@@ -111,6 +111,18 @@ async function main() {
     },
   });
 
+  // ---- Event Series: Lone Star Cup seasons ----
+  await prisma.eventSeries.upsert({
+    where: { slug: "lone-star-cup-s1" },
+    update: {},
+    create: { title: "Lone Star Cup Season 1", slug: "lone-star-cup-s1", visibility: "public" },
+  });
+  await prisma.eventSeries.upsert({
+    where: { slug: "lone-star-cup-s2" },
+    update: {},
+    create: { title: "Lone Star Cup Season 2", slug: "lone-star-cup-s2", visibility: "public" },
+  });
+
   // ---- Optional initial Season ----
   await prisma.season.upsert({
     where: { slug: "lone-star-cup-2025" },
