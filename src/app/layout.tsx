@@ -8,6 +8,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import React from "react";
 import { SiteFooter } from "@/components/site-footer"
 import { LiveBanner } from "@/components/live-banner";
+import { MaintenanceBanner } from "@/components/maintenance-banner";
 import { getCachedSessionUser } from "@/server/auth/cached-session";
 import { prisma } from "@/server/db";
 import { Toaster } from "@/components/ui/sonner";
@@ -91,6 +92,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <body className="min-h-dvh flex flex-col font-sans">
     <ThemeProvider>
       <CartProvider>
+        <MaintenanceBanner />
         <LiveBanner />
         <SiteHeader user={user} roles={roles} activeTierKey={activeTierKey} />
         <main className="flex-1">{children}</main>
