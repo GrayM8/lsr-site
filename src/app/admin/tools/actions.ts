@@ -1,9 +1,8 @@
 "use server";
 
 import { prisma } from "@/server/db";
-import { requireAdmin } from "@/lib/authz";
+import { requireOfficer } from "@/server/auth/guards";
 import { createAuditLog } from "@/server/audit/log";
-import { getSessionUser } from "@/server/auth/session";
 
 export async function getLeorgeGawrenceEnforcementUnitStatus() {
   const flag = await prisma.featureFlag.findUnique({
@@ -13,9 +12,7 @@ export async function getLeorgeGawrenceEnforcementUnitStatus() {
 }
 
 export async function setLeorgeGawrenceEnforcementUnitStatus(enabled: boolean) {
-  const { ok } = await requireAdmin();
-  const { user } = await getSessionUser();
-  if (!ok || !user) throw new Error("Unauthorized");
+  const user = await requireOfficer();
 
   await prisma.featureFlag.upsert({
     where: { key: "leorge-gawrence-enforcement-unit" },

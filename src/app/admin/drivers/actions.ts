@@ -1,15 +1,12 @@
 "use server";
 
-import { requireAdmin } from "@/lib/authz";
+import { requireOfficer } from "@/server/auth/guards";
 import { prisma } from "@/server/db";
 import { revalidatePath } from "next/cache";
 import { createAuditLog } from "@/server/audit/log";
-import { getSessionUser } from "@/server/auth/session";
 
 export async function updateDriverMapping(id: string, userId: string | null) {
-  const { ok } = await requireAdmin();
-  const { user } = await getSessionUser();
-  if (!ok || !user) throw new Error("Unauthorized");
+  const user = await requireOfficer();
 
   const identity = await prisma.driverIdentity.update({
     where: { id },
@@ -36,11 +33,10 @@ export async function updateDriverMapping(id: string, userId: string | null) {
 }
 
 export async function searchUsers(query: string) {
-    const { ok } = await requireAdmin();
-    if (!ok) throw new Error("Unauthorized");
-    
+    await requireOfficer();
+
     if (!query || query.length < 2) return [];
-    
+
     return prisma.user.findMany({
         where: {
             OR: [

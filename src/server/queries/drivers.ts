@@ -3,7 +3,10 @@ import { prisma } from "@/server/db";
 export async function getDriverStats(handle: string) {
   const user = await prisma.user.findUnique({
     where: { handle },
-    include: { roles: { include: { role: true } } },
+    include: {
+      roles: { include: { role: true } },
+      memberships: { include: { tier: true } },
+    },
   });
   if (!user) return null;
 
@@ -12,21 +15,21 @@ export async function getDriverStats(handle: string) {
   // 1. Current Season Entry
   // Find a season that is active now.
   const currentSeason = await prisma.season.findFirst({
-      where: {
-          startAt: { lte: now },
-          endAt: { gte: now },
-      }
+    where: {
+      startAt: { lte: now },
+      endAt: { gte: now },
+    }
   });
 
   let currentEntry = null;
   if (currentSeason) {
-      currentEntry = await prisma.entry.findFirst({
-        where: {
-          userId: user.id,
-          seasonId: currentSeason.id
-        },
-        include: { season: true },
-      });
+    currentEntry = await prisma.entry.findFirst({
+      where: {
+        userId: user.id,
+        seasonId: currentSeason.id
+      },
+      include: { season: true },
+    });
   }
 
   // 2. All Time Aggregates
@@ -85,28 +88,28 @@ export async function getDriverStats(handle: string) {
 
   // 4. Event History (Attendance)
   const eventHistory = await prisma.eventAttendance.findMany({
-      where: { userId: user.id },
-      include: { 
-          event: true 
-      },
-      orderBy: {
-          event: { startsAtUtc: 'desc' }
-      }
+    where: { userId: user.id },
+    include: {
+      event: true
+    },
+    orderBy: {
+      event: { startsAtUtc: 'desc' }
+    }
   });
 
   // 5. Total Registrations Count
   const totalRegistrations = await prisma.eventRegistration.count({
-      where: { userId: user.id }
+    where: { userId: user.id }
   });
 
   return {
     user,
     currentSeason: currentEntry
       ? {
-          name: currentEntry.season.name,
-          points: currentEntry.totalPoints,
-          top10: currentEntry.top10,
-        }
+        name: currentEntry.season.name,
+        points: currentEntry.totalPoints,
+        top10: currentEntry.top10,
+      }
       : null,
     allTime: allTimeStats,
     history: raceHistory,

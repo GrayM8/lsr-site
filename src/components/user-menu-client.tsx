@@ -14,16 +14,21 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Shield, User as UserIcon, Settings, LogOut } from "lucide-react";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { StatusIcons } from "@/components/status-indicators";
+import { getStatusIndicators } from "@/lib/status-indicators";
 import { AuthDialog } from "./auth-dialog";
 import { User } from "@prisma/client";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function UserMenuClient({
-                                 user,
-                                 roles,
-                               }: {
+  user,
+  roles,
+  activeTierKey,
+}: {
   user: User | null
   roles: string[]
+  activeTierKey: string | null
 }) {
   const supabase = createSupabaseBrowser()
   const router = useRouter()
@@ -53,7 +58,7 @@ export function UserMenuClient({
   return (
     <AnimatePresence mode="wait" initial={false}>
       {!user ? (
-        <motion.div 
+        <motion.div
           key="auth-trigger"
           layout
           initial={{ opacity: 0, scale: 0.95 }}
@@ -64,7 +69,7 @@ export function UserMenuClient({
           <AuthDialog />
         </motion.div>
       ) : (
-        <motion.div 
+        <motion.div
           key="user-trigger"
           layout
           initial={{ opacity: 0, scale: 0.95 }}
@@ -79,7 +84,19 @@ export function UserMenuClient({
                   <AvatarImage src={user.avatarUrl ?? undefined} alt={user.displayName ?? 'User avatar'} className="rounded-none" />
                   <AvatarFallback className="text-[9px] font-black uppercase bg-lsr-orange text-white rounded-none">{initials || "U"}</AvatarFallback>
                 </Avatar>
-                <span className="hidden sm:inline truncate max-w-[10rem] font-sans text-[10px] uppercase tracking-widest">{user.displayName}</span>
+                <span className="hidden sm:inline-flex items-center gap-1.5 truncate max-w-[10rem] font-sans text-[10px] uppercase tracking-widest leading-none">
+                  {user.displayName}
+                  <TooltipProvider>
+                    <StatusIcons
+                      indicators={getStatusIndicators({
+                        roles,
+                        activeTierKey,
+                        officerTitle: user.officerTitle,
+                      })}
+                      size={10}
+                    />
+                  </TooltipProvider>
+                </span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64 bg-lsr-charcoal border-white/10 rounded-none p-2 shadow-2xl">
@@ -89,14 +106,14 @@ export function UserMenuClient({
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-white/5" />
 
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onSelect={() => router.push(user.handle ? `/drivers/${user.handle}` : "/drivers/me")}
                 className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
               >
                 <UserIcon className="mr-2 h-3 w-3" />
                 <span>My driver page</span>
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onSelect={() => router.push("/account")}
                 className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
               >
@@ -105,7 +122,7 @@ export function UserMenuClient({
               </DropdownMenuItem>
 
               {isAdmin && (
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onSelect={() => router.push("/admin")}
                   className="rounded-none font-sans font-bold text-[10px] uppercase tracking-widest py-3 focus:bg-lsr-orange focus:text-white cursor-pointer"
                 >

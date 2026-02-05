@@ -6,7 +6,8 @@ import { useState } from "react";
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { ROLE_LABEL, type RoleCode } from "@/lib/roles";
+import { StatusIcons } from "@/components/status-indicators";
+import { getStatusIndicators, getActiveTierKey } from "@/lib/status-indicators";
 
 type DriverRow = {
   id: string;
@@ -14,7 +15,9 @@ type DriverRow = {
   handle: string;
   avatarUrl: string | null;
   status: string;
+  officerTitle: string | null;
   roles: { role: { key: string } }[];
+  memberships?: { tier: { key: string }; validTo: Date | null }[];
   allTimePoints: number;
   rank: number;
 };
@@ -75,12 +78,12 @@ export function DriversTable({ drivers }: { drivers: DriverRow[] }) {
     >
       <div className={cn("flex items-center gap-1", align === "center" && "justify-center", align === "right" && "justify-end")}>
         {tooltip ? (
-           <Tooltip>
-             <TooltipTrigger className="cursor-help decoration-dashed underline underline-offset-2 flex items-center gap-1">
-               {label}
-             </TooltipTrigger>
-             <TooltipContent>{tooltip}</TooltipContent>
-           </Tooltip>
+          <Tooltip>
+            <TooltipTrigger className="cursor-help decoration-dashed underline underline-offset-2 flex items-center gap-1">
+              {label}
+            </TooltipTrigger>
+            <TooltipContent>{tooltip}</TooltipContent>
+          </Tooltip>
         ) : (
           label
         )}
@@ -110,11 +113,11 @@ export function DriversTable({ drivers }: { drivers: DriverRow[] }) {
                 <SortHeader label="Driver" sortKey="driver" className="text-left" />
                 <SortHeader label="Points" sortKey="points" align="center" className="w-24 md:w-32" />
                 <th className="px-4 py-4 text-center font-sans font-black uppercase tracking-widest text-[9px] text-white/40 w-24 md:w-32 hidden sm:table-cell">
-                   <Tooltip>
-                      <TooltipTrigger className="cursor-help decoration-dashed underline underline-offset-2">Events</TooltipTrigger>
-                      <TooltipContent>
-                          <p>Event attendance tracking coming soon</p>
-                      </TooltipContent>
+                  <Tooltip>
+                    <TooltipTrigger className="cursor-help decoration-dashed underline underline-offset-2">Events</TooltipTrigger>
+                    <TooltipContent>
+                      <p>Event attendance tracking coming soon</p>
+                    </TooltipContent>
                   </Tooltip>
                 </th>
               </tr>
@@ -127,17 +130,14 @@ export function DriversTable({ drivers }: { drivers: DriverRow[] }) {
                   .slice(0, 2)
                   .join("")
                   .toUpperCase();
-                const codes: RoleCode[] = d.roles.length
-                  ? d.roles.map((ur) => ur.role.key as RoleCode)
-                  : [];
+                const roleKeys = d.roles.map((ur) => ur.role.key);
 
                 return (
                   <tr key={d.id} className="group hover:bg-white/[0.02] transition-colors">
                     <td className="px-4 py-3 text-center">
                       <span
-                        className={`font-display font-black italic text-xl ${
-                          d.rank <= 3 ? "text-lsr-orange" : "text-white/20"
-                        }`}
+                        className={`font-display font-black italic text-xl ${d.rank <= 3 ? "text-lsr-orange" : "text-white/20"
+                          }`}
                       >
                         {d.rank}
                       </span>
@@ -164,20 +164,19 @@ export function DriversTable({ drivers }: { drivers: DriverRow[] }) {
                             <div className="truncate font-sans font-bold text-white uppercase tracking-tight group-hover/driver:text-lsr-orange transition-colors">
                               {d.displayName}
                             </div>
-                            <div className="flex flex-wrap gap-1">
+                            <div className="flex flex-wrap items-center gap-1">
                               {d.status === "pending_verification" && (
                                 <span className="bg-red-900/50 text-red-200 border border-red-900 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-widest">
                                   Unverified
                                 </span>
                               )}
-                              {codes.map((c) => (
-                                <span
-                                  key={c}
-                                  className="bg-white/5 text-white/60 border border-white/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-widest"
-                                >
-                                  {ROLE_LABEL[c]}
-                                </span>
-                              ))}
+                              <StatusIcons
+                                indicators={getStatusIndicators({
+                                  roles: roleKeys,
+                                  activeTierKey: getActiveTierKey(d.memberships),
+                                  officerTitle: d.officerTitle,
+                                })}
+                              />
                             </div>
                           </div>
                           <div className="text-[9px] font-medium text-white/40 uppercase tracking-widest mt-0.5">

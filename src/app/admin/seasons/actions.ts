@@ -1,12 +1,11 @@
 "use server";
 
-import { requireAdmin } from "@/lib/authz";
+import { requireOfficer } from "@/server/auth/guards";
 import { prisma } from "@/server/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createAuditLog } from "@/server/audit/log";
-import { getSessionUser } from "@/server/auth/session";
 
 const seasonSchema = z.object({
   name: z.string().min(1),
@@ -19,9 +18,7 @@ const seasonSchema = z.object({
 });
 
 export async function createSeason(formData: FormData) {
-  const { ok } = await requireAdmin();
-  const { user } = await getSessionUser();
-  if (!ok || !user) throw new Error("Unauthorized");
+  const user = await requireOfficer();
 
   const data = seasonSchema.parse({
       name: formData.get("name"),
@@ -60,9 +57,7 @@ export async function createSeason(formData: FormData) {
 }
 
 export async function updateSeason(id: string, formData: FormData) {
-    const { ok } = await requireAdmin();
-    const { user } = await getSessionUser();
-    if (!ok || !user) throw new Error("Unauthorized");
+    const user = await requireOfficer();
 
     const data = seasonSchema.parse({
         name: formData.get("name"),
@@ -101,9 +96,7 @@ export async function updateSeason(id: string, formData: FormData) {
 }
 
 export async function deleteSeason(id: string) {
-    const { ok } = await requireAdmin();
-    const { user } = await getSessionUser();
-    if (!ok || !user) throw new Error("Unauthorized");
+    const user = await requireOfficer();
 
     await prisma.season.delete({ where: { id } });
 
@@ -119,9 +112,7 @@ export async function deleteSeason(id: string) {
 }
 
 export async function recomputeStandings(seasonId: string) {
-    const { ok } = await requireAdmin();
-    const { user } = await getSessionUser();
-    if (!ok || !user) throw new Error("Unauthorized");
+    const user = await requireOfficer();
 
     const season = await prisma.season.findUnique({
         where: { id: seasonId },
@@ -140,10 +131,10 @@ export async function recomputeStandings(seasonId: string) {
         },
         include: {
             ingestedSessions: {
-                where: { sessionType: "RACE" }, 
+                where: { sessionType: "RACE" },
                 include: {
                     results: {
-                        include: { 
+                        include: {
                             participant: {
                                 include: { carMapping: true }
                             }
@@ -165,7 +156,7 @@ export async function recomputeStandings(seasonId: string) {
         top10: number;
         bestFinish: number;
         dnfs: number;
-        finishes: number[]; 
+        finishes: number[];
         lastCarDisplay: string | null;
         totalCuts: number;
         totalCollisions: number;
@@ -176,7 +167,7 @@ export async function recomputeStandings(seasonId: string) {
         for (const session of event.ingestedSessions) {
             for (const result of session.results) {
                 const userId = result.participant.userId;
-                if (!userId) continue; 
+                if (!userId) continue;
 
                 const current = statsMap.get(userId) || {
                     userId,
@@ -201,16 +192,16 @@ export async function recomputeStandings(seasonId: string) {
                 // Points
                 current.totalPoints += (result.points || 0);
                 current.starts += 1;
-                
+
                 // Incidents
                 current.totalCuts += (result.totalCuts || 0);
                 current.totalCollisions += (result.collisionCount || 0);
 
                 // Position stats
-                if (result.status === "FINISHED" || result.status === "DNF" || result.status === "DSQ") { 
+                if (result.status === "FINISHED" || result.status === "DNF" || result.status === "DSQ") {
                     const pos = result.position;
                     current.finishes.push(pos);
-                    
+
                     if (pos === 1) current.wins++;
                     if (pos <= 3) current.podiums++;
                     if (pos <= 5) current.top5++;
@@ -219,7 +210,7 @@ export async function recomputeStandings(seasonId: string) {
                 }
 
                 if (result.status === "DNF") current.dnfs++;
-                
+
                 statsMap.set(userId, current);
             }
         }
@@ -228,11 +219,11 @@ export async function recomputeStandings(seasonId: string) {
     // 3. Update Entries
     await prisma.$transaction(async (tx) => {
         const allStats = Array.from(statsMap.values()).sort((a, b) => b.totalPoints - a.totalPoints);
-        
+
         let rank = 1;
         for (const stat of allStats) {
-            const avg = stat.finishes.length > 0 
-                ? stat.finishes.reduce((a, b) => a + b, 0) / stat.finishes.length 
+            const avg = stat.finishes.length > 0
+                ? stat.finishes.reduce((a, b) => a + b, 0) / stat.finishes.length
                 : 0;
 
             const existingEntry = await tx.entry.findFirst({
@@ -263,7 +254,7 @@ export async function recomputeStandings(seasonId: string) {
                     data: {
                         seasonId,
                         userId: stat.userId,
-                        classId: null, 
+                        classId: null,
                         isEligiblePoints: true,
                         totalPoints: stat.totalPoints,
                         starts: stat.starts,

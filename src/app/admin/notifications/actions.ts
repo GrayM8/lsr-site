@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/server/db";
-import { requireAdmin } from "@/lib/authz";
+import { requireOfficer } from "@/server/auth/guards";
 import { revalidatePath } from "next/cache";
 import {
   sendNotification,
@@ -14,8 +14,7 @@ import { NotificationChannel } from "@prisma/client";
 import { createAuditLog } from "@/server/audit/log";
 
 export async function getNotificationStats() {
-  const res = await requireAdmin();
-  if (!res.ok) throw new Error("Unauthorized");
+  await requireOfficer();
 
   const [total, pending, sent, failed] = await Promise.all([
     prisma.notification.count(),
@@ -28,8 +27,7 @@ export async function getNotificationStats() {
 }
 
 export async function getRecentNotifications(limit = 20, skip = 0) {
-  const res = await requireAdmin();
-  if (!res.ok) throw new Error("Unauthorized");
+  await requireOfficer();
 
   return prisma.notification.findMany({
     include: {
@@ -44,8 +42,7 @@ export async function getRecentNotifications(limit = 20, skip = 0) {
 }
 
 export async function getScheduledNotifications() {
-  const res = await requireAdmin();
-  if (!res.ok) throw new Error("Unauthorized");
+  await requireOfficer();
 
   return prisma.notification.findMany({
     where: {
@@ -62,8 +59,7 @@ export async function getScheduledNotifications() {
 }
 
 export async function cancelScheduledNotification(notificationId: string) {
-  const res = await requireAdmin();
-  if (!res.ok) throw new Error("Unauthorized");
+  const user = await requireOfficer();
 
   const notification = await prisma.notification.findUnique({
     where: { id: notificationId },
@@ -74,7 +70,7 @@ export async function cancelScheduledNotification(notificationId: string) {
 
   if (notification) {
     await createAuditLog({
-      actorUserId: res.user.id,
+      actorUserId: user.id,
       actionType: "CANCEL",
       entityType: "NOTIFICATION",
       entityId: notificationId,
@@ -90,8 +86,7 @@ export async function cancelScheduledNotification(notificationId: string) {
 }
 
 export async function retryFailedNotification(notificationId: string) {
-  const res = await requireAdmin();
-  if (!res.ok) throw new Error("Unauthorized");
+  const user = await requireOfficer();
 
   const notification = await prisma.notification.findUnique({
     where: { id: notificationId },
@@ -102,7 +97,7 @@ export async function retryFailedNotification(notificationId: string) {
 
   if (notification) {
     await createAuditLog({
-      actorUserId: res.user.id,
+      actorUserId: user.id,
       actionType: "RETRY",
       entityType: "NOTIFICATION",
       entityId: notificationId,
@@ -118,8 +113,7 @@ export async function retryFailedNotification(notificationId: string) {
 }
 
 export async function sendCustomNotification(formData: FormData) {
-  const res = await requireAdmin();
-  if (!res.ok) throw new Error("Unauthorized");
+  const user = await requireOfficer();
 
   const recipientType = formData.get("recipientType") as string;
   const userIdsJson = formData.get("userIds") as string | null;
@@ -174,7 +168,7 @@ export async function sendCustomNotification(formData: FormData) {
 
     const userNames = targetUsers.map((u) => u.displayName).join(", ");
     await createAuditLog({
-      actorUserId: res.user.id,
+      actorUserId: user.id,
       actionType: "CREATE",
       entityType: "NOTIFICATION",
       entityId: userIds.length === 1 ? "custom" : "multi",
@@ -202,7 +196,7 @@ export async function sendCustomNotification(formData: FormData) {
     });
 
     await createAuditLog({
-      actorUserId: res.user.id,
+      actorUserId: user.id,
       actionType: "CREATE",
       entityType: "NOTIFICATION",
       entityId: "bulk",
@@ -216,8 +210,7 @@ export async function sendCustomNotification(formData: FormData) {
 }
 
 export async function getEmailSettings() {
-  const res = await requireAdmin();
-  if (!res.ok) throw new Error("Unauthorized");
+  await requireOfficer();
 
   const [enabled, fromAddress] = await Promise.all([
     getSystemSetting<boolean>(SETTINGS.EMAIL_ENABLED),
@@ -232,8 +225,7 @@ export async function getEmailSettings() {
 }
 
 export async function updateEmailSettings(formData: FormData) {
-  const res = await requireAdmin();
-  if (!res.ok) throw new Error("Unauthorized");
+  const user = await requireOfficer();
 
   const enabled = formData.get("enabled") === "on";
   const fromAddress = formData.get("fromAddress") as string;
@@ -249,7 +241,7 @@ export async function updateEmailSettings(formData: FormData) {
   ]);
 
   await createAuditLog({
-    actorUserId: res.user.id,
+    actorUserId: user.id,
     actionType: "UPDATE",
     entityType: "NOTIFICATION_SETTINGS",
     entityId: "email",
@@ -262,8 +254,7 @@ export async function updateEmailSettings(formData: FormData) {
 }
 
 export async function searchUsers(query: string) {
-  const res = await requireAdmin();
-  if (!res.ok) throw new Error("Unauthorized");
+  await requireOfficer();
 
   if (!query || query.length < 2) return [];
 
@@ -287,8 +278,7 @@ export async function searchUsers(query: string) {
 }
 
 export async function deleteNotificationAdmin(notificationId: string) {
-  const res = await requireAdmin();
-  if (!res.ok) throw new Error("Unauthorized");
+  const user = await requireOfficer();
 
   const notification = await prisma.notification.findUnique({
     where: { id: notificationId },
@@ -304,7 +294,7 @@ export async function deleteNotificationAdmin(notificationId: string) {
   });
 
   await createAuditLog({
-    actorUserId: res.user.id,
+    actorUserId: user.id,
     actionType: "DELETE",
     entityType: "NOTIFICATION",
     entityId: notificationId,
@@ -327,8 +317,7 @@ export type BulkDeleteFilter = {
 };
 
 export async function bulkDeleteNotifications(filter: BulkDeleteFilter) {
-  const res = await requireAdmin();
-  if (!res.ok) throw new Error("Unauthorized");
+  const user = await requireOfficer();
 
   const where: {
     status?: "SENT" | "FAILED" | "CANCELLED" | "PENDING";
@@ -361,7 +350,7 @@ export async function bulkDeleteNotifications(filter: BulkDeleteFilter) {
     .join(", ");
 
   await createAuditLog({
-    actorUserId: res.user.id,
+    actorUserId: user.id,
     actionType: "BULK_DELETE",
     entityType: "NOTIFICATION",
     entityId: "bulk",

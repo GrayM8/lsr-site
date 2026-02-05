@@ -1,13 +1,14 @@
 import { redirect } from "next/navigation"
-import { requireAdmin } from "@/lib/authz"
+import { requireOfficer } from "@/server/auth/guards"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
 
 export const dynamic = "force-dynamic"
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const res = await requireAdmin()
-  if (!res.ok) {
-    redirect("/403") // or
+  try {
+    await requireOfficer();
+  } catch {
+    redirect("/403");
   }
   return (
     <div className="flex min-h-screen">

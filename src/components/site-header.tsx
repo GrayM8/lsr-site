@@ -21,7 +21,7 @@ import { WishlistIndicator } from "@/components/shop/WishlistIndicator"
 import { NotificationBell } from "@/components/notification-bell"
 import { motion, AnimatePresence } from "framer-motion"
 
-export function SiteHeader({ user, roles }: { user: User | null, roles: string[] }) {
+export function SiteHeader({ user, roles, activeTierKey }: { user: User | null, roles: string[], activeTierKey: string | null }) {
   const pathname = usePathname()
   const isHome = pathname === "/"
   const isShopPage = pathname.startsWith("/shop")
@@ -129,7 +129,7 @@ export function SiteHeader({ user, roles }: { user: User | null, roles: string[]
               )}
             </AnimatePresence>
 
-            <UserMenuClient user={user} roles={roles} />
+            <UserMenuClient user={user} roles={roles} activeTierKey={activeTierKey} />
             
             {/* Mobile hamburger menu */}
             <div className="md:hidden">

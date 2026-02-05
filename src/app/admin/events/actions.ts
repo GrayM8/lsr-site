@@ -204,14 +204,10 @@ export async function deleteEvent(eventId: string) {
 
 import { adminOverrideRegistration } from "@/server/services/registration.service";
 import { RegistrationStatus } from "@prisma/client";
-import { requireAdmin } from "@/lib/authz";
+import { requireOfficer } from "@/server/auth/guards";
 
 export async function updateEventRegistrationConfig(eventId: string, formData: FormData) {
-  const { user } = await getSessionUser();
-  const { ok } = await requireAdmin();
-  if (!ok || !user) {
-    throw new Error("Unauthorized");
-  }
+  const user = await requireOfficer();
 
   const event = await prisma.event.findUnique({ where: { id: eventId }, select: { timezone: true } });
   const timezone = event?.timezone || "America/Chicago";
@@ -252,11 +248,7 @@ export async function updateEventRegistrationConfig(eventId: string, formData: F
 }
 
 export async function overrideRegistrationStatus(eventId: string, userId: string, status: RegistrationStatus, reason?: string) {
-  const { user } = await getSessionUser();
-  const { ok } = await requireAdmin();
-  if (!ok || !user) {
-    throw new Error("Unauthorized");
-  }
+  const user = await requireOfficer();
 
   await adminOverrideRegistration(user.id, userId, eventId, status, reason);
 
@@ -265,11 +257,7 @@ export async function overrideRegistrationStatus(eventId: string, userId: string
 }
 
 export async function reorderWaitlist(eventId: string, orderedRegistrationIds: string[]) {
-  const { user } = await getSessionUser();
-  const { ok } = await requireAdmin();
-  if (!ok || !user) {
-    throw new Error("Unauthorized");
-  }
+  const user = await requireOfficer();
 
   await prisma.$transaction(async (tx) => {
     for (let i = 0; i < orderedRegistrationIds.length; i++) {
@@ -299,11 +287,7 @@ export async function reorderWaitlist(eventId: string, orderedRegistrationIds: s
 }
 
 export async function removeRegistration(eventId: string, userId: string) {
-  const { user } = await getSessionUser();
-  const { ok } = await requireAdmin();
-  if (!ok || !user) {
-    throw new Error("Unauthorized");
-  }
+  await requireOfficer();
 
   await prisma.eventRegistration.delete({
     where: { eventId_userId: { eventId, userId } },
@@ -321,106 +305,42 @@ export async function removeRegistration(eventId: string, userId: string) {
 
   
 
-  export async function updateEventAttendanceConfig(eventId: string, formData: FormData) {
+export async function updateEventAttendanceConfig(eventId: string, formData: FormData) {
+  const user = await requireOfficer();
 
-    const { user } = await getSessionUser();
+  const event = await prisma.event.findUnique({ where: { id: eventId }, select: { timezone: true } });
+  const timezone = event?.timezone || "America/Chicago";
 
-    const { ok } = await requireAdmin();
+  const enabled = formData.get("attendanceEnabled") === "on";
+  const opensAtRaw = formData.get("attendanceOpensAt") as string;
+  const closesAtRaw = formData.get("attendanceClosesAt") as string;
 
-    if (!ok || !user) {
+  await updateAttendanceConfig(
+    eventId,
+    {
+      attendanceEnabled: enabled,
+      attendanceOpensAt: opensAtRaw ? fromZonedTime(opensAtRaw, timezone) : null,
+      attendanceClosesAt: closesAtRaw ? fromZonedTime(closesAtRaw, timezone) : null,
+    },
+    user.id
+  );
 
-      throw new Error("Unauthorized");
+  revalidatePath(`/admin/events/${eventId}/manage`);
+}
 
-    }
+export async function manualCheckIn(eventId: string, userId: string) {
+  const user = await requireOfficer();
 
-  
+  await checkInUser(eventId, userId, "MANUAL", user.id);
 
-    const event = await prisma.event.findUnique({ where: { id: eventId }, select: { timezone: true } });
+  revalidatePath(`/admin/events/${eventId}/manage`);
+}
 
-    const timezone = event?.timezone || "America/Chicago";
+export async function manualRemoveCheckIn(eventId: string, userId: string) {
+  const user = await requireOfficer();
 
-  
+  await removeCheckIn(eventId, userId, user.id);
 
-    const enabled = formData.get("attendanceEnabled") === "on";
+  revalidatePath(`/admin/events/${eventId}/manage`);
+}
 
-    const opensAtRaw = formData.get("attendanceOpensAt") as string;
-
-    const closesAtRaw = formData.get("attendanceClosesAt") as string;
-
-  
-
-    await updateAttendanceConfig(
-
-      eventId,
-
-      {
-
-        attendanceEnabled: enabled,
-
-        attendanceOpensAt: opensAtRaw ? fromZonedTime(opensAtRaw, timezone) : null,
-
-        attendanceClosesAt: closesAtRaw ? fromZonedTime(closesAtRaw, timezone) : null,
-
-      },
-
-      user.id
-
-    );
-
-  
-
-    revalidatePath(`/admin/events/${eventId}/manage`);
-
-  }
-
-  
-
-  export async function manualCheckIn(eventId: string, userId: string) {
-
-    const { user } = await getSessionUser();
-
-    const { ok } = await requireAdmin();
-
-    if (!ok || !user) {
-
-      throw new Error("Unauthorized");
-
-    }
-
-  
-
-    await checkInUser(eventId, userId, "MANUAL", user.id);
-
-  
-
-    revalidatePath(`/admin/events/${eventId}/manage`);
-
-  }
-
-  
-
-  export async function manualRemoveCheckIn(eventId: string, userId: string) {
-
-    const { user } = await getSessionUser();
-
-    const { ok } = await requireAdmin();
-
-    if (!ok || !user) {
-
-      throw new Error("Unauthorized");
-
-    }
-
-  
-
-    await removeCheckIn(eventId, userId, user.id);
-
-  
-
-    revalidatePath(`/admin/events/${eventId}/manage`);
-
-  }
-
-  
-
-  
