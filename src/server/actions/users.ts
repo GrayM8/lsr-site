@@ -6,6 +6,13 @@ import { createAuditLog } from "@/server/audit/log";
 import { revalidatePath } from "next/cache";
 
 export type UpdateUserPayload = {
+    displayName: string;
+    handle: string;
+    bio: string | null;
+    iRating: number | null;
+    gradYear: number | null;
+    major: string | null;
+    socials: Record<string, string> | null;
     officerTitle: string | null;
     roleKeys: string[];
     activeMembershipTierKey: string | null; // e.g. "LSR_MEMBER"
@@ -49,10 +56,35 @@ export async function updateUser(userId: string, payload: UpdateUserPayload) {
         throw new Error("Only Administrators can promote users to Officer roles.");
     }
 
-    // 2. Update Basic Info (Title)
+    // 2. Validate & Update Basic Info
+    const trimmedName = payload.displayName.trim();
+    const trimmedHandle = payload.handle.trim().toLowerCase();
+
+    if (!trimmedName) {
+        throw new Error("Display name cannot be empty.");
+    }
+    if (!trimmedHandle || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(trimmedHandle)) {
+        throw new Error("Handle must be lowercase alphanumeric with hyphens (e.g. john-doe).");
+    }
+
+    // Check handle uniqueness if changed
+    if (trimmedHandle !== targetUser.handle) {
+        const handleTaken = await prisma.user.findUnique({ where: { handle: trimmedHandle } });
+        if (handleTaken) {
+            throw new Error(`Handle "@${trimmedHandle}" is already taken.`);
+        }
+    }
+
     await prisma.user.update({
         where: { id: userId },
         data: {
+            displayName: trimmedName,
+            handle: trimmedHandle,
+            bio: payload.bio || null,
+            iRating: payload.iRating,
+            gradYear: payload.gradYear,
+            major: payload.major || null,
+            socials: payload.socials ?? undefined,
             officerTitle: payload.officerTitle || null,
         },
     });
@@ -148,11 +180,25 @@ export async function updateUser(userId: string, payload: UpdateUserPayload) {
         targetUserId: userId,
         summary: `Updated user ${targetUser.displayName} (@${targetUser.handle})`,
         before: {
+            displayName: targetUser.displayName,
+            handle: targetUser.handle,
+            bio: targetUser.bio,
+            iRating: targetUser.iRating,
+            gradYear: targetUser.gradYear,
+            major: targetUser.major,
+            socials: targetUser.socials,
             officerTitle: targetUser.officerTitle,
             roles: beforeRoles,
             membership: beforeMembership,
         },
         after: {
+            displayName: trimmedName,
+            handle: trimmedHandle,
+            bio: payload.bio,
+            iRating: payload.iRating,
+            gradYear: payload.gradYear,
+            major: payload.major,
+            socials: payload.socials,
             officerTitle: payload.officerTitle,
             roles: afterRoles,
             membership: afterMembership,
@@ -161,5 +207,8 @@ export async function updateUser(userId: string, payload: UpdateUserPayload) {
 
     revalidatePath(`/admin/users/${userId}/edit`);
     revalidatePath(`/admin/users`);
-    revalidatePath(`/drivers/${targetUser.handle}`);
+    revalidatePath(`/drivers/${trimmedHandle}`);
+    if (trimmedHandle !== targetUser.handle) {
+        revalidatePath(`/drivers/${targetUser.handle}`);
+    }
 }

@@ -5,6 +5,7 @@ import { User, Role, MembershipTier, UserRole, UserMembership } from "@prisma/cl
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
@@ -30,6 +31,17 @@ export function UserEditForm({ user, currentUser, allRoles, allTiers }: UserEdit
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
 
+    const [displayName, setDisplayName] = useState(user.displayName);
+    const [handle, setHandle] = useState(user.handle);
+    const [bio, setBio] = useState(user.bio || "");
+    const [iRating, setIRating] = useState(user.iRating?.toString() || "");
+    const [gradYear, setGradYear] = useState(user.gradYear?.toString() || "");
+    const [major, setMajor] = useState(user.major || "");
+    const userSocials = (user.socials as Record<string, string> | null) ?? {};
+    const [website, setWebsite] = useState(userSocials.website || "");
+    const [instagram, setInstagram] = useState(userSocials.instagram || "");
+    const [twitch, setTwitch] = useState(userSocials.twitch || "");
+    const [youtube, setYoutube] = useState(userSocials.youtube || "");
     const [officerTitle, setOfficerTitle] = useState(user.officerTitle || "");
     const [selectedRoleKeys, setSelectedRoleKeys] = useState<string[]>(
         user.roles.map((r) => r.role.key)
@@ -50,7 +62,20 @@ export function UserEditForm({ user, currentUser, allRoles, allTiers }: UserEdit
     };
 
     const onSubmit = () => {
+        const socials: Record<string, string> = {};
+        if (website.trim()) socials.website = website.trim();
+        if (instagram.trim()) socials.instagram = instagram.trim();
+        if (twitch.trim()) socials.twitch = twitch.trim();
+        if (youtube.trim()) socials.youtube = youtube.trim();
+
         const payload: UpdateUserPayload = {
+            displayName,
+            handle,
+            bio: bio || null,
+            iRating: iRating ? parseInt(iRating, 10) : null,
+            gradYear: gradYear ? parseInt(gradYear, 10) : null,
+            major: major || null,
+            socials: Object.keys(socials).length > 0 ? socials : null,
             officerTitle,
             roleKeys: selectedRoleKeys,
             activeMembershipTierKey: selectedTierKey === "GENERAL" ? null : selectedTierKey,
@@ -70,6 +95,181 @@ export function UserEditForm({ user, currentUser, allRoles, allTiers }: UserEdit
 
     return (
         <div className="space-y-6">
+            {/* Section: Identity */}
+            <section className="border border-white/10 bg-lsr-charcoal">
+                <div className="px-6 py-4 border-b border-white/10">
+                    <h2 className="font-sans font-black text-sm uppercase tracking-widest text-white">
+                        Identity
+                    </h2>
+                    <p className="text-[10px] text-white/40 uppercase tracking-wider mt-1">
+                        Display name and unique handle for this user
+                    </p>
+                </div>
+                <div className="p-6 space-y-5">
+                    <div className="max-w-sm space-y-2">
+                        <Label htmlFor="displayName" className="text-xs text-white/60 uppercase tracking-wider">
+                            Display Name
+                        </Label>
+                        <Input
+                            id="displayName"
+                            placeholder="e.g. John Doe"
+                            value={displayName}
+                            onChange={(e) => setDisplayName(e.target.value)}
+                            className="rounded-none border-white/10 bg-white/5 text-white"
+                        />
+                    </div>
+                    <div className="max-w-sm space-y-2">
+                        <Label htmlFor="handle" className="text-xs text-white/60 uppercase tracking-wider">
+                            Handle
+                        </Label>
+                        <div className="flex items-center gap-2">
+                            <span className="text-white/40 text-sm font-mono">@</span>
+                            <Input
+                                id="handle"
+                                placeholder="e.g. john-doe"
+                                value={handle}
+                                onChange={(e) => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                                className="rounded-none border-white/10 bg-white/5 text-white font-mono"
+                            />
+                        </div>
+                        <p className="text-[10px] text-white/30">Lowercase letters, numbers, and hyphens only</p>
+                    </div>
+                </div>
+            </section>
+
+            {/* Section: Profile */}
+            <section className="border border-white/10 bg-lsr-charcoal">
+                <div className="px-6 py-4 border-b border-white/10">
+                    <h2 className="font-sans font-black text-sm uppercase tracking-widest text-white">
+                        Profile
+                    </h2>
+                    <p className="text-[10px] text-white/40 uppercase tracking-wider mt-1">
+                        Driver details visible on their public profile
+                    </p>
+                </div>
+                <div className="p-6 space-y-5">
+                    <div className="space-y-2">
+                        <Label htmlFor="bio" className="text-xs text-white/60 uppercase tracking-wider">
+                            Bio
+                        </Label>
+                        <Textarea
+                            id="bio"
+                            rows={4}
+                            placeholder="A short bio..."
+                            value={bio}
+                            onChange={(e) => setBio(e.target.value)}
+                            className="rounded-none border-white/10 bg-white/5 text-white"
+                        />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                        <div className="space-y-2">
+                            <Label htmlFor="iRating" className="text-xs text-white/60 uppercase tracking-wider">
+                                iRating
+                            </Label>
+                            <Input
+                                id="iRating"
+                                type="number"
+                                placeholder="e.g. 2500"
+                                value={iRating}
+                                onChange={(e) => setIRating(e.target.value)}
+                                className="rounded-none border-white/10 bg-white/5 text-white"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="gradYear" className="text-xs text-white/60 uppercase tracking-wider">
+                                Grad Year
+                            </Label>
+                            <Input
+                                id="gradYear"
+                                type="number"
+                                placeholder="e.g. 2027"
+                                value={gradYear}
+                                onChange={(e) => setGradYear(e.target.value)}
+                                className="rounded-none border-white/10 bg-white/5 text-white"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="major" className="text-xs text-white/60 uppercase tracking-wider">
+                                Major
+                            </Label>
+                            <Input
+                                id="major"
+                                placeholder="e.g. Computer Science"
+                                value={major}
+                                onChange={(e) => setMajor(e.target.value)}
+                                className="rounded-none border-white/10 bg-white/5 text-white"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Section: Social Links */}
+            <section className="border border-white/10 bg-lsr-charcoal">
+                <div className="px-6 py-4 border-b border-white/10">
+                    <h2 className="font-sans font-black text-sm uppercase tracking-widest text-white">
+                        Social Links
+                    </h2>
+                    <p className="text-[10px] text-white/40 uppercase tracking-wider mt-1">
+                        External links shown on the driver profile
+                    </p>
+                </div>
+                <div className="p-6 space-y-5">
+                    <div className="max-w-sm space-y-2">
+                        <Label htmlFor="website" className="text-xs text-white/60 uppercase tracking-wider">
+                            Website
+                        </Label>
+                        <Input
+                            id="website"
+                            type="url"
+                            placeholder="https://example.com"
+                            value={website}
+                            onChange={(e) => setWebsite(e.target.value)}
+                            className="rounded-none border-white/10 bg-white/5 text-white"
+                        />
+                    </div>
+                    <div className="max-w-sm space-y-2">
+                        <Label htmlFor="instagram" className="text-xs text-white/60 uppercase tracking-wider">
+                            Instagram
+                        </Label>
+                        <Input
+                            id="instagram"
+                            type="url"
+                            placeholder="https://instagram.com/handle"
+                            value={instagram}
+                            onChange={(e) => setInstagram(e.target.value)}
+                            className="rounded-none border-white/10 bg-white/5 text-white"
+                        />
+                    </div>
+                    <div className="max-w-sm space-y-2">
+                        <Label htmlFor="twitch" className="text-xs text-white/60 uppercase tracking-wider">
+                            Twitch
+                        </Label>
+                        <Input
+                            id="twitch"
+                            type="url"
+                            placeholder="https://twitch.tv/handle"
+                            value={twitch}
+                            onChange={(e) => setTwitch(e.target.value)}
+                            className="rounded-none border-white/10 bg-white/5 text-white"
+                        />
+                    </div>
+                    <div className="max-w-sm space-y-2">
+                        <Label htmlFor="youtube" className="text-xs text-white/60 uppercase tracking-wider">
+                            YouTube
+                        </Label>
+                        <Input
+                            id="youtube"
+                            type="url"
+                            placeholder="https://youtube.com/@channel"
+                            value={youtube}
+                            onChange={(e) => setYoutube(e.target.value)}
+                            className="rounded-none border-white/10 bg-white/5 text-white"
+                        />
+                    </div>
+                </div>
+            </section>
+
             {/* Section: Officer Title */}
             <section className="border border-white/10 bg-lsr-charcoal">
                 <div className="px-6 py-4 border-b border-white/10">
