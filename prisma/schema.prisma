@@ -770,6 +770,7 @@ model RawResultUpload {
   uploadedBy       User                    @relation(fields: [uploadedByUserId], references: [id])
   eventId          String?
   pointsSystem     String? // "F1", "NONE"
+  sessionLabel     String? // "PRACTICE", "QUALIFYING", "RACE"
   event            Event?                  @relation(fields: [eventId], references: [id])
 
   ingestedSessions RaceSession[]

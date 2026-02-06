@@ -39,7 +39,11 @@ export default async function EventPage({ params }: EventPageArgs) {
     return notFound();
   }
 
-  const raceSessions = await getIngestedResultsByEventId(event.id);
+  const rawSessions = await getIngestedResultsByEventId(event.id);
+  const sessionTypeOrder: Record<string, number> = { PRACTICE: 0, QUALIFYING: 1, RACE: 2 };
+  const raceSessions = [...rawSessions].sort(
+    (a, b) => (sessionTypeOrder[a.sessionType] ?? 2) - (sessionTypeOrder[b.sessionType] ?? 2)
+  );
   const startsAt = new Date(event.startsAtUtc);
   const endsAt = new Date(event.endsAtUtc);
   const isLive = isEventLive(event);
@@ -192,14 +196,19 @@ export default async function EventPage({ params }: EventPageArgs) {
           {raceSessions.length > 0 && (
             <div className="relative mt-12 pt-12 border-t border-white/10">
               <div className="space-y-8">
-                {raceSessions.map(session => (
+                {raceSessions.map(session => {
+                    const typeLabel = session.sessionType === "QUALIFYING" ? "Qualifying" : session.sessionType === "PRACTICE" ? "Practice" : "Race";
+                    const isRace = session.sessionType === "RACE";
+                    return (
                     <div key={session.id}>
-                        <ResultsTable 
-                            results={session.results} 
-                            title={`Official Results | ${session.sessionType}${session.trackName ? ` - ${session.trackName}` : ''}`}
+                        <ResultsTable
+                            results={session.results}
+                            title={`${typeLabel} Results${session.trackName ? ` - ${session.trackName}` : ''}`}
+                            showPoints={isRace}
                         />
                     </div>
-                ))}
+                    );
+                })}
               </div>
             </div>
           )}

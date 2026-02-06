@@ -19,7 +19,7 @@ type SortConfig = {
     direction: "asc" | "desc";
 };
 
-export function ResultsTable({ results, title }: { results: ResultWithParticipant[], title?: string }) {
+export function ResultsTable({ results, title, showPoints = true }: { results: ResultWithParticipant[], title?: string, showPoints?: boolean }) {
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: "position", direction: "asc" });
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -144,7 +144,7 @@ export function ResultsTable({ results, title }: { results: ResultWithParticipan
                 <SortHeader label="Best Lap" sortKey="bestLap" align="right" />
                 <SortHeader label="Cuts" sortKey="cuts" align="center" />
                 <SortHeader label="Collisions" sortKey="collisions" align="center" />
-                <SortHeader label="Pts" sortKey="points" align="center" />
+                {showPoints && <SortHeader label="Pts" sortKey="points" align="center" />}
             </tr>
             </thead>
             <tbody className="divide-y divide-white/5 font-sans text-white/80">
@@ -207,9 +207,11 @@ export function ResultsTable({ results, title }: { results: ResultWithParticipan
                     <td className={`p-4 text-center font-mono text-xs ${result.collisionCount && result.collisionCount > 0 ? 'text-red-400 font-bold' : 'text-white/40'}`}>
                         {result.collisionCount ?? 0}
                     </td>
+                    {showPoints && (
                     <td className="p-4 text-center font-sans font-black text-sm text-lsr-orange">
                         {result.points !== null && result.points > 0 ? result.points : "-"}
                     </td>
+                    )}
                 </tr>
                 );
             })}

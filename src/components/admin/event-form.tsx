@@ -14,6 +14,8 @@ import { Tag, Clock, Info, Users, QrCode, Megaphone } from "lucide-react";
 
 export function EventForm({ event, series, venues }: { event?: Event, series: EventSeries[], venues: Venue[] }) {
   const [timezone, setTimezone] = useState<string>(event?.timezone || DEFAULT_TIMEZONE);
+  const [slug, setSlug] = useState(event?.slug ?? "");
+  const [slugTouched, setSlugTouched] = useState(!!event);
 
   return (
     <div className="max-w-5xl mx-auto font-mono text-sm border border-white/10 bg-white/[0.02] p-8 md:p-12 rounded-xl shadow-2xl">
@@ -30,24 +32,30 @@ export function EventForm({ event, series, venues }: { event?: Event, series: Ev
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
             <div className="space-y-2">
               <label htmlFor="title" className="text-[10px] uppercase tracking-wider text-white/60">Event Title</label>
-              <Input 
-                id="title" 
-                name="title" 
-                defaultValue={event?.title} 
-                required 
-                className="bg-transparent border-b border-white/20 border-t-0 border-x-0 rounded-none px-0 h-8 focus-visible:ring-0 focus:border-lsr-orange transition-colors font-bold text-base" 
-                placeholder="e.g. Grand Prix of Texas" 
+              <Input
+                id="title"
+                name="title"
+                defaultValue={event?.title}
+                required
+                onChange={(e) => {
+                  if (!slugTouched) {
+                    setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""));
+                  }
+                }}
+                className="bg-transparent border-b border-white/20 border-t-0 border-x-0 rounded-none px-0 h-8 focus-visible:ring-0 focus:border-lsr-orange transition-colors font-bold text-base"
+                placeholder="e.g. Grand Prix of Texas"
               />
             </div>
             <div className="space-y-2">
               <label htmlFor="slug" className="text-[10px] uppercase tracking-wider text-white/60">URL Slug</label>
-              <Input 
-                id="slug" 
-                name="slug" 
-                defaultValue={event?.slug} 
-                required 
-                className="bg-transparent border-b border-white/20 border-t-0 border-x-0 rounded-none px-0 h-8 focus-visible:ring-0 focus:border-lsr-orange transition-colors" 
-                placeholder="e.g. grand-prix-texas-2026" 
+              <Input
+                id="slug"
+                name="slug"
+                value={slug}
+                onChange={(e) => { setSlugTouched(true); setSlug(e.target.value); }}
+                required
+                className="bg-transparent border-b border-white/20 border-t-0 border-x-0 rounded-none px-0 h-8 focus-visible:ring-0 focus:border-lsr-orange transition-colors"
+                placeholder="e.g. grand-prix-texas-2026"
               />
             </div>
 
