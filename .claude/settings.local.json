@@ -16,7 +16,9 @@
       "mcp__supabase__get_project",
       "mcp__supabase__get_organization",
       "Bash(npx prisma db seed:*)",
-      "Bash(node prisma/seed.cjs:*)"
+      "Bash(node prisma/seed.cjs:*)",
+      "mcp__supabase__search_docs",
+      "Bash(npx tsx:*)"
     ]
   }
 }

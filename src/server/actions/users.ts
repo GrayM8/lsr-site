@@ -2,6 +2,7 @@
 
 import { prisma } from "@/server/db";
 import { requireOfficer, requireSystemAdmin } from "@/server/auth/guards";
+import { createAuditLog } from "@/server/audit/log";
 import { revalidatePath } from "next/cache";
 
 export type UpdateUserPayload = {
@@ -17,7 +18,10 @@ export async function updateUser(userId: string, payload: UpdateUserPayload) {
     // 1. Fetch target user to check for Officer protection
     const targetUser = await prisma.user.findUnique({
         where: { id: userId },
-        include: { roles: { include: { role: true } } },
+        include: {
+            roles: { include: { role: true } },
+            memberships: { include: { tier: true }, orderBy: { validFrom: 'desc' }, take: 1 },
+        },
     });
 
     if (!targetUser) {
@@ -125,6 +129,35 @@ export async function updateUser(userId: string, payload: UpdateUserPayload) {
             }
         }
     }
+
+    // 5. Audit Log
+    const beforeRoles = targetUser.roles.map(r => r.role.key).sort();
+    const afterRoles = [...payload.roleKeys].sort();
+    const beforeMembership = targetUser.memberships[0]
+        ? { tier: targetUser.memberships[0].tier.key, validTo: targetUser.memberships[0].validTo }
+        : null;
+    const afterMembership = payload.activeMembershipTierKey
+        ? { tier: payload.activeMembershipTierKey, validTo: payload.activeMembershipValidTo }
+        : null;
+
+    await createAuditLog({
+        actorUserId: currentUser.id,
+        actionType: "UPDATE",
+        entityType: "USER",
+        entityId: userId,
+        targetUserId: userId,
+        summary: `Updated user ${targetUser.displayName} (@${targetUser.handle})`,
+        before: {
+            officerTitle: targetUser.officerTitle,
+            roles: beforeRoles,
+            membership: beforeMembership,
+        },
+        after: {
+            officerTitle: payload.officerTitle,
+            roles: afterRoles,
+            membership: afterMembership,
+        },
+    });
 
     revalidatePath(`/admin/users/${userId}/edit`);
     revalidatePath(`/admin/users`);

@@ -38,6 +38,7 @@ export function DriverHero({ user, isOwner, totalRegistrations }: DriverHeroProp
 
   const getDuesLabel = (m: (UserMembership & { tier: MembershipTier })) => {
     if (m.tier.key === "ALUMNI") return "ALUMNI";
+    if (m.tier.key === "PARTNER") return m.tier.label;
     if (!m.validTo) return m.tier.label;
 
     const validTo = new Date(m.validTo);
