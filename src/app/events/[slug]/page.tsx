@@ -198,6 +198,7 @@ export default async function EventPage({ params }: EventPageArgs) {
                             results={session.results}
                             title={`${typeLabel} Results${session.trackName ? ` - ${session.trackName}` : ''}`}
                             showPoints={isRace}
+                            sessionType={session.sessionType}
                         />
                     </div>
                     );
