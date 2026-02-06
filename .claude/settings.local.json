@@ -19,7 +19,8 @@
       "Bash(node prisma/seed.cjs:*)",
       "mcp__supabase__search_docs",
       "Bash(npx tsx:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "mcp__supabase__list_projects"
     ]
   }
 }

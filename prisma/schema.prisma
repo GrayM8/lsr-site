@@ -546,6 +546,8 @@ model Venue {
   country      String?
   room         String?
   geo          Json?
+  googleMapsUrl String?
+  appleMapsUrl  String?
 
   events    Event[]
   createdAt DateTime @default(now())

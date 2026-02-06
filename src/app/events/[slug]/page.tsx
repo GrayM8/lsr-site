@@ -3,11 +3,11 @@ import { getIngestedResultsByEventId } from "@/server/queries/results";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, Send, Trophy, QrCode } from "lucide-react";
+import { Calendar, Clock, MapPin, Send, Trophy, QrCode, Copy, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { LocalTime, LocalTimeRange } from "@/components/ui/local-time";
-import { GeoPoint } from "@/types";
 import { Button } from "@/components/ui/button";
+import { VenueActions } from "@/components/venue-actions";
 import { ResultsTable } from "@/components/results-table";
 import { EventRegistrationPanel } from "@/components/event-registration-panel";
 import { getSessionUser } from "@/server/auth/session";
@@ -54,9 +54,6 @@ export default async function EventPage({ params }: EventPageArgs) {
   // const isEventPassed = new Date() > endsAt; // Logic handled by registration config/snapshot
 
   const venue = event.venue;
-  const geo = venue?.geo as GeoPoint | null;
-  const hasCoords = geo?.type === "Point" && geo?.coordinates?.length === 2;
-  const directionsUrl = hasCoords ? `https://www.google.com/maps/search/?api=1&query=${geo.coordinates[1]},${geo.coordinates[0]}` : null;
 
   return (
     <main className="bg-lsr-charcoal text-white min-h-screen">
@@ -170,19 +167,15 @@ export default async function EventPage({ params }: EventPageArgs) {
                   {venue && (
                     <div className="flex items-start gap-4">
                       <MapPin className="h-5 w-5 text-lsr-orange mt-0.5 shrink-0" />
-                      <div>
-                        <div className="font-sans font-bold text-[10px] uppercase tracking-widest text-white/40 mb-1">Circuit / Venue</div>
-                        {directionsUrl ? (
-                          <Link href={directionsUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 font-sans font-bold text-sm text-white hover:text-lsr-orange transition-colors group">
-                            <span>{venue.name}</span>
-                            <Send className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          </Link>
-                        ) : (
-                          <div className="font-sans font-bold text-sm text-white">{venue.name}</div>
+                      <div className="space-y-2">
+                        <div className="font-sans font-bold text-[10px] uppercase tracking-widest text-white/40">Circuit / Venue</div>
+                        <div className="font-sans font-bold text-sm text-white">{venue.name}</div>
+                        {(venue.addressLine1 || venue.city) && (
+                          <div className="text-xs text-white/40">
+                            {[venue.addressLine1, venue.city, venue.state].filter(Boolean).join(", ")}
+                          </div>
                         )}
-                        <div className="text-xs text-white/40 mt-1">
-                          {[venue.city, venue.state].filter(Boolean).join(", ")}
-                        </div>
+                        <VenueActions venue={venue} />
                       </div>
                     </div>
                   )}
