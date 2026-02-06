@@ -29,6 +29,7 @@ export function ResultsTable({ results, title, showPoints = true, sessionType = 
   const [searchTerm, setSearchTerm] = useState("");
 
   const podiumColors: Record<number, string> = { 1: "text-yellow-400", 2: "text-gray-300", 3: "text-amber-600" };
+  const podiumBorders: Record<number, string> = { 1: "border-l-yellow-400", 2: "border-l-gray-300", 3: "border-l-amber-600" };
 
   const ordinal = (n: number) => {
     const s = ["th", "st", "nd", "rd"];
@@ -76,7 +77,7 @@ export function ResultsTable({ results, title, showPoints = true, sessionType = 
           case "car": return row.participant.carMapping?.displayName || row.participant.carName;
           case "laps": return row.lapsCompleted;
           case "totalTime": return row.totalTime ?? Infinity;
-          case "gap": return row.gap ?? ""; // simple string sort for gap usually sufficient or parse
+          case "gap": return row.gap ?? "";
           case "bestLap": return row.bestLapTime ?? Infinity;
           case "cuts": return row.totalCuts ?? 0;
           case "collisions": return row.collisionCount ?? 0;
@@ -117,6 +118,61 @@ export function ResultsTable({ results, title, showPoints = true, sessionType = 
       </th>
   );
 
+  const MobileCard = ({ result }: { result: ResultWithParticipant }) => {
+    const user = result.participant.user;
+    const mapping = result.participant.carMapping;
+    const carDisplay = mapping?.displayName || result.participant.carName;
+    const borderClass = !isNonRace && result.position <= 3 ? podiumBorders[result.position] : "border-l-white/10";
+
+    return (
+      <div className={cn("border-l-2 bg-white/[0.02] p-3", borderClass)}>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {!isPractice && (
+              <div className="shrink-0 font-sans font-bold text-sm text-white/80 w-8 text-center">
+                {isNonRace ? result.position : ordinal(result.position)}
+              </div>
+            )}
+            {showPoints && result.points !== null && result.points > 0 && (
+              <div className="shrink-0 font-sans font-black text-sm text-lsr-orange w-6 text-center">
+                {result.points}
+              </div>
+            )}
+            {user ? (
+              <Link href={`/drivers/${user.handle}`} className="flex items-center gap-2 min-w-0">
+                <Avatar className="h-7 w-7 border border-white/10 rounded-none shrink-0">
+                  <AvatarImage src={user.avatarUrl || ""} alt={user.displayName} className="object-cover" />
+                  <AvatarFallback className="bg-lsr-charcoal text-white/50 text-[9px] font-bold rounded-none">
+                    {user.displayName.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="font-sans font-bold text-sm text-white truncate">{user.displayName}</span>
+              </Link>
+            ) : (
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="h-7 w-7 bg-white/5 border border-white/10 flex items-center justify-center rounded-none text-white/20 font-bold text-[9px] shrink-0">?</div>
+                <span className="font-sans font-bold text-sm text-white/40 truncate">{result.participant.displayName}</span>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-3 mt-2 ml-8 flex-wrap">
+          <span className="text-[10px] font-bold text-white/30 uppercase tracking-wider">{carDisplay}</span>
+          <span className="text-white/10">|</span>
+          <span className="font-mono text-[10px] text-lsr-orange font-bold">{formatTime(result.bestLapTime)}</span>
+          {!isNonRace && (
+            <>
+              <span className="text-white/10">|</span>
+              <span className="font-mono text-[10px] text-white/40 italic">{formatGap(result.totalTime, result.lapsCompleted)}</span>
+            </>
+          )}
+          <span className="text-white/10">|</span>
+          <span className="font-mono text-[10px] text-white/40">{result.lapsCompleted} laps</span>
+        </div>
+      </div>
+    );
+  };
+
     return (
         <div className={cn(
             "relative flex flex-col transition-all duration-300 bg-black/40",
@@ -139,7 +195,7 @@ export function ResultsTable({ results, title, showPoints = true, sessionType = 
                     )}
                     {!isCollapsed && (
                     <>
-                    <div className="relative" onClick={e => e.stopPropagation()}>
+                    <div className="relative hidden md:block" onClick={e => e.stopPropagation()}>
                         <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-white/40" />
                         <input
                             type="text"
@@ -149,7 +205,7 @@ export function ResultsTable({ results, title, showPoints = true, sessionType = 
                             className="bg-black/20 border border-white/10 rounded-none pl-8 pr-2 py-1.5 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-lsr-orange w-32 md:w-48 transition-all"
                         />
                     </div>
-                    <button onClick={(e) => { e.stopPropagation(); setIsFullscreen(!isFullscreen); }} className="p-1.5 text-white/50 hover:text-white transition-colors bg-black/20 hover:bg-black/40 border border-white/10 rounded-none">
+                    <button onClick={(e) => { e.stopPropagation(); setIsFullscreen(!isFullscreen); }} className="hidden md:block p-1.5 text-white/50 hover:text-white transition-colors bg-black/20 hover:bg-black/40 border border-white/10 rounded-none">
                         {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
                     </button>
                     </>
@@ -162,17 +218,19 @@ export function ResultsTable({ results, title, showPoints = true, sessionType = 
           isCollapsed ? "grid-rows-[0fr]" : "grid-rows-[1fr]"
       )}>
       <div className="overflow-hidden">
+
+      {/* Desktop table */}
       <div className={cn(
-          "overflow-x-auto flex-grow custom-scrollbar",
+          "hidden md:block overflow-x-auto flex-grow custom-scrollbar",
           !isFullscreen && "max-h-[500px] overflow-y-auto"
       )}>
-        <table className="w-full text-left text-sm min-w-[800px]">
+        <table className="w-full text-left text-sm">
             <thead className="bg-white/5 border-b border-white/10 font-sans font-black text-[10px] uppercase tracking-widest text-white/50 sticky top-0 z-10 backdrop-blur-md">
             <tr>
                 {!isPractice && <SortHeader label={isQualifying ? "Qualified" : "Finished"} sortKey="position" align="center" className="w-12" />}
                 {showPoints && <SortHeader label="Pts" sortKey="points" align="center" />}
                 <SortHeader label="Driver" sortKey="driver" />
-                <SortHeader label="Car" sortKey="car" align="center" className="hidden md:table-cell" />
+                <SortHeader label="Car" sortKey="car" align="center" />
                 {isNonRace && <SortHeader label="Best Lap" sortKey="bestLap" align="right" />}
                 <SortHeader label="Laps" sortKey="laps" align="center" />
                 {!isNonRace && <SortHeader label="Total Time" sortKey="totalTime" align="right" />}
@@ -186,7 +244,7 @@ export function ResultsTable({ results, title, showPoints = true, sessionType = 
             {filteredResults.map((result) => {
                 const user = result.participant.user;
                 const mapping = result.participant.carMapping;
-                
+
                 return (
                 <tr key={result.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                     {!isPractice && <td className="p-4 text-center font-sans font-bold text-white/80">{isNonRace ? result.position : ordinal(result.position)}</td>}
@@ -223,7 +281,7 @@ export function ResultsTable({ results, title, showPoints = true, sessionType = 
                         )}
                     </div>
                     </td>
-                    <td className="p-4 hidden md:table-cell font-sans text-xs text-center">
+                    <td className="p-4 font-sans text-xs text-center">
                         {mapping ? (
                             <div className="flex flex-col items-center">
                                 <span className="text-white/80 font-bold">{mapping.displayName}</span>
@@ -256,6 +314,14 @@ export function ResultsTable({ results, title, showPoints = true, sessionType = 
             </tbody>
         </table>
       </div>
+
+      {/* Mobile card list */}
+      <div className="md:hidden max-h-[500px] overflow-y-auto divide-y divide-white/5">
+        {filteredResults.map((result) => (
+          <MobileCard key={result.id} result={result} />
+        ))}
+      </div>
+
       </div>
       </div>
     </div>
