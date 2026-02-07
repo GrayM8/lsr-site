@@ -421,6 +421,7 @@ model Entry {
   roundsCounted Int     @default(0)
   totalCuts     Int     @default(0)
   totalCollisions Int   @default(0)
+  totalPositionsGained Int @default(0)
   starts        Int     @default(0)
   wins          Int     @default(0)
   podiums       Int     @default(0)

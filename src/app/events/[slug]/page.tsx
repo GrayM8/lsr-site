@@ -44,6 +44,29 @@ export default async function EventPage({ params }: EventPageArgs) {
   const raceSessions = [...rawSessions].sort(
     (a, b) => (sessionTypeOrder[a.sessionType] ?? 2) - (sessionTypeOrder[b.sessionType] ?? 2)
   );
+
+  // Build qualifying position map: driverGuid → qualifying position
+  const qualiSession = rawSessions.find(s => s.sessionType === "QUALIFYING");
+  const qualiPositionByGuid = new Map<string, number>();
+  if (qualiSession) {
+    for (const result of qualiSession.results) {
+      qualiPositionByGuid.set(result.participant.driverGuid, result.position);
+    }
+  }
+
+  // Build positions gained maps per race session: participantId → { gained, gridPosition }
+  const positionsGainedBySession = new Map<string, Map<string, { gained: number; grid: number }>>();
+  for (const session of rawSessions) {
+    if (session.sessionType !== "RACE") continue;
+    const map = new Map<string, { gained: number; grid: number }>();
+    for (const result of session.results) {
+      const qualiPos = qualiPositionByGuid.get(result.participant.driverGuid);
+      if (qualiPos !== undefined) {
+        map.set(result.participant.id, { gained: qualiPos - result.position, grid: qualiPos });
+      }
+    }
+    positionsGainedBySession.set(session.id, map);
+  }
   const startsAt = new Date(event.startsAtUtc);
   const endsAt = new Date(event.endsAtUtc);
   const isLive = isEventLive(event);
@@ -199,6 +222,7 @@ export default async function EventPage({ params }: EventPageArgs) {
                             title={`${typeLabel} Results${session.trackName ? ` - ${session.trackName}` : ''}`}
                             showPoints={isRace}
                             sessionType={session.sessionType}
+                            positionsGained={isRace ? positionsGainedBySession.get(session.id) : undefined}
                         />
                     </div>
                     );

@@ -2,7 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { type RaceResult, type RaceParticipant, type User, type CarMapping } from "@prisma/client";
-import { UserIcon, ArrowUpDown, ArrowUp, ArrowDown, Maximize2, Minimize2, Search, Trophy, Medal, Flag, Timer, Cone, ChevronDown } from "lucide-react";
+import { UserIcon, ArrowUpDown, ArrowUp, ArrowDown, Maximize2, Minimize2, Search, Trophy, Medal, Flag, Timer, Cone, ChevronDown, ChevronUp, Minus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -19,7 +19,7 @@ type SortConfig = {
     direction: "asc" | "desc";
 };
 
-export function ResultsTable({ results, title, showPoints = true, sessionType = "RACE" }: { results: ResultWithParticipant[], title?: string, showPoints?: boolean, sessionType?: string }) {
+export function ResultsTable({ results, title, showPoints = true, sessionType = "RACE", positionsGained }: { results: ResultWithParticipant[], title?: string, showPoints?: boolean, sessionType?: string, positionsGained?: Map<string, { gained: number; grid: number }> }) {
   const isPractice = sessionType === "PRACTICE";
   const isQualifying = sessionType === "QUALIFYING";
   const isNonRace = isPractice || isQualifying;
@@ -28,8 +28,17 @@ export function ResultsTable({ results, title, showPoints = true, sessionType = 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const isRace = sessionType === "RACE";
+  const hasPositionsGained = isRace && positionsGained && positionsGained.size > 0;
+
   const podiumColors: Record<number, string> = { 1: "text-yellow-400", 2: "text-gray-300", 3: "text-amber-600" };
   const podiumBorders: Record<number, string> = { 1: "border-l-yellow-400", 2: "border-l-gray-300", 3: "border-l-amber-600" };
+
+  const renderPositionChange = (gained: number) => {
+    if (gained > 0) return <span className="inline-flex items-center gap-0.5 text-emerald-400 font-bold text-xs"><ChevronUp className="h-3 w-3" />+{gained}</span>;
+    if (gained < 0) return <span className="inline-flex items-center gap-0.5 text-red-400 font-bold text-xs"><ChevronDown className="h-3 w-3" />{gained}</span>;
+    return <span className="inline-flex items-center gap-0.5 text-white/30 text-xs"><Minus className="h-3 w-3" />0</span>;
+  };
 
   const ordinal = (n: number) => {
     const s = ["th", "st", "nd", "rd"];
@@ -82,6 +91,8 @@ export function ResultsTable({ results, title, showPoints = true, sessionType = 
           case "cuts": return row.totalCuts ?? 0;
           case "collisions": return row.collisionCount ?? 0;
           case "points": return row.points ?? 0;
+          case "grid": return positionsGained?.get(row.participant.id)?.grid ?? Infinity;
+          case "posGained": return positionsGained?.get(row.participant.id)?.gained ?? 0;
           default: return 0;
       }
   };
@@ -166,6 +177,12 @@ export function ResultsTable({ results, title, showPoints = true, sessionType = 
               <span className="font-mono text-[10px] text-white/40 italic">{formatGap(result.totalTime, result.lapsCompleted)}</span>
             </>
           )}
+          {hasPositionsGained && positionsGained?.get(result.participant.id) != null && (
+            <>
+              <span className="text-white/10">|</span>
+              {renderPositionChange(positionsGained.get(result.participant.id)!.gained)}
+            </>
+          )}
           <span className="text-white/10">|</span>
           <span className="font-mono text-[10px] text-white/40">{result.lapsCompleted} laps</span>
         </div>
@@ -236,6 +253,8 @@ export function ResultsTable({ results, title, showPoints = true, sessionType = 
                 {!isNonRace && <SortHeader label="Total Time" sortKey="totalTime" align="right" />}
                 {!isNonRace && <SortHeader label="Gap" sortKey="gap" align="right" />}
                 {!isNonRace && <SortHeader label="Best Lap" sortKey="bestLap" align="right" />}
+                {hasPositionsGained && <SortHeader label="Grid" sortKey="grid" align="center" />}
+                {hasPositionsGained && <SortHeader label="+/−" sortKey="posGained" align="center" />}
                 <SortHeader label="Cuts" sortKey="cuts" align="center" />
                 <SortHeader label="Collisions" sortKey="collisions" align="center" />
             </tr>
@@ -302,6 +321,16 @@ export function ResultsTable({ results, title, showPoints = true, sessionType = 
                     </td>
                     )}
                     {!isNonRace && <td className="p-4 text-right font-mono text-xs text-lsr-orange">{formatTime(result.bestLapTime)}</td>}
+                    {hasPositionsGained && (
+                    <td className="p-4 text-center font-mono text-xs text-white/50">
+                        {positionsGained?.get(result.participant.id)?.grid != null ? `P${positionsGained.get(result.participant.id)!.grid}` : "-"}
+                    </td>
+                    )}
+                    {hasPositionsGained && (
+                    <td className="p-4 text-center">
+                        {positionsGained?.get(result.participant.id) != null ? renderPositionChange(positionsGained.get(result.participant.id)!.gained) : "-"}
+                    </td>
+                    )}
                     <td className={`p-4 text-center font-mono text-xs ${result.totalCuts && result.totalCuts > 0 ? 'text-red-400' : 'text-white/40'}`}>
                         {result.totalCuts ?? 0}
                     </td>
