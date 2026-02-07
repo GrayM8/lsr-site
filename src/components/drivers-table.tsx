@@ -111,7 +111,13 @@ export function DriversTable({ drivers }: { drivers: DriverRow[] }) {
               <tr>
                 <SortHeader label="Pos" sortKey="rank" className="w-12 text-left" />
                 <SortHeader label="Driver" sortKey="driver" className="text-left" />
-                <SortHeader label="Points" sortKey="points" align="center" className="w-24 md:w-32" />
+                <SortHeader
+                  label="All Time Pts*"
+                  sortKey="points"
+                  align="center"
+                  className="w-24 md:w-32"
+                  tooltip="Total points earned across all races and seasons in a driver's career"
+                />
                 <th className="px-4 py-4 text-center font-sans font-black uppercase tracking-widest text-[9px] text-white/40 w-24 md:w-32 hidden sm:table-cell">
                   <Tooltip>
                     <TooltipTrigger className="cursor-help decoration-dashed underline underline-offset-2">Events</TooltipTrigger>
