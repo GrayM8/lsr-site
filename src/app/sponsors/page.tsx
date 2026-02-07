@@ -152,7 +152,7 @@ export default function SponsorsPage() {
             <div className="border border-white/10 bg-white/[0.02] p-6 flex flex-col h-full hover:border-white/20 transition-colors">
               <div className="mb-4">
                 <h3 className="font-sans font-black text-lg text-white uppercase tracking-tight">Friend of LSR</h3>
-                <div className="mt-2 text-xl font-mono text-white/60">$100 – $250</div>
+                <div className="mt-2 text-xl font-mono text-white/60">$100 – $249</div>
               </div>
               <ul className="space-y-4 mb-8 flex-grow">
                 <li className="flex items-start gap-3 text-xs text-white/70">
@@ -171,7 +171,7 @@ export default function SponsorsPage() {
             <div className="border border-white/10 bg-white/[0.02] p-6 flex flex-col h-full hover:border-white/20 transition-colors">
               <div className="mb-4">
                 <h3 className="font-sans font-black text-lg text-white uppercase tracking-tight">Silver Partner</h3>
-                <div className="mt-2 text-xl font-mono text-white/80">$250 – $1000</div>
+                <div className="mt-2 text-xl font-mono text-white/80">$250 – $999</div>
               </div>
               <ul className="space-y-4 mb-8 flex-grow">
                 <li className="flex items-start gap-3 text-xs text-white/70">
@@ -196,7 +196,7 @@ export default function SponsorsPage() {
             <div className="border border-white/10 bg-white/[0.02] p-6 flex flex-col h-full hover:border-white/20 transition-colors">
               <div className="mb-4">
                 <h3 className="font-sans font-black text-lg text-white uppercase tracking-tight">Gold Partner</h3>
-                <div className="mt-2 text-xl font-mono text-white">$1000 – $2,500</div>
+                <div className="mt-2 text-xl font-mono text-white">$1,000 – $4,999</div>
               </div>
               <ul className="space-y-4 mb-8 flex-grow">
                 <li className="flex items-start gap-3 text-xs text-white/70">
@@ -221,13 +221,13 @@ export default function SponsorsPage() {
             <div className="border border-white/10 bg-white/[0.02] p-6 flex flex-col h-full hover:border-white/20 transition-colors">
               <div className="mb-4">
                 <h3 className="font-sans font-black text-lg text-white uppercase tracking-tight">Platinum Partner</h3>
-                <div className="mt-2 text-xl font-mono text-white">$2,500+</div>
+                <div className="mt-2 text-xl font-mono text-white">$5,000+</div>
               </div>
               <ul className="space-y-4 mb-8 flex-grow">
                 <li className="flex items-start gap-3 text-xs text-white/70">
                   <span className="h-1.5 w-1.5 rounded-full bg-white/60 mt-1.5 shrink-0" />
                   <span>
-                    <strong className="block text-white/90">Largest logo featured on the team banner displayed at tabling and press events</strong>
+                    <strong className="block text-white/90">Logo featured on the team banner displayed at tabling and press events</strong>
                   </span>
                 </li>
                 <li className="flex items-start gap-3 text-xs text-white/70">
@@ -315,7 +315,7 @@ export default function SponsorsPage() {
                   <td className="p-4 text-center text-white/20">-</td>
                   <td className="p-4 text-center text-white/20">-</td>
                   <td className="p-4 text-center text-white">Medium Logo</td>
-                  <td className="p-4 text-center text-white">Largest Logo</td>
+                  <td className="p-4 text-center text-white">Logo</td>
                 </tr>
                 <tr className="hover:bg-white/[0.02]">
                   <td className="p-4 font-bold">Scheduled Campus Visit</td>
