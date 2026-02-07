@@ -6,9 +6,6 @@ import { createVenue, updateVenue } from "@/app/admin/venues/actions";
 import { Venue } from "@prisma/client";
 
 export function VenueForm({ venue }: { venue?: Venue }) {
-  // @ts-expect-error - geo is a JSON object
-  const [longitude, latitude] = venue?.geo?.coordinates ?? [];
-
   return (
     <div className="overflow-x-auto">
       <form action={venue ? updateVenue.bind(null, venue.id) : createVenue} className="min-w-[600px]">
@@ -47,12 +44,12 @@ export function VenueForm({ venue }: { venue?: Venue }) {
           </div>
           <div className="flex space-x-4">
             <div className="w-1/2">
-              <label htmlFor="latitude">Latitude</label>
-              <Input id="latitude" name="latitude" type="number" step="any" defaultValue={latitude} />
+              <label htmlFor="googleMapsUrl">Google Maps Link</label>
+              <Input id="googleMapsUrl" name="googleMapsUrl" defaultValue={venue?.googleMapsUrl ?? ""} placeholder="https://maps.google.com/..." />
             </div>
             <div className="w-1/2">
-              <label htmlFor="longitude">Longitude</label>
-              <Input id="longitude" name="longitude" type="number" step="any" defaultValue={longitude} />
+              <label htmlFor="appleMapsUrl">Apple Maps Link</label>
+              <Input id="appleMapsUrl" name="appleMapsUrl" defaultValue={venue?.appleMapsUrl ?? ""} placeholder="https://maps.apple.com/..." />
             </div>
           </div>
           <Button type="submit">{venue ? "Update Venue" : "Create Venue"}</Button>

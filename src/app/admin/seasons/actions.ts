@@ -120,7 +120,7 @@ export async function recomputeStandings(seasonId: string) {
     if (!season) throw new Error("Season not found");
     if (!season.seriesId) throw new Error("Season must have a Series assigned to recompute");
 
-    // 1. Fetch Events in Season Range with Results
+    // 1. Fetch Events in Season Range with Results (include QUALIFYING for positions gained)
     const events = await prisma.event.findMany({
         where: {
             seriesId: season.seriesId,
@@ -131,7 +131,7 @@ export async function recomputeStandings(seasonId: string) {
         },
         include: {
             ingestedSessions: {
-                where: { sessionType: "RACE" },
+                where: { sessionType: { in: ["RACE", "QUALIFYING"] } },
                 include: {
                     results: {
                         include: {
@@ -160,11 +160,22 @@ export async function recomputeStandings(seasonId: string) {
         lastCarDisplay: string | null;
         totalCuts: number;
         totalCollisions: number;
+        totalPositionsGained: number;
     }
     const statsMap = new Map<string, DriverStats>();
 
     for (const event of events) {
+        // Build qualifying position map for this event
+        const qualiSession = event.ingestedSessions.find(s => s.sessionType === "QUALIFYING");
+        const qualiPosByGuid = new Map<string, number>();
+        if (qualiSession) {
+            for (const result of qualiSession.results) {
+                qualiPosByGuid.set(result.participant.driverGuid, result.position);
+            }
+        }
+
         for (const session of event.ingestedSessions) {
+            if (session.sessionType !== "RACE") continue;
             for (const result of session.results) {
                 const userId = result.participant.userId;
                 if (!userId) continue;
@@ -183,6 +194,7 @@ export async function recomputeStandings(seasonId: string) {
                     lastCarDisplay: null,
                     totalCuts: 0,
                     totalCollisions: 0,
+                    totalPositionsGained: 0,
                 };
 
                 // Car
@@ -196,6 +208,12 @@ export async function recomputeStandings(seasonId: string) {
                 // Incidents
                 current.totalCuts += (result.totalCuts || 0);
                 current.totalCollisions += (result.collisionCount || 0);
+
+                // Positions gained
+                const qualiPos = qualiPosByGuid.get(result.participant.driverGuid);
+                if (qualiPos !== undefined) {
+                    current.totalPositionsGained += (qualiPos - result.position);
+                }
 
                 // Position stats
                 if (result.status === "FINISHED" || result.status === "DNF" || result.status === "DSQ") {
@@ -247,6 +265,7 @@ export async function recomputeStandings(seasonId: string) {
                         carDisplay: stat.lastCarDisplay,
                         totalCuts: stat.totalCuts,
                         totalCollisions: stat.totalCollisions,
+                        totalPositionsGained: stat.totalPositionsGained,
                     }
                 });
             } else {
@@ -269,6 +288,7 @@ export async function recomputeStandings(seasonId: string) {
                         carDisplay: stat.lastCarDisplay,
                         totalCuts: stat.totalCuts,
                         totalCollisions: stat.totalCollisions,
+                        totalPositionsGained: stat.totalPositionsGained,
                     }
                 });
             }

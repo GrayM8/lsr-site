@@ -166,15 +166,25 @@ export async function previewParseResult(uploadId: string) {
   return updatedUpload;
 }
 
-export async function bindEventToUpload(uploadId: string, eventId: string, pointsSystem: string | null = null) {
+export async function bindEventToUpload(
+  uploadId: string,
+  eventId: string,
+  pointsSystem: string | null = null,
+  sessionLabel: string | null = null,
+) {
   const user = await requireOfficer();
 
   const event = await prisma.event.findUnique({ where: { id: eventId } });
   if (!event) throw new Error("Event not found");
 
+  // Practice and qualifying sessions never award points
+  const effectivePoints = (sessionLabel === "PRACTICE" || sessionLabel === "QUALIFYING")
+    ? "NONE"
+    : pointsSystem;
+
   await prisma.rawResultUpload.update({
     where: { id: uploadId },
-    data: { eventId, pointsSystem },
+    data: { eventId, pointsSystem: effectivePoints, sessionLabel },
   });
 
   await createAuditLog({
@@ -183,7 +193,7 @@ export async function bindEventToUpload(uploadId: string, eventId: string, point
     entityType: "RESULT_UPLOAD",
     entityId: uploadId,
     summary: `Bound upload to event ${event.title}`,
-    metadata: { eventId, pointsSystem },
+    metadata: { eventId, pointsSystem: effectivePoints, sessionLabel },
   });
 
   revalidatePath(`/admin/results/${uploadId}`);
@@ -255,17 +265,20 @@ export async function ingestUpload(uploadId: string) {
 
   await prisma.$transaction(async (tx) => {
     // 1. Create RaceSession
+    const sessionType = upload.sessionLabel || "RACE";
     const session = await tx.raceSession.create({
       data: {
         uploadId,
         eventId: upload.eventId!,
-        sessionType: data.Type || "UNKNOWN",
+        sessionType,
         trackName: data.TrackName || "UNKNOWN",
         trackConfig: data.TrackConfig,
         startedAt: data.Date ? new Date(data.Date) : new Date(),
         pointsSystem: pointsSystem,
       },
     });
+
+    const isRaceSession = sessionType === "RACE";
 
     // 2. Process Participants (Cars) & Map Identity
     const carIdToParticipantId = new Map<number, string>();
@@ -363,7 +376,7 @@ export async function ingestUpload(uploadId: string) {
             }
 
             const currentPos = position++;
-            const points = calculatePoints(currentPos, pointsSystem);
+            const points = isRaceSession ? calculatePoints(currentPos, pointsSystem) : 0;
 
             await tx.raceResult.create({
                 data: {

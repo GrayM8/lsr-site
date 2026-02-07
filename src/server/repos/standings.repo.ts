@@ -32,7 +32,8 @@ export async function getStandings(slug: string) {
           car: entry.carDisplay || "Unknown",
           incidents: (entry.totalCuts || 0) + (entry.totalCollisions || 0),
           bestFinish: entry.bestFinish,
-          rank: entry.rank
+          rank: entry.rank,
+          positionsGained: entry.totalPositionsGained
       }));
   }
 

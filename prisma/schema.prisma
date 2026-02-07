@@ -421,6 +421,7 @@ model Entry {
   roundsCounted Int     @default(0)
   totalCuts     Int     @default(0)
   totalCollisions Int   @default(0)
+  totalPositionsGained Int @default(0)
   starts        Int     @default(0)
   wins          Int     @default(0)
   podiums       Int     @default(0)
@@ -546,6 +547,8 @@ model Venue {
   country      String?
   room         String?
   geo          Json?
+  googleMapsUrl String?
+  appleMapsUrl  String?
 
   events    Event[]
   createdAt DateTime @default(now())
@@ -770,6 +773,7 @@ model RawResultUpload {
   uploadedBy       User                    @relation(fields: [uploadedByUserId], references: [id])
   eventId          String?
   pointsSystem     String? // "F1", "NONE"
+  sessionLabel     String? // "PRACTICE", "QUALIFYING", "RACE"
   event            Event?                  @relation(fields: [eventId], references: [id])
 
   ingestedSessions RaceSession[]

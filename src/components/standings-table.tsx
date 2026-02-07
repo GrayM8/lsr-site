@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
-import { ArrowUpDown, ArrowUp, ArrowDown, Maximize2, Minimize2, Search, Info } from "lucide-react";
+import { ArrowUpDown, ArrowUp, ArrowDown, Maximize2, Minimize2, Search, Info, ChevronUp, ChevronDown, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -27,6 +27,7 @@ type Standing = {
     incidents: number;
     bestFinish: number | null;
     rank: number | null;
+    positionsGained?: number;
 };
 
 type SortConfig = {
@@ -69,6 +70,8 @@ export function StandingsTable({ standings, title = "Standings", infoText }: { s
                 return row.starts;
             case "incidents":
                 return row.incidents;
+            case "positionsGained":
+                return row.positionsGained ?? 0;
             default:
                 return 0;
         }
@@ -87,6 +90,12 @@ export function StandingsTable({ standings, title = "Standings", infoText }: { s
         if (!searchTerm) return true;
         return row.driver.name.toLowerCase().includes(searchTerm.toLowerCase());
     });
+
+    const renderPositionChange = (gained: number) => {
+        if (gained > 0) return <span className="inline-flex items-center gap-0.5 text-emerald-400 font-bold text-xs"><ChevronUp className="h-3 w-3" />+{gained}</span>;
+        if (gained < 0) return <span className="inline-flex items-center gap-0.5 text-red-400 font-bold text-xs"><ChevronDown className="h-3 w-3" />{gained}</span>;
+        return <span className="inline-flex items-center gap-0.5 text-white/30 text-xs"><Minus className="h-3 w-3" />0</span>;
+    };
 
     const SortHeader = ({ label, sortKey, align = "left", className }: { label: string; sortKey: string; align?: "left" | "center" | "right"; className?: string }) => (
         <th className={cn("p-4 cursor-pointer select-none group hover:text-white", className)} onClick={() => handleSort(sortKey)}>
@@ -152,6 +161,7 @@ export function StandingsTable({ standings, title = "Standings", infoText }: { s
                             <SortHeader label="Podiums" sortKey="podiums" align="center" />
                             <SortHeader label="Best Finish" sortKey="bestFinish" align="center" />
                             <SortHeader label="Starts" sortKey="starts" align="center" />
+                            <SortHeader label="+/−" sortKey="positionsGained" align="center" />
                             <SortHeader label="Incidents" sortKey="incidents" align="center" />
                         </tr>
                     </thead>
@@ -191,6 +201,9 @@ export function StandingsTable({ standings, title = "Standings", infoText }: { s
                                 </td>
                                 <td className="p-4 text-center font-mono text-xs text-white/60">
                                     {standing.starts}
+                                </td>
+                                <td className="p-4 text-center">
+                                    {standing.positionsGained != null ? renderPositionChange(standing.positionsGained) : "-"}
                                 </td>
                                 <td className={`p-4 text-center font-mono text-xs ${standing.incidents > 0 ? 'text-red-400' : 'text-white/60'}`}>
                                     {standing.incidents}

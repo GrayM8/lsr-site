@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Event, Venue, EventSeries } from "@prisma/client"
 import { isEventLive } from "@/lib/events"
-import { GeoPoint } from "@/types";
 
 type Props = {
   index: number
@@ -20,9 +19,7 @@ export default function NextEvent({ index, featuredEvent, upcomingEvents }: Prop
   const nextEventEndDate = featuredEvent ? new Date(featuredEvent.endsAtUtc) : null
 
   const venue = featuredEvent?.venue
-  const geo = venue?.geo as GeoPoint | null
-  const hasCoords = geo?.type === "Point" && geo?.coordinates?.length === 2
-  const directionsUrl = hasCoords ? `https://www.google.com/maps/search/?api=1&query=${geo.coordinates[1]},${geo.coordinates[0]}` : null
+  const directionsUrl = venue?.googleMapsUrl || null
   const featuredIsLive = featuredEvent ? isEventLive(featuredEvent) : false;
 
   return (

@@ -1,6 +1,5 @@
 "use server"
 
-import { GeoPoint } from "@/types";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createVenue as createVenueInDb, updateVenue as updateVenueInDb, deleteVenue as deleteVenueInDb } from "@/server/repos/venue.repo";
@@ -21,16 +20,8 @@ export async function createVenue(formData: FormData) {
   const postalCode = formData.get("postalCode") as string;
   const country = formData.get("country") as string;
   const room = formData.get("room") as string;
-  const latitude = formData.get("latitude") as string;
-  const longitude = formData.get("longitude") as string;
-
-  let geo: GeoPoint | undefined = undefined;
-  if (latitude && longitude) {
-    geo = {
-      type: "Point",
-      coordinates: [parseFloat(longitude), parseFloat(latitude)],
-    };
-  }
+  const googleMapsUrl = (formData.get("googleMapsUrl") as string) || null;
+  const appleMapsUrl = (formData.get("appleMapsUrl") as string) || null;
 
   const venue = await createVenueInDb({
     name,
@@ -41,7 +32,8 @@ export async function createVenue(formData: FormData) {
     postalCode,
     country,
     room,
-    ...(geo && { geo }),
+    googleMapsUrl,
+    appleMapsUrl,
   });
 
   await createAuditLog({
@@ -71,16 +63,8 @@ export async function updateVenue(id: string, formData: FormData) {
   const postalCode = formData.get("postalCode") as string;
   const country = formData.get("country") as string;
   const room = formData.get("room") as string;
-  const latitude = formData.get("latitude") as string;
-  const longitude = formData.get("longitude") as string;
-
-  let geo: GeoPoint | undefined = undefined;
-  if (latitude && longitude) {
-    geo = {
-      type: "Point",
-      coordinates: [parseFloat(longitude), parseFloat(latitude)],
-    };
-  }
+  const googleMapsUrl = (formData.get("googleMapsUrl") as string) || null;
+  const appleMapsUrl = (formData.get("appleMapsUrl") as string) || null;
 
   await updateVenueInDb(id, {
     name,
@@ -91,7 +75,8 @@ export async function updateVenue(id: string, formData: FormData) {
     postalCode,
     country,
     room,
-    ...(geo && { geo }),
+    googleMapsUrl,
+    appleMapsUrl,
   });
 
   await createAuditLog({

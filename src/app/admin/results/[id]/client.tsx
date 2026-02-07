@@ -51,8 +51,11 @@ export function ResultDetailClient({
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [selectedEventId, setSelectedEventId] = useState(result.eventId || "");
+  const [selectedSessionLabel, setSelectedSessionLabel] = useState(result.sessionLabel || "RACE");
   const [selectedPointsSystem, setSelectedPointsSystem] = useState(result.pointsSystem || "F1");
   const router = useRouter();
+
+  const isNonRace = selectedSessionLabel === "PRACTICE" || selectedSessionLabel === "QUALIFYING";
 
   const handleParse = async () => {
     setIsProcessing(true);
@@ -72,12 +75,14 @@ export function ResultDetailClient({
       setIsProcessing(true);
       setError(null);
       try {
-          await bindEventToUpload(result.id, selectedEventId, selectedPointsSystem);
+          const effectivePoints = isNonRace ? "NONE" : selectedPointsSystem;
+          await bindEventToUpload(result.id, selectedEventId, effectivePoints, selectedSessionLabel);
           router.refresh();
-          setResult(prev => ({ 
-              ...prev, 
+          setResult(prev => ({
+              ...prev,
               eventId: selectedEventId,
-              pointsSystem: selectedPointsSystem
+              pointsSystem: effectivePoints,
+              sessionLabel: selectedSessionLabel
           }));
       } catch (e: any) {
           setError(e.message);
@@ -128,7 +133,9 @@ export function ResultDetailClient({
       }
   };
 
-  const hasChanges = selectedEventId !== result.eventId || selectedPointsSystem !== (result.pointsSystem || "F1");
+  const hasChanges = selectedEventId !== result.eventId
+    || selectedPointsSystem !== (result.pointsSystem || "F1")
+    || selectedSessionLabel !== (result.sessionLabel || "RACE");
 
   return (
     <div className="space-y-6">
@@ -159,12 +166,12 @@ export function ResultDetailClient({
           <p>SHA256: {result.sha256}</p>
           
           <div className="mt-4 p-4 border rounded bg-muted/50 space-y-4">
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                  <div className="space-y-2">
                      <label className="font-medium text-sm">Assigned Event</label>
-                     <select 
+                     <select
                         className="w-full p-2 border rounded bg-background text-foreground"
-                        value={selectedEventId} 
+                        value={selectedEventId}
                         onChange={(e) => setSelectedEventId(e.target.value)}
                         disabled={isProcessing || result.status === 'INGESTED'}
                      >
@@ -176,14 +183,31 @@ export function ResultDetailClient({
                          ))}
                      </select>
                  </div>
-                 
+
+                 <div className="space-y-2">
+                     <label className="font-medium text-sm">Session Type</label>
+                     <select
+                        className="w-full p-2 border rounded bg-background text-foreground"
+                        value={selectedSessionLabel}
+                        onChange={(e) => setSelectedSessionLabel(e.target.value)}
+                        disabled={isProcessing || result.status === 'INGESTED'}
+                     >
+                         <option value="PRACTICE">Practice</option>
+                         <option value="QUALIFYING">Qualifying</option>
+                         <option value="RACE">Race</option>
+                     </select>
+                     {isNonRace && (
+                         <p className="text-xs text-muted-foreground">Points disabled for non-race sessions</p>
+                     )}
+                 </div>
+
                  <div className="space-y-2">
                      <label className="font-medium text-sm">Points Ruleset</label>
-                     <select 
+                     <select
                         className="w-full p-2 border rounded bg-background text-foreground"
-                        value={selectedPointsSystem} 
+                        value={isNonRace ? "NONE" : selectedPointsSystem}
                         onChange={(e) => setSelectedPointsSystem(e.target.value)}
-                        disabled={isProcessing || result.status === 'INGESTED'}
+                        disabled={isProcessing || result.status === 'INGESTED' || isNonRace}
                      >
                          <option value="F1">F1 (Default)</option>
                          <option value="HALF">Half Points</option>

@@ -7,7 +7,6 @@ import { LocalTime, LocalTimeRange } from "@/components/ui/local-time"
 import { getAllEvents } from "@/server/queries/events";
 import { Event, Venue, EventSeries } from "@prisma/client"
 import { isEventLive } from "@/lib/events";
-import { GeoPoint } from "@/types";
 import Image from "next/image"
 import Link from "next/link"
 import { Metadata } from "next"
@@ -26,9 +25,7 @@ function FeaturedEventCard({ event }: { event: Event & { series: EventSeries | n
   const live = isEventLive(event);
 
   const venue = event.venue
-  const geo = venue?.geo as GeoPoint | null
-  const hasCoords = geo?.type === "Point" && geo?.coordinates?.length === 2
-  const directionsUrl = hasCoords ? `https://www.google.com/maps/search/?api=1&query=${geo.coordinates[1]},${geo.coordinates[0]}` : null
+  const directionsUrl = venue?.googleMapsUrl || null
 
   return (
     <div className="border-l-4 border-lsr-orange bg-white/[0.03] flex flex-col md:flex-row overflow-hidden group">
