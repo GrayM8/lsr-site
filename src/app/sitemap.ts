@@ -2,6 +2,8 @@ import type { MetadataRoute } from "next"
 import { prisma } from "@/server/db"
 import { getProducts } from "@/lib/shopify/catalog"
 
+export const dynamic = 'force-dynamic'
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = process.env.NEXT_PUBLIC_SITE_URL || "https://www.longhornsimracing.org"
 
@@ -18,65 +20,75 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/sponsors`, changeFrequency: "monthly", priority: 0.6 },
   ]
 
-  // 2. Dynamic: Drivers (Users)
-  const users = await prisma.user.findMany({
-    where: { status: { not: "deleted" } },
-    select: { handle: true, updatedAt: true },
-  })
-  const driverRoutes: MetadataRoute.Sitemap = users.map((user) => ({
-    url: `${base}/drivers/${user.handle}`,
-    lastModified: user.updatedAt,
-    changeFrequency: "weekly",
-    priority: 0.8,
-  }))
+  // Dynamic routes — all wrapped in try/catch so sitemap still generates during outages
+  let driverRoutes: MetadataRoute.Sitemap = [];
+  let eventRoutes: MetadataRoute.Sitemap = [];
+  let postRoutes: MetadataRoute.Sitemap = [];
+  let seriesRoutes: MetadataRoute.Sitemap = [];
+  let productRoutes: MetadataRoute.Sitemap = [];
 
-  // 3. Dynamic: Events
-  const events = await prisma.event.findMany({
-    where: { visibility: "public" },
-    select: { slug: true, updatedAt: true },
-  })
-  const eventRoutes: MetadataRoute.Sitemap = events.map((event) => ({
-    url: `${base}/events/${event.slug}`,
-    lastModified: event.updatedAt,
-    changeFrequency: "weekly",
-    priority: 0.7,
-  }))
+  try {
+    // 2. Dynamic: Drivers (Users)
+    const users = await prisma.user.findMany({
+      where: { status: { not: "deleted" } },
+      select: { handle: true, updatedAt: true },
+    })
+    driverRoutes = users.map((user) => ({
+      url: `${base}/drivers/${user.handle}`,
+      lastModified: user.updatedAt,
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    }))
 
-  // 4. Dynamic: News Posts
-  const posts = await prisma.post.findMany({
-    where: { publishedAt: { not: null }, visibility: "public" },
-    select: { slug: true, updatedAt: true },
-  })
-  const postRoutes: MetadataRoute.Sitemap = posts.map((post) => ({
-    url: `${base}/news/${post.slug}`,
-    lastModified: post.updatedAt,
-    changeFrequency: "never", // Posts usually don't change after publication
-    priority: 0.7,
-  }))
+    // 3. Dynamic: Events
+    const events = await prisma.event.findMany({
+      where: { visibility: "public" },
+      select: { slug: true, updatedAt: true },
+    })
+    eventRoutes = events.map((event) => ({
+      url: `${base}/events/${event.slug}`,
+      lastModified: event.updatedAt,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    }))
 
-  // 5. Dynamic: Event Series
-  const series = await prisma.eventSeries.findMany({
-    where: { visibility: "public" },
-    select: { slug: true, updatedAt: true },
-  })
-  const seriesRoutes: MetadataRoute.Sitemap = series.map((s) => ({
-    url: `${base}/series/${s.slug}`,
-    lastModified: s.updatedAt,
-    changeFrequency: "weekly",
-    priority: 0.6,
-  }))
+    // 4. Dynamic: News Posts
+    const posts = await prisma.post.findMany({
+      where: { publishedAt: { not: null }, visibility: "public" },
+      select: { slug: true, updatedAt: true },
+    })
+    postRoutes = posts.map((post) => ({
+      url: `${base}/news/${post.slug}`,
+      lastModified: post.updatedAt,
+      changeFrequency: "never" as const,
+      priority: 0.7,
+    }))
+
+    // 5. Dynamic: Event Series
+    const series = await prisma.eventSeries.findMany({
+      where: { visibility: "public" },
+      select: { slug: true, updatedAt: true },
+    })
+    seriesRoutes = series.map((s) => ({
+      url: `${base}/series/${s.slug}`,
+      lastModified: s.updatedAt,
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    }))
+  } catch (error) {
+    console.error("[Sitemap] Failed to fetch dynamic routes:", error);
+  }
 
   // 6. Dynamic: Shop Products
-  let productRoutes: MetadataRoute.Sitemap = [];
   const SHOP_ENABLED = process.env.NEXT_PUBLIC_SHOP_ENABLED === "true";
-  
+
   if (SHOP_ENABLED) {
     try {
       const products = await getProducts();
       productRoutes = products.map((product) => ({
         url: `${base}/shop/products/${product.handle}`,
         lastModified: new Date(product.updatedAt),
-        changeFrequency: "weekly",
+        changeFrequency: "weekly" as const,
         priority: 0.8,
       }));
     } catch (error) {

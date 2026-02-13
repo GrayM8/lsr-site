@@ -17,9 +17,16 @@ function esc(s: string) {
     .replaceAll("'", "&apos;")
 }
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   const site = baseUrl()
-  const posts = await getAllPosts()
+  let posts: Awaited<ReturnType<typeof getAllPosts>>;
+  try {
+    posts = await getAllPosts()
+  } catch {
+    posts = []
+  }
 
   const items = posts
     .map(p => {
