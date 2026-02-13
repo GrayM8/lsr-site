@@ -10,6 +10,7 @@ import { isEventLive } from "@/lib/events";
 import Image from "next/image"
 import Link from "next/link"
 import { Metadata } from "next"
+import { DatabaseUnavailable } from "@/components/database-unavailable"
 
 export const metadata: Metadata = {
   title: "Events Schedule",
@@ -176,7 +177,25 @@ export default async function EventsIndexPage({
   const selectedTypes = (Array.isArray(typeParam) ? typeParam : typeParam ? [typeParam] : [])
     .map((t) => t.toString().toLowerCase())
 
-  const allEvents = await getAllEvents()
+  let allEvents;
+  try {
+    allEvents = await getAllEvents();
+  } catch (error) {
+    console.error('[Events] Failed to load events:', error);
+    return (
+      <main className="bg-lsr-charcoal text-white min-h-screen">
+        <div className="mx-auto max-w-6xl px-6 md:px-8 py-14 md:py-20">
+          <div className="mb-10">
+            <h1 className="font-display font-black italic text-5xl md:text-6xl text-white uppercase tracking-normal">
+              The <span className="text-lsr-orange">Schedule</span>
+            </h1>
+            <p className="font-sans font-bold text-white/40 uppercase tracking-[0.3em] text-[10px] mt-2">Official Event Calendar</p>
+          </div>
+          <DatabaseUnavailable title="Schedule Unavailable" />
+        </div>
+      </main>
+    );
+  }
   const allSeries = [...new Set(allEvents.map(e => e.series?.title).filter((s): s is string => !!s))].sort();
 
   const filteredEvents = allEvents.filter((e) => {

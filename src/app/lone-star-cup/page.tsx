@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StandingsTable } from "@/components/standings-table";
 import { prisma } from "@/server/db";
 import { Metadata } from "next";
+import { DatabaseUnavailable } from "@/components/database-unavailable";
 
 export const metadata: Metadata = {
   title: "Lone Star Cup",
@@ -54,13 +55,30 @@ async function getSeriesWithPodiums(slug: string) {
 }
 
 export default async function LoneStarCupPage() {
-  // Fetch both seasons
-  const [currentSeries, currentStandings, s1Series, s1Standings] = await Promise.all([
-    getSeriesWithPodiums("lone-star-cup-s2"),
-    getStandings("lone-star-cup-s2"),
-    getSeriesWithPodiums("lone-star-cup-s1"),
-    getStandings("lone-star-cup-s1"),
-  ]);
+  let currentSeries, currentStandings, s1Series, s1Standings;
+  try {
+    [currentSeries, currentStandings, s1Series, s1Standings] = await Promise.all([
+      getSeriesWithPodiums("lone-star-cup-s2"),
+      getStandings("lone-star-cup-s2"),
+      getSeriesWithPodiums("lone-star-cup-s1"),
+      getStandings("lone-star-cup-s1"),
+    ]);
+  } catch (error) {
+    console.error('[LoneStarCup] Failed to load series data:', error);
+    return (
+      <main className="bg-lsr-charcoal text-white min-h-screen">
+        <div className="mx-auto max-w-6xl px-6 md:px-8 py-14 md:py-20">
+          <div className="mb-10">
+            <h1 className="font-display font-black italic text-5xl md:text-7xl text-white uppercase tracking-normal leading-[0.9]">
+              Lone Star Cup
+            </h1>
+            <p className="font-sans font-bold text-white/40 uppercase tracking-[0.3em] text-[10px] mt-4">Official Championship Series</p>
+          </div>
+          <DatabaseUnavailable title="Championship Data Unavailable" />
+        </div>
+      </main>
+    );
+  }
 
   // We only strictly require the current series to exist for the page to render meaningfully
   if (!currentSeries) {

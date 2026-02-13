@@ -59,7 +59,14 @@ export async function getSessionUser(): Promise<SessionUser> {
     },
   );
 
-  const { data: { user: authUser } } = await supabase.auth.getUser();
+  let authUser;
+  try {
+    const { data } = await supabase.auth.getUser();
+    authUser = data.user;
+  } catch (error) {
+    console.error('[getSessionUser] Supabase auth unreachable:', error);
+    return { user: null, roles: [] };
+  }
 
   if (!authUser) {
     return { user: null, roles: [] };

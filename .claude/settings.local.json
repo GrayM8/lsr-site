@@ -20,7 +20,9 @@
       "mcp__supabase__search_docs",
       "Bash(npx tsx:*)",
       "Bash(timeout:*)",
-      "mcp__supabase__list_projects"
+      "mcp__supabase__list_projects",
+      "mcp__supabase__get_logs",
+      "WebFetch(domain:status.supabase.com)"
     ]
   }
 }

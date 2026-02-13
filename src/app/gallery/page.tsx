@@ -15,7 +15,12 @@ export const metadata: Metadata = {
 
 export default async function GalleryPage() {
   const videos = galleryItems.filter(item => item.type !== 'image');
-  const images = await getAllGalleryImages();
+  let images: Awaited<ReturnType<typeof getAllGalleryImages>>;
+  try {
+    images = await getAllGalleryImages();
+  } catch {
+    images = [];
+  }
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
 
   return (

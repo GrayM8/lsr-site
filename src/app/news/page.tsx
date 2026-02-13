@@ -4,6 +4,7 @@ import { Separator } from "@/components/ui/separator"
 import { NewsSearch } from "@/components/news-search"
 import { NewsFilters } from "@/components/news-filters"
 import { Metadata } from "next"
+import { DatabaseUnavailable } from "@/components/database-unavailable"
 
 export const metadata: Metadata = {
   title: "Team News",
@@ -26,7 +27,25 @@ export default async function NewsIndexPage({
   const selectedTags = (Array.isArray(tagParam) ? tagParam : tagParam ? [tagParam] : [])
     .map((t) => t.toString().toLowerCase())
 
-  const allPosts = await getAllPosts()
+  let allPosts;
+  try {
+    allPosts = await getAllPosts();
+  } catch (error) {
+    console.error('[News] Failed to load posts:', error);
+    return (
+      <main className="bg-lsr-charcoal text-white min-h-screen">
+        <div className="mx-auto max-w-6xl px-6 md:px-8 py-14 md:py-20">
+          <div className="mb-10">
+            <h1 className="font-display font-black italic text-5xl md:text-6xl text-white uppercase tracking-normal">
+              Team <span className="text-lsr-orange">News</span>
+            </h1>
+            <p className="font-sans font-bold text-white/40 uppercase tracking-[0.3em] text-[10px] mt-2">Latest Updates & Reports</p>
+          </div>
+          <DatabaseUnavailable title="News Unavailable" />
+        </div>
+      </main>
+    );
+  }
 
   const allTags = [...new Set(allPosts.flatMap((p) => p.tags || []))].sort()
 

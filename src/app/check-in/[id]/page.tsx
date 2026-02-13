@@ -2,16 +2,30 @@ import { getSessionUser } from "@/server/auth/session";
 import { prisma } from "@/server/db";
 import { redirect } from "next/navigation";
 import { CheckInView } from "@/components/events/check-in-view";
+import { DatabaseUnavailable } from "@/components/database-unavailable";
 
 export default async function CheckInPage({ params }: { params: Promise<{ id: string }> }) {
-  const { user } = await getSessionUser();
   const { id: eventId } = await params;
+
+  let user;
+  try {
+    ({ user } = await getSessionUser());
+  } catch (error) {
+    console.error('[CheckIn] Failed to load session:', error);
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-lsr-charcoal p-4">
+        <DatabaseUnavailable title="Check-in Unavailable" message="We're experiencing issues. Please try again in a few minutes." />
+      </div>
+    );
+  }
 
   if (!user) {
     redirect(`/auth/signin?next=/check-in/${eventId}`);
   }
 
-  const event = await prisma.event.findUnique({
+  let event;
+  try {
+    event = await prisma.event.findUnique({
     where: { id: eventId },
     select: {
       id: true,
@@ -22,6 +36,14 @@ export default async function CheckInPage({ params }: { params: Promise<{ id: st
       attendanceClosesAt: true,
     }
   });
+  } catch (error) {
+    console.error('[CheckIn] Failed to load event:', error);
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-lsr-charcoal p-4">
+        <DatabaseUnavailable title="Check-in Unavailable" message="We're experiencing issues. Please try again in a few minutes." />
+      </div>
+    );
+  }
 
   if (!event) {
     return (
@@ -31,9 +53,14 @@ export default async function CheckInPage({ params }: { params: Promise<{ id: st
     );
   }
 
-  const existing = await prisma.eventAttendance.findUnique({
+  let existing;
+  try {
+    existing = await prisma.eventAttendance.findUnique({
     where: { eventId_userId: { eventId, userId: user.id } }
   });
+  } catch {
+    existing = null;
+  }
 
   const now = new Date();
   let status: "OPEN" | "NOT_ENABLED" | "NOT_OPEN_YET" | "CLOSED" | "ALREADY_CHECKED_IN" = "OPEN";

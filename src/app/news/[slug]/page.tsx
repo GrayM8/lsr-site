@@ -4,6 +4,7 @@ import Link from "next/link"
 
 import { Separator } from "@/components/ui/separator"
 import { Metadata } from "next"
+import { DatabaseUnavailable } from "@/components/database-unavailable"
 
 export const revalidate = 60;
 
@@ -21,8 +22,12 @@ export async function generateMetadata({
 }
 
 export async function generateStaticParams() {
-  const posts = await getAllPosts()
-  return posts.map(({ slug }) => ({ slug }))
+  try {
+    const posts = await getAllPosts()
+    return posts.map(({ slug }) => ({ slug }))
+  } catch {
+    return []
+  }
 }
 
 type RouteParams = { slug: string }
@@ -34,7 +39,21 @@ export default async function NewsPostPage({
 }) {
   const { slug } = await params // 👈 await before using
 
-  const { content, frontmatter } = await getPostContent(slug)
+  let postData;
+  try {
+    postData = await getPostContent(slug);
+  } catch (error) {
+    console.error('[NewsPost] Failed to load post:', error);
+    return (
+      <main className="bg-lsr-charcoal text-white min-h-screen">
+        <div className="mx-auto max-w-4xl px-6 md:px-8 py-14 md:py-20">
+          <DatabaseUnavailable title="Article Unavailable" />
+        </div>
+      </main>
+    );
+  }
+
+  const { content, frontmatter } = postData
 
   return (
     <main className="bg-lsr-charcoal text-white min-h-screen">

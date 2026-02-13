@@ -14,6 +14,7 @@ import { getSessionUser } from "@/server/auth/session";
 import { Metadata } from "next";
 import { isEventLive } from "@/lib/events";
 import { StreamPlayer } from "@/components/stream-player";
+import { DatabaseUnavailable } from "@/components/database-unavailable";
 
 type EventPageArgs = {
   params: Promise<{ slug: string }>;
@@ -32,14 +33,34 @@ export async function generateMetadata({
 
 export default async function EventPage({ params }: EventPageArgs) {
   const { slug } = await params;
-  const event = await getEventBySlug(slug);
-  const { user } = await getSessionUser();
+
+  let event, user;
+  try {
+    [event, { user }] = await Promise.all([
+      getEventBySlug(slug),
+      getSessionUser(),
+    ]);
+  } catch (error) {
+    console.error('[EventPage] Failed to load event:', error);
+    return (
+      <main className="bg-lsr-charcoal text-white min-h-screen">
+        <div className="mx-auto max-w-6xl px-6 md:px-8 py-14 md:py-20">
+          <DatabaseUnavailable title="Event Unavailable" />
+        </div>
+      </main>
+    );
+  }
 
   if (!event) {
     return notFound();
   }
 
-  const rawSessions = await getIngestedResultsByEventId(event.id);
+  let rawSessions: Awaited<ReturnType<typeof getIngestedResultsByEventId>>;
+  try {
+    rawSessions = await getIngestedResultsByEventId(event.id);
+  } catch {
+    rawSessions = [];
+  }
   const sessionTypeOrder: Record<string, number> = { PRACTICE: 0, QUALIFYING: 1, RACE: 2 };
   const raceSessions = [...rawSessions].sort(
     (a, b) => (sessionTypeOrder[a.sessionType] ?? 2) - (sessionTypeOrder[b.sessionType] ?? 2)
