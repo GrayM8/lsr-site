@@ -101,7 +101,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <body className="min-h-dvh flex flex-col font-sans">
     <ThemeProvider>
       <CartProvider>
-        <MaintenanceBanner />
+        {/* <MaintenanceBanner /> */}
         <LiveBanner />
         <SiteHeader user={user} roles={roles} activeTierKey={activeTierKey} />
         <main className="flex-1">{children}</main>
