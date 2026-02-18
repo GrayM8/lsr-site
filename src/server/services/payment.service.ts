@@ -262,6 +262,7 @@ async function handleCheckoutCompleted(
         startsAt: event.startsAtUtc,
         timezone: tz,
         slug: event.slug,
+        heroImageUrl: event.heroImageUrl,
       },
     }).catch((err) =>
       console.error(

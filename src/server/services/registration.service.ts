@@ -267,6 +267,7 @@ export async function registerForEvent(
           startsAt: result.event.startsAtUtc,
           timezone: tz,
           slug: result.event.slug,
+          heroImageUrl: result.event.heroImageUrl,
         },
       }).catch((err) => console.error("[Notification] Failed to send registration notification:", err));
     }
@@ -286,6 +287,7 @@ export async function registerForEvent(
           startsAt: result.event.startsAtUtc,
           timezone: result.event.timezone || "America/Chicago",
           slug: result.event.slug,
+          heroImageUrl: result.event.heroImageUrl,
         },
       }).catch((err) => console.error("[Notification] Failed to send waitlist promotion notification:", err));
     }
@@ -406,6 +408,7 @@ export async function adminOverrideRegistration(
           startsAt: result.event.startsAtUtc,
           timezone: result.event.timezone || "America/Chicago",
           slug: result.event.slug,
+          heroImageUrl: result.event.heroImageUrl,
         },
       }).catch((err) =>
         console.error("[Notification] Failed to send admin promotion notification:", err)
@@ -427,6 +430,7 @@ export async function adminOverrideRegistration(
           startsAt: result.event.startsAtUtc,
           timezone: result.event.timezone || "America/Chicago",
           slug: result.event.slug,
+          heroImageUrl: result.event.heroImageUrl,
         },
       }).catch((err) =>
         console.error("[Notification] Failed to send waitlist promotion notification:", err)

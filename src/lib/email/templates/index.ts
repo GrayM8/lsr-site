@@ -14,6 +14,7 @@ type EventData = {
   startsAt: Date;
   timezone?: string;
   slug: string;
+  heroImageUrl?: string;
 };
 
 type ResultData = {
@@ -66,6 +67,7 @@ function registrationConfirmedTemplate(
     previewText: `You're registered for ${event?.title ?? "the event"}!`,
     title: "You're In!",
     body: `
+      ${event?.heroImageUrl ? `<img src="${event.heroImageUrl}" alt="${event.title}" width="100%" style="display:block;margin:0 0 16px 0;border-radius:4px;" />` : ""}
       <p style="margin:0 0 16px 0;color:${textColor};">Your registration has been confirmed!</p>
       ${event ? `<p style="margin:0 0 8px 0;color:#ffffff;font-weight:700;font-size:18px;">${event.title}</p>` : ""}
       ${eventDate ? `<p style="margin:0 0 16px 0;color:${accentColor};font-weight:600;">${eventDate}</p>` : ""}
@@ -89,6 +91,7 @@ function waitlistPromotedTemplate(
     previewText: `A spot opened up for ${event?.title ?? "the event"}!`,
     title: "You've Been Promoted!",
     body: `
+      ${event?.heroImageUrl ? `<img src="${event.heroImageUrl}" alt="${event.title}" width="100%" style="display:block;margin:0 0 16px 0;border-radius:4px;" />` : ""}
       <p style="margin:0 0 16px 0;color:${textColor};">Great news! A spot has opened up and you've been moved from the waitlist.</p>
       ${event ? `<p style="margin:0 0 16px 0;color:#ffffff;font-weight:700;font-size:18px;">${event.title}</p>` : ""}
       <p style="margin:0 0 16px 0;color:${textColor};">${notification.body}</p>
@@ -115,6 +118,7 @@ function eventReminderTemplate(
     previewText: `Reminder: ${event?.title ?? "Event"} starts tomorrow!`,
     title: "Event Tomorrow!",
     body: `
+      ${event?.heroImageUrl ? `<img src="${event.heroImageUrl}" alt="${event.title}" width="100%" style="display:block;margin:0 0 16px 0;border-radius:4px;" />` : ""}
       <p style="margin:0 0 16px 0;color:${textColor};">This is a reminder that you're registered for an event starting in less than 24 hours.</p>
       ${event ? `<p style="margin:0 0 8px 0;color:#ffffff;font-weight:700;font-size:18px;">${event.title}</p>` : ""}
       ${eventDate ? `<p style="margin:0 0 16px 0;color:${accentColor};font-weight:600;">${eventDate}</p>` : ""}
@@ -141,6 +145,7 @@ function eventPostedTemplate(
     previewText: `New event: ${event?.title ?? "Check it out"}!`,
     title: "New Event Posted!",
     body: `
+      ${event?.heroImageUrl ? `<img src="${event.heroImageUrl}" alt="${event.title}" width="100%" style="display:block;margin:0 0 16px 0;border-radius:4px;" />` : ""}
       <p style="margin:0 0 16px 0;color:${textColor};">A new event has been published that might interest you.</p>
       ${event ? `<p style="margin:0 0 8px 0;color:#ffffff;font-weight:700;font-size:18px;">${event.title}</p>` : ""}
       ${eventDate ? `<p style="margin:0 0 16px 0;color:${accentColor};font-weight:600;">${eventDate}</p>` : ""}
