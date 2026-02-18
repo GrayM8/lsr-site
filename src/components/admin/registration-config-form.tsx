@@ -61,6 +61,26 @@ export function RegistrationConfigForm({ event }: { event: Event }) {
         </div>
       </div>
 
+      <div className="space-y-4 pt-4 border-t border-white/5">
+        <div>
+          <Label htmlFor="registrationFeeCents" className="text-[10px] uppercase tracking-widest text-white/40 mb-1.5 block">Registration Fee (USD)</Label>
+          <div className="flex items-center gap-2">
+            <span className="text-white/40 text-sm">$</span>
+            <Input
+              id="registrationFeeCents"
+              name="registrationFeeCents"
+              type="number"
+              min="0"
+              step="0.01"
+              defaultValue={event.registrationFeeCents ? (event.registrationFeeCents / 100).toFixed(2) : ""}
+              placeholder="0.00 (Free)"
+              className="bg-black/20 border-white/10 text-xs font-mono"
+            />
+          </div>
+          <p className="text-[10px] text-white/30 mt-1">Leave blank for free events. Setting a fee requires Stripe payment before registration.</p>
+        </div>
+      </div>
+
       <Button type="submit" className="w-full bg-lsr-orange hover:bg-lsr-orange/90 text-white uppercase tracking-widest text-xs font-bold h-10">
         Update Configuration
       </Button>

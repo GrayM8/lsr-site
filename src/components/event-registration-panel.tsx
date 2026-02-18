@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 type Attendee = {
   displayName: string;
@@ -26,6 +27,7 @@ type RegistrationSnapshot = {
   waitlistCount: number;
   myStatus: "REGISTERED" | "WAITLISTED" | "NOT_ATTENDING" | "NONE";
   attendees: Attendee[];
+  registrationFeeCents: number | null;
 };
 
 export function EventRegistrationPanel({ eventSlug, userLoggedIn }: { eventSlug: string; userLoggedIn: boolean }) {
@@ -33,6 +35,17 @@ export function EventRegistrationPanel({ eventSlug, userLoggedIn }: { eventSlug:
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Handle payment return query params
+  useEffect(() => {
+    const payment = searchParams.get("payment");
+    if (payment === "success") {
+      toast.success("Payment confirmed! You're registered.");
+    } else if (payment === "cancelled") {
+      toast("Payment was cancelled. You have not been registered.");
+    }
+  }, [searchParams]);
 
   const fetchSnapshot = async () => {
     setLoading(true);
@@ -80,6 +93,27 @@ export function EventRegistrationPanel({ eventSlug, userLoggedIn }: { eventSlug:
     }
   };
 
+  const handleCheckout = async () => {
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/events/${eventSlug}/checkout`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        const { url } = await res.json();
+        window.location.href = url;
+      } else {
+        const err = await res.json();
+        toast.error(err.message || "Could not start checkout");
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("An error occurred starting checkout");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   if (loading && !snapshot) {
     return <div className="pt-6 border-t border-white/10 text-center text-white/40 text-xs animate-pulse">Loading registration...</div>;
   }
@@ -115,6 +149,8 @@ export function EventRegistrationPanel({ eventSlug, userLoggedIn }: { eventSlug:
   const isFull = snapshot.capacity !== null && snapshot.registeredCount >= snapshot.capacity;
   const canRegister = snapshot.windowStatus === "OPEN" && (!isFull || snapshot.waitlistEnabled);
   const myStatus = snapshot.myStatus;
+  const isPaidEvent = snapshot.registrationFeeCents != null && snapshot.registrationFeeCents > 0;
+  const formatPrice = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 
   return (
     <div className="space-y-6">
@@ -156,19 +192,26 @@ export function EventRegistrationPanel({ eventSlug, userLoggedIn }: { eventSlug:
                     </div>
                 ) : (
                     <div className={cn("grid gap-3", (myStatus === "REGISTERED" || myStatus === "WAITLISTED") ? "grid-cols-2" : "grid-cols-1")}>
-                        <Button 
-                            onClick={() => handleAction("YES")}
+                        <Button
+                            onClick={() => {
+                              if (isPaidEvent && !isFull && myStatus !== "REGISTERED" && myStatus !== "WAITLISTED") {
+                                handleCheckout();
+                              } else {
+                                handleAction("YES");
+                              }
+                            }}
                             disabled={actionLoading || myStatus === "REGISTERED" || (myStatus === "WAITLISTED") || (!canRegister && myStatus === "NONE")}
                             className={cn(
                                 "rounded-none font-black uppercase tracking-[0.1em] text-[10px] h-10 transition-all",
-                                myStatus === "REGISTERED" || myStatus === "WAITLISTED" 
-                                    ? "bg-white/10 text-white/40 cursor-default border border-transparent" 
+                                myStatus === "REGISTERED" || myStatus === "WAITLISTED"
+                                    ? "bg-white/10 text-white/40 cursor-default border border-transparent"
                                     : "bg-lsr-orange text-white hover:bg-white hover:text-lsr-charcoal"
                             )}
                         >
-                            {myStatus === "REGISTERED" ? "Registered" : 
-                            myStatus === "WAITLISTED" ? "On Waitlist" : 
+                            {myStatus === "REGISTERED" ? "Registered" :
+                            myStatus === "WAITLISTED" ? "On Waitlist" :
                             (isFull && snapshot.waitlistEnabled) ? "Join Waitlist" :
+                            isPaidEvent ? `Register — ${formatPrice(snapshot.registrationFeeCents!)}` :
                             "Attending"
                             }
                         </Button>

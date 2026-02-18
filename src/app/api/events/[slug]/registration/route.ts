@@ -67,6 +67,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     waitlistCount: 0, // Hidden for public by default usually, but requested to return count if logged in?
     myStatus: "NONE",
     attendees: [] as any[],
+    registrationFeeCents: event.registrationFeeCents ?? null,
   };
 
   // If NOT logged in, return minimal info
@@ -153,6 +154,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         waitlistEnabled: event.registrationWaitlistEnabled,
         waitlistCount: updatedEvent!._count.registrations,
         myStatus: myReg ? myReg.status : "NONE",
+        registrationFeeCents: event.registrationFeeCents ?? null,
         attendees: updatedEvent!.registrations.map(reg => ({
             displayName: reg.user.displayName,
             avatarUrl: reg.user.avatarUrl,

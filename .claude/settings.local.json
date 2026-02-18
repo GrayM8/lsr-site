@@ -25,7 +25,8 @@
       "WebFetch(domain:status.supabase.com)",
       "Bash(npm ls:*)",
       "WebSearch",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(npx prisma migrate resolve:*)"
     ]
   }
 }

@@ -236,14 +236,31 @@ export function EventForm({ event, series, venues }: { event?: Event, series: Ev
             </div>
             <div className="space-y-2">
               <label htmlFor="registrationMax" className="text-[10px] uppercase tracking-wider text-white/60">Capacity Limit</label>
-              <Input 
-                id="registrationMax" 
-                name="registrationMax" 
-                type="number" 
-                defaultValue={event?.registrationMax ?? ""} 
+              <Input
+                id="registrationMax"
+                name="registrationMax"
+                type="number"
+                defaultValue={event?.registrationMax ?? ""}
                 placeholder="Unlimited"
                 className="bg-transparent border-b border-white/20 border-t-0 border-x-0 rounded-none px-0 h-8 focus-visible:ring-0 focus:border-lsr-orange transition-colors w-1/2"
               />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="registrationFeeCents" className="text-[10px] uppercase tracking-wider text-white/60">Registration Fee (USD)</label>
+              <div className="flex items-center gap-2">
+                <span className="text-white/40 text-sm">$</span>
+                <Input
+                  id="registrationFeeCents"
+                  name="registrationFeeCents"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  defaultValue={event?.registrationFeeCents ? (event.registrationFeeCents / 100).toFixed(2) : ""}
+                  placeholder="0.00 (Free)"
+                  className="bg-transparent border-b border-white/20 border-t-0 border-x-0 rounded-none px-0 h-8 focus-visible:ring-0 focus:border-lsr-orange transition-colors w-1/3"
+                />
+              </div>
+              <p className="text-[10px] text-white/30">Leave blank for free events. Setting a fee requires Stripe payment before registration.</p>
             </div>
           </div>
         </section>
