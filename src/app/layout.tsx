@@ -88,7 +88,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       activeTierKey = activeMembership?.tier.key ?? null;
     }
   } catch (error) {
-    console.error('[RootLayout] Failed to load session/membership — rendering degraded shell:', error);
+    console.warn('[RootLayout] Failed to load session/membership — rendering degraded shell:', error);
   }
 
   return (
