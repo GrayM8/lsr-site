@@ -3,7 +3,7 @@ import { prisma } from "@/server/db";
 import { RegistrationStatus, Prisma } from "@prisma/client";
 import { createAuditLog } from "@/server/audit/log";
 import { sendNotification } from "@/server/services/notification.service";
-import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 import type Stripe from "stripe";
 
 // ---------------------------------------------------------------------------
@@ -247,7 +247,8 @@ async function handleCheckoutCompleted(
     where: { id: meta.eventId },
   });
   if (event && registrationStatus === "REGISTERED") {
-    const eventDate = format(event.startsAtUtc, "EEEE, MMMM d 'at' h:mm a");
+    const tz = event.timezone || "America/Chicago";
+    const eventDate = formatInTimeZone(event.startsAtUtc, tz, "EEEE, MMMM d 'at' h:mm a");
     sendNotification({
       userId: payment.userId,
       type: "REGISTRATION_CONFIRMED",
@@ -259,6 +260,7 @@ async function handleCheckoutCompleted(
         eventId: meta.eventId,
         title: event.title,
         startsAt: event.startsAtUtc,
+        timezone: tz,
         slug: event.slug,
       },
     }).catch((err) =>

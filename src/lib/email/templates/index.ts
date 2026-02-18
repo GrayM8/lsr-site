@@ -1,5 +1,5 @@
 import { baseTemplate } from "./base";
-import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 
 export type NotificationTemplateData = {
   type: string;
@@ -12,6 +12,7 @@ export type NotificationTemplateData = {
 type EventData = {
   title: string;
   startsAt: Date;
+  timezone?: string;
   slug: string;
 };
 
@@ -55,7 +56,7 @@ function registrationConfirmedTemplate(
 ): { html: string; text: string } {
   const event = notification.metadata as EventData | undefined;
   const eventDate = event?.startsAt
-    ? format(new Date(event.startsAt), "EEEE, MMMM d 'at' h:mm a")
+    ? formatInTimeZone(new Date(event.startsAt), event.timezone || "America/Chicago", "EEEE, MMMM d 'at' h:mm a")
     : "";
 
   const textColor = "#b3b3b3";
@@ -104,7 +105,7 @@ function eventReminderTemplate(
 ): { html: string; text: string } {
   const event = notification.metadata as EventData | undefined;
   const eventDate = event?.startsAt
-    ? format(new Date(event.startsAt), "EEEE, MMMM d 'at' h:mm a")
+    ? formatInTimeZone(new Date(event.startsAt), event.timezone || "America/Chicago", "EEEE, MMMM d 'at' h:mm a")
     : "";
 
   const textColor = "#b3b3b3";
@@ -130,7 +131,7 @@ function eventPostedTemplate(
 ): { html: string; text: string } {
   const event = notification.metadata as EventData | undefined;
   const eventDate = event?.startsAt
-    ? format(new Date(event.startsAt), "EEEE, MMMM d 'at' h:mm a")
+    ? formatInTimeZone(new Date(event.startsAt), event.timezone || "America/Chicago", "EEEE, MMMM d 'at' h:mm a")
     : "";
 
   const textColor = "#b3b3b3";

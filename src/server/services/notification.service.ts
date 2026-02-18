@@ -219,11 +219,22 @@ async function processNotification(
 async function processEmailNotification(
   notification: Prisma.NotificationGetPayload<{ include: { user: true } }>
 ): Promise<void> {
+  // For emails, relative actionUrls need a full base URL (unlike in-app where Next.js handles it)
+  let actionUrl = notification.actionUrl ?? undefined;
+  if (actionUrl && actionUrl.startsWith("/")) {
+    const baseUrl =
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      (process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : "http://localhost:3000");
+    actionUrl = `${baseUrl.replace(/\/$/, "")}${actionUrl}`;
+  }
+
   const template = getEmailTemplate({
     type: notification.type,
     title: notification.title,
     body: notification.body,
-    actionUrl: notification.actionUrl ?? undefined,
+    actionUrl,
     metadata: notification.metadata as Record<string, unknown> | undefined,
   });
 

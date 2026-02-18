@@ -2,7 +2,7 @@ import { prisma } from "@/server/db";
 import { RegistrationStatus, Prisma } from "@prisma/client";
 import { createAuditLog } from "@/server/audit/log";
 import { sendNotification } from "@/server/services/notification.service";
-import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 
 /**
  * Core Registration Service
@@ -252,7 +252,8 @@ export async function registerForEvent(
   try {
     // Notify the registering user if they got registered
     if (result.status === "REGISTERED") {
-      const eventDate = format(result.event.startsAtUtc, "EEEE, MMMM d 'at' h:mm a");
+      const tz = result.event.timezone || "America/Chicago";
+      const eventDate = formatInTimeZone(result.event.startsAtUtc, tz, "EEEE, MMMM d 'at' h:mm a");
       sendNotification({
         userId,
         type: "REGISTRATION_CONFIRMED",
@@ -264,6 +265,7 @@ export async function registerForEvent(
           eventId,
           title: result.event.title,
           startsAt: result.event.startsAtUtc,
+          timezone: tz,
           slug: result.event.slug,
         },
       }).catch((err) => console.error("[Notification] Failed to send registration notification:", err));
@@ -282,6 +284,7 @@ export async function registerForEvent(
           eventId,
           title: result.event.title,
           startsAt: result.event.startsAtUtc,
+          timezone: result.event.timezone || "America/Chicago",
           slug: result.event.slug,
         },
       }).catch((err) => console.error("[Notification] Failed to send waitlist promotion notification:", err));
@@ -401,6 +404,7 @@ export async function adminOverrideRegistration(
           eventId,
           title: result.event.title,
           startsAt: result.event.startsAtUtc,
+          timezone: result.event.timezone || "America/Chicago",
           slug: result.event.slug,
         },
       }).catch((err) =>
@@ -421,6 +425,7 @@ export async function adminOverrideRegistration(
           eventId,
           title: result.event.title,
           startsAt: result.event.startsAtUtc,
+          timezone: result.event.timezone || "America/Chicago",
           slug: result.event.slug,
         },
       }).catch((err) =>
