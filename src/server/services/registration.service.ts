@@ -21,6 +21,11 @@ async function reconcileEvent(tx: Prisma.TransactionClient, eventId: string): Pr
   const event = await tx.event.findUnique({ where: { id: eventId } });
   if (!event) throw new Error("Event not found during reconciliation");
 
+  // Skip auto-promotion for paid events — officers handle waitlist manually
+  if (event.registrationFeeCents != null && event.registrationFeeCents > 0) {
+    return [];
+  }
+
   const promotedUserIds: string[] = [];
 
   // If no limit, everyone should be registered.
@@ -147,6 +152,28 @@ export async function registerForEvent(
     }
 
     // 5. Handle "YES" (Registering)
+
+    // For paid events, block direct registration — must go through Stripe Checkout.
+    // Exception: joining the waitlist is free when the event is full.
+    if (event.registrationFeeCents != null && event.registrationFeeCents > 0) {
+      let isFull = false;
+      if (event.registrationMax !== null) {
+        const registeredCount = await tx.eventRegistration.count({
+          where: { eventId, status: "REGISTERED" },
+        });
+        const isAlreadyRegistered = currentReg?.status === "REGISTERED";
+        isFull = !isAlreadyRegistered && registeredCount >= event.registrationMax;
+      }
+
+      if (!isFull) {
+        // Slots available (or unlimited capacity) — must pay to register
+        throw new Error("This event requires payment to register.");
+      }
+      // Event is full — fall through to waitlist logic below
+      if (!event.registrationWaitlistEnabled) {
+        throw new Error("Event is full and waitlist is disabled.");
+      }
+    }
 
     // Determine Target Status based on Capacity
     let targetStatus: RegistrationStatus = "REGISTERED";

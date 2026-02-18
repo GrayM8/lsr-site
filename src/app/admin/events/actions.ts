@@ -18,6 +18,8 @@ export async function createEvent(formData: FormData) {
   const opensAtRaw = formData.get("registrationOpensAt") as string;
   const closesAtRaw = formData.get("registrationClosesAt") as string;
   const maxRaw = formData.get("registrationMax") as string;
+  const feeRaw = formData.get("registrationFeeCents") as string;
+  const registrationFeeCents = feeRaw && parseFloat(feeRaw) > 0 ? Math.round(parseFloat(feeRaw) * 100) : null;
 
   const submitAction = formData.get("submitAction") as string;
   const scheduleDateRaw = formData.get("scheduleDate") as string;
@@ -55,6 +57,7 @@ export async function createEvent(formData: FormData) {
       registrationClosesAt: closesAtRaw ? fromZonedTime(closesAtRaw, timezone) : null,
       registrationMax: maxRaw && maxRaw !== "-1" ? parseInt(maxRaw) : null,
       registrationWaitlistEnabled: formData.get("registrationWaitlistEnabled") === "on",
+      registrationFeeCents,
       attendanceEnabled: formData.get("attendanceEnabled") === "on",
       attendanceOpensAt: formData.get("attendanceOpensAt") ? fromZonedTime(formData.get("attendanceOpensAt") as string, timezone) : null,
       attendanceClosesAt: formData.get("attendanceClosesAt") ? fromZonedTime(formData.get("attendanceClosesAt") as string, timezone) : null,
@@ -122,7 +125,9 @@ export async function updateEvent(id: string, formData: FormData) {
   const opensAtRaw = formData.get("registrationOpensAt") as string;
   const closesAtRaw = formData.get("registrationClosesAt") as string;
   const maxRaw = formData.get("registrationMax") as string;
-  
+  const feeRaw = formData.get("registrationFeeCents") as string;
+  const registrationFeeCents = feeRaw && parseFloat(feeRaw) > 0 ? Math.round(parseFloat(feeRaw) * 100) : null;
+
   const submitAction = formData.get("submitAction") as string;
   const scheduleDateRaw = formData.get("scheduleDate") as string;
   const timezone = formData.get("timezone") as string;
@@ -144,6 +149,7 @@ export async function updateEvent(id: string, formData: FormData) {
     registrationClosesAt: closesAtRaw ? fromZonedTime(closesAtRaw, formData.get("timezone") as string) : null,
     registrationMax: maxRaw && maxRaw !== "-1" ? parseInt(maxRaw) : null,
     registrationWaitlistEnabled: formData.get("registrationWaitlistEnabled") === "on",
+    registrationFeeCents,
     attendanceEnabled: formData.get("attendanceEnabled") === "on",
     attendanceOpensAt: formData.get("attendanceOpensAt") ? fromZonedTime(formData.get("attendanceOpensAt") as string, formData.get("timezone") as string) : null,
     attendanceClosesAt: formData.get("attendanceClosesAt") ? fromZonedTime(formData.get("attendanceClosesAt") as string, formData.get("timezone") as string) : null,
@@ -217,6 +223,8 @@ export async function updateEventRegistrationConfig(eventId: string, formData: F
   const closesAtRaw = formData.get("registrationClosesAt") as string;
   const maxRaw = formData.get("registrationMax") as string;
   const waitlistEnabled = formData.get("registrationWaitlistEnabled") === "on";
+  const feeRaw = formData.get("registrationFeeCents") as string;
+  const registrationFeeCents = feeRaw && parseFloat(feeRaw) > 0 ? Math.round(parseFloat(feeRaw) * 100) : null;
 
   const configData = {
     registrationEnabled: enabled,
@@ -224,6 +232,7 @@ export async function updateEventRegistrationConfig(eventId: string, formData: F
     registrationClosesAt: closesAtRaw ? fromZonedTime(closesAtRaw, timezone) : null,
     registrationMax: maxRaw && maxRaw !== "-1" ? parseInt(maxRaw) : null,
     registrationWaitlistEnabled: waitlistEnabled,
+    registrationFeeCents,
   };
 
   await prisma.event.update({

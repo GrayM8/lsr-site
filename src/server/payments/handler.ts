@@ -5,6 +5,9 @@ import { Payment } from '@prisma/client';
 
 // This is a stub implementation. In a real app, you would pass in the full payment object from Stripe, etc.
 export async function onPaymentSucceeded(payment: Payment) {
+  // Event fee payments have no associated product — they're handled by the Stripe webhook directly
+  if (!payment.productId) return;
+
   const product = await prisma.product.findUnique({ where: { id: payment.productId } });
   if (!product) {
     console.error(`Product not found for payment ${payment.id}`);

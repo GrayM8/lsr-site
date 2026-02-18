@@ -93,6 +93,7 @@ enum PaymentStatus {
 enum ProductType {
   ANNUAL_DUES
   LEAGUE_FEE
+  EVENT_FEE
 }
 
 enum EntitlementKind {
@@ -274,7 +275,7 @@ model Product {
 model Payment {
   id          String          @id @default(uuid())
   userId      String
-  productId   String
+  productId   String?
   amountCents Int
   currency    String          @default("USD")
   provider    PaymentProvider
@@ -284,10 +285,11 @@ model Payment {
   metadata    Json?
   createdAt   DateTime        @default(now())
 
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: Restrict)
 
-  entitlements Entitlement[]
+  entitlements      Entitlement[]
+  eventRegistration EventRegistration? // 1:1 back-relation for event fee payments
 
   @@index([userId, productId, status, paidAt])
 }
@@ -579,6 +581,7 @@ model Event {
   registrationClosesAt        DateTime?
   registrationMax             Int?
   registrationWaitlistEnabled Boolean   @default(false)
+  registrationFeeCents        Int?      // null = free event; set to require Stripe payment
 
   // Attendance Config
   attendanceEnabled       Boolean                  @default(false)
@@ -630,19 +633,21 @@ model EventEligibility {
 }
 
 model EventRegistration {
-  id            String             @id @default(uuid())
-  eventId       String
-  userId        String
-  status        RegistrationStatus
-  waitlistOrder Int? // 1-based index for waitlist position
+  id              String             @id @default(uuid())
+  eventId         String
+  userId          String
+  status          RegistrationStatus
+  waitlistOrder   Int? // 1-based index for waitlist position
   promotedAt      DateTime?
   promotionSource String? // e.g. "manual", "auto"
   statusReason    String? // e.g. "Admin demote", "Capacity increase"
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
+  sourcePaymentId String?  @unique // links to Payment for paid event registrations
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
 
-  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event   Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payment Payment? @relation(fields: [sourcePaymentId], references: [id], onDelete: SetNull)
 
   @@unique([eventId, userId])
   @@index([eventId, status])
