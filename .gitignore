@@ -47,3 +47,6 @@ next-env.d.ts
 RECOVERY-STATUS.md
 
 nul
+
+# database backups
+*.dump
