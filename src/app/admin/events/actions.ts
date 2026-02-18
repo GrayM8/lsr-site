@@ -59,6 +59,7 @@ export async function createEvent(formData: FormData) {
       registrationWaitlistEnabled: formData.get("registrationWaitlistEnabled") === "on",
       registrationFeeCents,
       attendanceEnabled: formData.get("attendanceEnabled") === "on",
+      attendanceReportingMode: formData.get("attendanceEnabled") === "on" ? "CHECKIN_REQUIRED" : "ASSUME_REGISTERED",
       attendanceOpensAt: formData.get("attendanceOpensAt") ? fromZonedTime(formData.get("attendanceOpensAt") as string, timezone) : null,
       attendanceClosesAt: formData.get("attendanceClosesAt") ? fromZonedTime(formData.get("attendanceClosesAt") as string, timezone) : null,
     },
@@ -155,9 +156,14 @@ export async function updateEvent(id: string, formData: FormData) {
     attendanceClosesAt: formData.get("attendanceClosesAt") ? fromZonedTime(formData.get("attendanceClosesAt") as string, formData.get("timezone") as string) : null,
   };
 
+  // When enabling attendance via the event form, set reporting mode to CHECKIN_REQUIRED
+  if (eventUpdateData.attendanceEnabled) {
+    eventUpdateData.attendanceReportingMode = "CHECKIN_REQUIRED";
+  }
+
   if (submitAction === "publish") {
     eventUpdateData.status = "PUBLISHED";
-    // Only set publishedAt if we are explicitly publishing, 
+    // Only set publishedAt if we are explicitly publishing,
     // but for updates we might want to check if it's already published to avoid resetting time?
     // For now, "Publish Now" means NOW.
     eventUpdateData.publishedAt = new Date();
