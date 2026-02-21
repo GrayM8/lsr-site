@@ -20,7 +20,8 @@
       "mcp__supabase__search_docs",
       "Bash(npx tsx:*)",
       "Bash(timeout:*)",
-      "mcp__supabase__list_projects"
+      "mcp__supabase__list_projects",
+      "Bash(/dev/null --include=\"*.md\" --include=\"*.txt\" --include=\"*.example\")"
     ]
   }
 }
