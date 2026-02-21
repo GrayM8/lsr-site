@@ -7,6 +7,7 @@ import { DriversSearch } from '@/components/drivers-search';
 import { DriversTable } from '@/components/drivers-table';
 import { DriversSidebar } from '@/components/drivers-sidebar';
 import { Metadata } from 'next';
+import { DatabaseUnavailable } from '@/components/database-unavailable';
 
 export const metadata: Metadata = {
   title: "Driver Roster",
@@ -32,7 +33,27 @@ export default async function DriversIndexPage({
     .map(r => r.toString().toLowerCase())
     .filter((r): r is RoleCode => ALL_ROLES.includes(r as RoleCode));
 
-  // Fetch ALL drivers to calculate global rank
+  try {
+    return await renderDriversPage(q, selectedRoles);
+  } catch (error) {
+    console.error('[Drivers] Failed to load drivers:', error);
+    return (
+      <main className="bg-lsr-charcoal text-white min-h-screen">
+        <div className="mx-auto max-w-6xl px-6 md:px-8 py-14 md:py-20">
+          <div className="mb-10">
+            <h1 className="font-display font-black italic text-5xl md:text-6xl text-white uppercase tracking-normal">
+              Driver <span className="text-lsr-orange">Roster</span>
+            </h1>
+            <p className="font-sans font-bold text-white/40 uppercase tracking-[0.3em] text-[10px] mt-2">Official Entry List</p>
+          </div>
+          <DatabaseUnavailable title="Roster Unavailable" />
+        </div>
+      </main>
+    );
+  }
+}
+
+async function renderDriversPage(q: string, selectedRoles: RoleCode[]) {
   const allDrivers = await prisma.user.findMany({
     where: {
       status: { not: 'deleted' },

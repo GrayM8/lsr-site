@@ -3,7 +3,7 @@ import { getIngestedResultsByEventId } from "@/server/queries/results";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, Send, Trophy, QrCode, Copy, ExternalLink } from "lucide-react";
+import { Calendar, Clock, MapPin, Send, Trophy, QrCode, CreditCard, Copy, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { LocalTime, LocalTimeRange } from "@/components/ui/local-time";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { getSessionUser } from "@/server/auth/session";
 import { Metadata } from "next";
 import { isEventLive } from "@/lib/events";
 import { StreamPlayer } from "@/components/stream-player";
+import { DatabaseUnavailable } from "@/components/database-unavailable";
 
 type EventPageArgs = {
   params: Promise<{ slug: string }>;
@@ -32,14 +33,34 @@ export async function generateMetadata({
 
 export default async function EventPage({ params }: EventPageArgs) {
   const { slug } = await params;
-  const event = await getEventBySlug(slug);
-  const { user } = await getSessionUser();
+
+  let event, user;
+  try {
+    [event, { user }] = await Promise.all([
+      getEventBySlug(slug),
+      getSessionUser(),
+    ]);
+  } catch (error) {
+    console.error('[EventPage] Failed to load event:', error);
+    return (
+      <main className="bg-lsr-charcoal text-white min-h-screen">
+        <div className="mx-auto max-w-6xl px-6 md:px-8 py-14 md:py-20">
+          <DatabaseUnavailable title="Event Unavailable" />
+        </div>
+      </main>
+    );
+  }
 
   if (!event) {
     return notFound();
   }
 
-  const rawSessions = await getIngestedResultsByEventId(event.id);
+  let rawSessions: Awaited<ReturnType<typeof getIngestedResultsByEventId>>;
+  try {
+    rawSessions = await getIngestedResultsByEventId(event.id);
+  } catch {
+    rawSessions = [];
+  }
   const sessionTypeOrder: Record<string, number> = { PRACTICE: 0, QUALIFYING: 1, RACE: 2 };
   const raceSessions = [...rawSessions].sort(
     (a, b) => (sessionTypeOrder[a.sessionType] ?? 2) - (sessionTypeOrder[b.sessionType] ?? 2)
@@ -71,8 +92,9 @@ export default async function EventPage({ params }: EventPageArgs) {
   const endsAt = new Date(event.endsAtUtc);
   const isLive = isEventLive(event);
 
-  const isCheckinRequired = event.attendanceEnabled && 
+  const isCheckinRequired = event.attendanceEnabled &&
     event.attendanceReportingMode === 'CHECKIN_REQUIRED';
+  const isPaidEvent = event.registrationFeeCents != null && event.registrationFeeCents > 0;
 
   // const isEventPassed = new Date() > endsAt; // Logic handled by registration config/snapshot
 
@@ -140,7 +162,7 @@ export default async function EventPage({ params }: EventPageArgs) {
                   </p>
                 </div>
               )}
-              
+
               <div className="prose prose-invert prose-p:font-sans prose-p:text-white/70 prose-p:text-sm prose-p:leading-relaxed max-w-none">
                 <p>{event.summary || event.description}</p>
               </div>
@@ -199,6 +221,19 @@ export default async function EventPage({ params }: EventPageArgs) {
                           </div>
                         )}
                         <VenueActions venue={venue} />
+                      </div>
+                    </div>
+                  )}
+
+                  {isPaidEvent && (
+                    <div className="flex items-start gap-4">
+                      <CreditCard className="h-5 w-5 text-lsr-orange mt-0.5 shrink-0" />
+                      <div>
+                        <div className="font-sans font-bold text-[10px] uppercase tracking-widest text-white/40 mb-1">Paid Event</div>
+                        <div className="font-sans text-xs text-white/50 leading-relaxed">
+                          For payment issues or refunds, contact{" "}
+                          <a href="mailto:info@longhornsimracing.org" className="text-white/70 hover:text-lsr-orange transition-colors border-b border-white/10 hover:border-lsr-orange">info@longhornsimracing.org</a>
+                        </div>
                       </div>
                     </div>
                   )}

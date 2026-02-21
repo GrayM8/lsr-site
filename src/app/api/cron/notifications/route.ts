@@ -118,7 +118,9 @@ async function scheduleEventReminders(): Promise<number> {
             eventId: event.id,
             title: event.title,
             startsAt: event.startsAtUtc,
+            timezone: event.timezone,
             slug: event.slug,
+            heroImageUrl: event.heroImageUrl,
           },
           // Schedule for 24 hours before event
           scheduledFor: subHours(event.startsAtUtc, 24),

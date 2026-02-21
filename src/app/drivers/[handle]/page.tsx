@@ -21,6 +21,7 @@ import { DriverPerformance } from '@/components/drivers/profile/driver-performan
 import { DriverEventHistory } from '@/components/drivers/profile/driver-event-history';
 import { DriverMetadata } from '@/components/drivers/profile/driver-metadata';
 import { Metadata } from 'next';
+import { DatabaseUnavailable } from '@/components/database-unavailable';
 
 export const revalidate = 60;
 
@@ -40,19 +41,36 @@ export default async function DriverProfilePage({
 }: { params: Promise<{ handle: string }> }) {
   const { handle } = await params;
 
-  const stats = await getDriverStats(handle);
+  let stats;
+  try {
+    stats = await getDriverStats(handle);
+  } catch (error) {
+    console.error('[DriverProfile] Failed to load driver:', error);
+    return (
+      <main className="bg-lsr-charcoal text-white min-h-screen">
+        <div className="mx-auto max-w-6xl px-6 md:px-8 py-14 md:py-20">
+          <DatabaseUnavailable title="Driver Profile Unavailable" />
+        </div>
+      </main>
+    );
+  }
+
   if (!stats) return notFound();
 
   const { user, currentSeason, allTime, history, eventHistory } = stats;
   if (user.status === 'deleted') return notFound();
 
-  const { isOwner } = await getOwnerStatus(user.id);
-  
-  // Check if viewing own profile
-  const { user: sessionUser } = await getCachedSessionUser();
-  const isMe = sessionUser?.id === user.id;
-  
-  const upcomingRegistrations = isMe ? await getUpcomingRegistrations(user.id) : [];
+  let isOwner = false;
+  let isMe = false;
+  let upcomingRegistrations: Awaited<ReturnType<typeof getUpcomingRegistrations>> = [];
+  try {
+    ({ isOwner } = await getOwnerStatus(user.id));
+    const { user: sessionUser } = await getCachedSessionUser();
+    isMe = sessionUser?.id === user.id;
+    if (isMe) upcomingRegistrations = await getUpcomingRegistrations(user.id);
+  } catch {
+    // Non-critical — render profile without ownership/registration features
+  }
   const socials = (user.socials as Record<string, string> | null) ?? {};
 
   return (

@@ -391,7 +391,7 @@ export default function SponsorsPage() {
       {/* Floating Download Button */}
       <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-1000 fill-mode-both">
         <Button asChild className="rounded-full shadow-2xl bg-lsr-orange hover:bg-white text-white hover:text-lsr-charcoal font-black uppercase tracking-widest text-[10px] h-12 px-6 border-2 border-transparent hover:border-lsr-orange transition-all">
-          <Link href="/LSR_SPONSOR_BENEFITS.pdf" target="_blank" download>
+          <Link href="/SPONSOR_BENEFITS.pdf" target="_blank" download>
             <Download className="mr-2 h-4 w-4" />
             Download Packet
           </Link>

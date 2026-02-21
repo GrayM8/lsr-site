@@ -14,7 +14,7 @@ type EmailSettings = {
   fromAddress: string;
 };
 
-export function NotificationSettings({ settings }: { settings: EmailSettings }) {
+export function NotificationSettings({ settings, resendKeyConfigured }: { settings: EmailSettings; resendKeyConfigured: boolean }) {
   const [isPending, startTransition] = useTransition();
   const [enabled, setEnabled] = useState(settings.enabled);
   const [fromAddress, setFromAddress] = useState(settings.fromAddress);
@@ -118,9 +118,9 @@ export function NotificationSettings({ settings }: { settings: EmailSettings }) 
           <div className="flex items-center justify-between">
             <span className="text-white/60">API Key Configured</span>
             <span
-              className={`font-mono ${process.env.RESEND_API_KEY ? "text-green-500" : "text-red-500"}`}
+              className={`font-mono ${resendKeyConfigured ? "text-green-500" : "text-red-500"}`}
             >
-              {process.env.RESEND_API_KEY ? "Yes" : "No"}
+              {resendKeyConfigured ? "Yes" : "No"}
             </span>
           </div>
           <div className="flex items-center justify-between">

@@ -2,7 +2,7 @@
 
 import { useRouter, usePathname } from "next/navigation"
 import { createSupabaseBrowser } from "@/lib/supabase-browser"
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -66,7 +66,7 @@ export function UserMenuClient({
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.2 }}
         >
-          <AuthDialog />
+          <Suspense><AuthDialog /></Suspense>
         </motion.div>
       ) : (
         <motion.div

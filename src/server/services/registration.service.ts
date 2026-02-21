@@ -2,7 +2,7 @@ import { prisma } from "@/server/db";
 import { RegistrationStatus, Prisma } from "@prisma/client";
 import { createAuditLog } from "@/server/audit/log";
 import { sendNotification } from "@/server/services/notification.service";
-import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 
 /**
  * Core Registration Service
@@ -20,6 +20,11 @@ import { format } from "date-fns";
 async function reconcileEvent(tx: Prisma.TransactionClient, eventId: string): Promise<string[]> {
   const event = await tx.event.findUnique({ where: { id: eventId } });
   if (!event) throw new Error("Event not found during reconciliation");
+
+  // Skip auto-promotion for paid events — officers handle waitlist manually
+  if (event.registrationFeeCents != null && event.registrationFeeCents > 0) {
+    return [];
+  }
 
   const promotedUserIds: string[] = [];
 
@@ -148,6 +153,28 @@ export async function registerForEvent(
 
     // 5. Handle "YES" (Registering)
 
+    // For paid events, block direct registration — must go through Stripe Checkout.
+    // Exception: joining the waitlist is free when the event is full.
+    if (event.registrationFeeCents != null && event.registrationFeeCents > 0) {
+      let isFull = false;
+      if (event.registrationMax !== null) {
+        const registeredCount = await tx.eventRegistration.count({
+          where: { eventId, status: "REGISTERED" },
+        });
+        const isAlreadyRegistered = currentReg?.status === "REGISTERED";
+        isFull = !isAlreadyRegistered && registeredCount >= event.registrationMax;
+      }
+
+      if (!isFull) {
+        // Slots available (or unlimited capacity) — must pay to register
+        throw new Error("This event requires payment to register.");
+      }
+      // Event is full — fall through to waitlist logic below
+      if (!event.registrationWaitlistEnabled) {
+        throw new Error("Event is full and waitlist is disabled.");
+      }
+    }
+
     // Determine Target Status based on Capacity
     let targetStatus: RegistrationStatus = "REGISTERED";
     let waitlistOrder: number | null = null;
@@ -225,7 +252,8 @@ export async function registerForEvent(
   try {
     // Notify the registering user if they got registered
     if (result.status === "REGISTERED") {
-      const eventDate = format(result.event.startsAtUtc, "EEEE, MMMM d 'at' h:mm a");
+      const tz = result.event.timezone || "America/Chicago";
+      const eventDate = formatInTimeZone(result.event.startsAtUtc, tz, "EEEE, MMMM d 'at' h:mm a");
       sendNotification({
         userId,
         type: "REGISTRATION_CONFIRMED",
@@ -237,7 +265,9 @@ export async function registerForEvent(
           eventId,
           title: result.event.title,
           startsAt: result.event.startsAtUtc,
+          timezone: tz,
           slug: result.event.slug,
+          heroImageUrl: result.event.heroImageUrl,
         },
       }).catch((err) => console.error("[Notification] Failed to send registration notification:", err));
     }
@@ -255,7 +285,9 @@ export async function registerForEvent(
           eventId,
           title: result.event.title,
           startsAt: result.event.startsAtUtc,
+          timezone: result.event.timezone || "America/Chicago",
           slug: result.event.slug,
+          heroImageUrl: result.event.heroImageUrl,
         },
       }).catch((err) => console.error("[Notification] Failed to send waitlist promotion notification:", err));
     }
@@ -374,7 +406,9 @@ export async function adminOverrideRegistration(
           eventId,
           title: result.event.title,
           startsAt: result.event.startsAtUtc,
+          timezone: result.event.timezone || "America/Chicago",
           slug: result.event.slug,
+          heroImageUrl: result.event.heroImageUrl,
         },
       }).catch((err) =>
         console.error("[Notification] Failed to send admin promotion notification:", err)
@@ -394,7 +428,9 @@ export async function adminOverrideRegistration(
           eventId,
           title: result.event.title,
           startsAt: result.event.startsAtUtc,
+          timezone: result.event.timezone || "America/Chicago",
           slug: result.event.slug,
+          heroImageUrl: result.event.heroImageUrl,
         },
       }).catch((err) =>
         console.error("[Notification] Failed to send waitlist promotion notification:", err)

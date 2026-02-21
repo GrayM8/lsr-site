@@ -13,6 +13,7 @@ import Link from "next/link";
 import { getStandings } from "@/server/queries/standings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Metadata } from "next";
+import { DatabaseUnavailable } from "@/components/database-unavailable";
 
 type SeriesPageArgs = {
   params: Promise<{ slug: string }>;
@@ -31,10 +32,22 @@ export async function generateMetadata({
 
 export default async function SeriesPage({ params }: SeriesPageArgs) {
   const { slug } = await params;
-  const [series, standings] = await Promise.all([
-    getSeriesBySlug(slug),
-    getStandings(slug),
-  ]);
+  let series, standings;
+  try {
+    [series, standings] = await Promise.all([
+      getSeriesBySlug(slug),
+      getStandings(slug),
+    ]);
+  } catch (error) {
+    console.error('[Series] Failed to load series:', error);
+    return (
+      <main className="bg-lsr-charcoal text-white min-h-screen">
+        <div className="mx-auto max-w-6xl px-6 md:px-8 py-14 md:py-20">
+          <DatabaseUnavailable title="Series Unavailable" />
+        </div>
+      </main>
+    );
+  }
 
   if (!series) {
     return notFound();

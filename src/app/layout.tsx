@@ -68,18 +68,27 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const { user, roles } = await getCachedSessionUser();
-
+  let user: Awaited<ReturnType<typeof getCachedSessionUser>>['user'] = null;
+  let roles: string[] = [];
   let activeTierKey: string | null = null;
-  if (user) {
-    const activeMembership = await prisma.userMembership.findFirst({
-      where: {
-        userId: user.id,
-        OR: [{ validTo: null }, { validTo: { gt: new Date() } }],
-      },
-      include: { tier: { select: { key: true } } },
-    });
-    activeTierKey = activeMembership?.tier.key ?? null;
+
+  try {
+    const session = await getCachedSessionUser();
+    user = session.user;
+    roles = session.roles;
+
+    if (user) {
+      const activeMembership = await prisma.userMembership.findFirst({
+        where: {
+          userId: user.id,
+          OR: [{ validTo: null }, { validTo: { gt: new Date() } }],
+        },
+        include: { tier: { select: { key: true } } },
+      });
+      activeTierKey = activeMembership?.tier.key ?? null;
+    }
+  } catch (error) {
+    console.warn('[RootLayout] Failed to load session/membership — rendering degraded shell:', error);
   }
 
   return (
@@ -92,7 +101,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <body className="min-h-dvh flex flex-col font-sans">
     <ThemeProvider>
       <CartProvider>
-        <MaintenanceBanner />
+        {/* <MaintenanceBanner /> */}
         <LiveBanner />
         <SiteHeader user={user} roles={roles} activeTierKey={activeTierKey} />
         <main className="flex-1">{children}</main>

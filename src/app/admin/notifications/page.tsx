@@ -101,7 +101,7 @@ export default async function AdminNotificationsPage() {
         </TabsContent>
 
         <TabsContent value="settings" className="mt-6 space-y-6">
-          <NotificationSettings settings={emailSettings} />
+          <NotificationSettings settings={emailSettings} resendKeyConfigured={!!process.env.RESEND_API_KEY} />
           <NotificationCleanup />
         </TabsContent>
       </Tabs>

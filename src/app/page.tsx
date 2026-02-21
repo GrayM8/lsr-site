@@ -15,33 +15,27 @@ export const metadata: Metadata = {
 }
 
 export default async function Home() {
-  const posts = await getAllPosts()
-  const upcomingEventsRaw = await getNextEventForHomepage()
+  const [posts, upcomingEventsRaw, galleryImages, drivers] = await Promise.all([
+    getAllPosts().catch((e) => {
+      console.error('[Home] Failed to load posts:', e);
+      return [];
+    }),
+    getNextEventForHomepage().catch((e) => {
+      console.error('[Home] Failed to load events:', e);
+      return [];
+    }),
+    getAllGalleryImages().catch((e) => {
+      console.error('[Home] Failed to load gallery:', e);
+      return [];
+    }),
+    loadDriverLeaderboard().catch((e) => {
+      console.error('[Home] Failed to load drivers:', e);
+      return [];
+    }),
+  ]);
+
   const featuredEvent = upcomingEventsRaw.length > 0 ? upcomingEventsRaw[0] : null
   const upcomingEvents = upcomingEventsRaw.length > 0 ? upcomingEventsRaw.slice(1) : []
-  
-  const rawDrivers = await prisma.user.findMany({
-    where: { status: { not: "deleted" } },
-  })
-
-  const driverIds = rawDrivers.map(d => d.id);
-  const pointsData = await prisma.entry.groupBy({
-      by: ['userId'],
-      _sum: { totalPoints: true },
-      where: { userId: { in: driverIds } }
-  });
-  
-  const pointsMap = new Map(pointsData.map(p => [p.userId, p._sum.totalPoints || 0]));
-  
-  const drivers = rawDrivers.map(d => ({
-      ...d,
-      allTimePoints: pointsMap.get(d.id) || 0
-  })).sort((a, b) => {
-      if (b.allTimePoints !== a.allTimePoints) return b.allTimePoints - a.allTimePoints;
-      return a.displayName.localeCompare(b.displayName);
-  });
-
-  const galleryImages = await getAllGalleryImages()
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -66,4 +60,27 @@ export default async function Home() {
       />
     </>
   )
+}
+
+async function loadDriverLeaderboard() {
+  const rawDrivers = await prisma.user.findMany({
+    where: { status: { not: "deleted" } },
+  });
+
+  const driverIds = rawDrivers.map(d => d.id);
+  const pointsData = await prisma.entry.groupBy({
+    by: ['userId'],
+    _sum: { totalPoints: true },
+    where: { userId: { in: driverIds } }
+  });
+
+  const pointsMap = new Map(pointsData.map(p => [p.userId, p._sum.totalPoints || 0]));
+
+  return rawDrivers.map(d => ({
+    ...d,
+    allTimePoints: pointsMap.get(d.id) || 0
+  })).sort((a, b) => {
+    if (b.allTimePoints !== a.allTimePoints) return b.allTimePoints - a.allTimePoints;
+    return a.displayName.localeCompare(b.displayName);
+  });
 }
