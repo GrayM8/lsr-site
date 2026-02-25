@@ -3,6 +3,7 @@ import { getAllPosts } from "@/lib/news"
 import { prisma } from "@/server/db"
 import { getNextEventForHomepage } from "@/server/queries/events"
 import { getAllGalleryImages } from "@/server/queries/gallery"
+import { getSystemSetting, SETTINGS, type HotlapSettings } from "@/lib/email/settings"
 import { Event, EventSeries, Venue } from "@prisma/client"
 import { Metadata } from "next"
 
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 }
 
 export default async function Home() {
-  const [posts, upcomingEventsRaw, galleryImages, drivers] = await Promise.all([
+  const [posts, upcomingEventsRaw, galleryImages, drivers, hotlap] = await Promise.all([
     getAllPosts().catch((e) => {
       console.error('[Home] Failed to load posts:', e);
       return [];
@@ -31,6 +32,10 @@ export default async function Home() {
     loadDriverLeaderboard().catch((e) => {
       console.error('[Home] Failed to load drivers:', e);
       return [];
+    }),
+    getSystemSetting<HotlapSettings>(SETTINGS.HOTLAP).catch((e) => {
+      console.error('[Home] Failed to load hotlap:', e);
+      return null;
     }),
   ]);
 
@@ -57,6 +62,7 @@ export default async function Home() {
         upcomingEvents={upcomingEvents as (Event & { venue: Venue | null; series: EventSeries | null; })[]}
         drivers={drivers}
         galleryImages={galleryImages}
+        hotlap={hotlap ?? null}
       />
     </>
   )

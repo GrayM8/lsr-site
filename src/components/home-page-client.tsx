@@ -11,6 +11,7 @@ import GalleryRibbon from "@/components/home/GalleryRibbon"
 import FinalCta from "@/components/home/FinalCta"
 import { type NewsFrontmatter } from '@/lib/news';
 import { type User, type Event, type Venue, type EventSeries, type GalleryImage } from '@prisma/client';
+import type { HotlapSettings } from '@/lib/email/settings';
 
 type DriverWithPoints = User & { allTimePoints: number };
 
@@ -20,9 +21,10 @@ type Props = {
   upcomingEvents: (Event & { venue: Venue | null, series: EventSeries | null })[];
   drivers: DriverWithPoints[];
   galleryImages: GalleryImage[];
+  hotlap?: HotlapSettings | null;
 }
 
-export default function HomePageClient({ posts, featuredEvent, upcomingEvents, drivers, galleryImages }: Props) {
+export default function HomePageClient({ posts, featuredEvent, upcomingEvents, drivers, galleryImages, hotlap }: Props) {
   return (
     <main className="relative bg-lsr-charcoal text-white">
       <Hero />
@@ -32,7 +34,7 @@ export default function HomePageClient({ posts, featuredEvent, upcomingEvents, d
         <WhatWeDo index={0} />
         <NextEvent index={1} featuredEvent={featuredEvent} upcomingEvents={upcomingEvents} />
         <Leaderboard index={2} drivers={drivers} />
-        <Hotlap index={3} />
+        <Hotlap index={3} hotlap={hotlap} />
         <NewsHighlights index={4} posts={posts} />
         <FinalCta index={5} />
         <GalleryRibbon index={6} galleryImages={galleryImages} />

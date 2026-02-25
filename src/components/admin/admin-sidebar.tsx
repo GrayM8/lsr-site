@@ -17,6 +17,7 @@ import {
   List,
   Bell,
   IdCard,
+  Timer,
 } from "lucide-react";
 
 const pinnedItems = [
@@ -28,6 +29,7 @@ const navItems = [
   { title: "Driver Mappings", href: "/admin/drivers", icon: IdCard },
   { title: "Events", href: "/admin/events", icon: Calendar },
   { title: "Gallery", href: "/admin/gallery", icon: ImageIcon },
+  { title: "Hotlap", href: "/admin/hotlap", icon: Timer },
   { title: "Misc. Tools", href: "/admin/tools", icon: Wrench },
   { title: "News", href: "/admin/news", icon: Newspaper },
   { title: "Notifications", href: "/admin/notifications", icon: Bell },

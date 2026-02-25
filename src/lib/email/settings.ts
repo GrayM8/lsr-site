@@ -36,7 +36,17 @@ export async function setSystemSetting(key: string, value: unknown): Promise<voi
 export const SETTINGS = {
   EMAIL_ENABLED: "notifications.email.enabled",
   EMAIL_FROM: "notifications.email.from",
+  HOTLAP: "homepage.hotlap",
 } as const;
+
+/** Shape of the hotlap-of-the-week setting stored in SystemSetting. */
+export type HotlapSettings = {
+  videoUrl: string;
+  driverName: string;
+  car: string;
+  track: string;
+  lapTime: string;
+};
 
 /**
  * Check if email notifications are enabled globally.
