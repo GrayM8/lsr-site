@@ -26,7 +26,12 @@
       "Bash(npm ls:*)",
       "WebSearch",
       "Bash(ls:*)",
-      "Bash(npx prisma migrate resolve:*)"
+      "Bash(npx prisma migrate resolve:*)",
+      "Bash(mkdir:*)",
+      "Bash(pnpm:*)",
+      "Bash(npm:*)",
+      "Bash(corepack:*)",
+      "Bash(rm:*)"
     ]
   }
 }
