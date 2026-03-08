@@ -4,10 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Longhorn Sim Racing website for UT Austin. A club management application handling events, race results, membership, and content.
+Longhorn Sim Racing platform for UT Austin. A monorepo containing the club management application handling events, race results, membership, and content.
+
+## Monorepo Structure
+
+- `apps/platform/` - Main Next.js web application
+- `docs/` - Documentation
+- `scripts/` - Shared scripts
+- `.github/` - CI/CD workflows and repo config
 
 ## Tech Stack
 
+- **Monorepo**: pnpm workspaces + Turborepo
 - **Framework**: Next.js 16 (App Router with React Server Components)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS v4 with shadcn/ui (new-york style)
@@ -19,18 +27,24 @@ Longhorn Sim Racing website for UT Austin. A club management application handlin
 ## Commands
 
 ```bash
-npm run dev           # Start dev server (localhost:3000)
-npm run build         # Production build (runs prisma generate first)
-npm run lint          # ESLint
-npm run db:migrate    # Apply Prisma migrations
-npm run db:reset      # Reset and re-seed database
-npm run db:generate   # Regenerate Prisma client
-npm run set-role <userId> <role>  # Assign role to user
+# Root-level (runs via pnpm filter)
+pnpm dev              # Start dev server (localhost:3000)
+pnpm build            # Production build
+pnpm lint             # ESLint
+
+# From apps/platform/
+pnpm dev              # Start dev server (localhost:3000)
+pnpm build            # Production build (runs prisma generate first)
+pnpm lint             # ESLint
+pnpm db:migrate       # Apply Prisma migrations
+pnpm db:reset         # Reset and re-seed database
+pnpm db:generate      # Regenerate Prisma client
+pnpm set-role <userId> <role>  # Assign role to user
 ```
 
 ## Architecture
 
-### Directory Structure
+### Directory Structure (apps/platform/)
 
 - `src/app/` - Next.js App Router pages and layouts
 - `src/components/` - React components (feature-specific and shared)
@@ -50,7 +64,7 @@ npm run set-role <userId> <role>  # Assign role to user
 
 ### Path Alias
 
-`@/*` maps to `./src/*`
+`@/*` maps to `./src/*` (relative to `apps/platform/`)
 
 ### Data Fetching Pattern
 
@@ -81,7 +95,7 @@ Event registration uses database locks (`FOR UPDATE`) to prevent race conditions
 
 ## Environment Variables
 
-Required in `.env.local`:
+Required in `apps/platform/.env.local`:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `DATABASE_URL` (Supabase connection string, port 6543 for session mode)

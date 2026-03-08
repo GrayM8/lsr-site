@@ -2,16 +2,13 @@
 
 import { prisma } from "@/server/db";
 import { fromZonedTime } from "date-fns-tz";
-import { getSessionUser } from "@/server/auth/session";
 import { createAuditLog } from "@/server/audit/log";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { requireOfficer } from "@/server/auth/guards";
 
 export async function createEvent(formData: FormData) {
-  const { user } = await getSessionUser();
-  if (!user) {
-    throw new Error("You must be logged in to create an event.");
-  }
+  const user = await requireOfficer();
 
   const seriesId = formData.get("seriesId") as string;
   const venueId = formData.get("venueId") as string;
@@ -82,10 +79,7 @@ import { EventStatus } from "@prisma/client";
 import { getEventById } from "@/server/repos/event.repo";
 
 export async function updateEventStatus(eventId: string, status: EventStatus, publishedAt?: Date) {
-  const { user } = await getSessionUser();
-  if (!user) {
-    throw new Error("You must be logged in to update an event.");
-  }
+  const user = await requireOfficer();
 
   const data: { status: EventStatus; publishedAt?: Date } = {
     status,
@@ -116,10 +110,7 @@ export async function getEvent(id: string) {
 }
 
 export async function updateEvent(id: string, formData: FormData) {
-  const { user } = await getSessionUser();
-  if (!user) {
-    throw new Error("You must be logged in to update an event.");
-  }
+  const user = await requireOfficer();
 
   const seriesId = formData.get("seriesId") as string;
   const venueId = formData.get("venueId") as string;
@@ -194,10 +185,7 @@ export async function updateEvent(id: string, formData: FormData) {
 }
 
 export async function deleteEvent(eventId: string) {
-  const { user } = await getSessionUser();
-  if (!user) {
-    throw new Error("You must be logged in to delete an event.");
-  }
+  const user = await requireOfficer();
 
   await prisma.event.delete({
     where: { id: eventId },
@@ -216,7 +204,6 @@ export async function deleteEvent(eventId: string) {
 
 import { adminOverrideRegistration } from "@/server/services/registration.service";
 import { RegistrationStatus } from "@prisma/client";
-import { requireOfficer } from "@/server/auth/guards";
 
 export async function updateEventRegistrationConfig(eventId: string, formData: FormData) {
   const user = await requireOfficer();
