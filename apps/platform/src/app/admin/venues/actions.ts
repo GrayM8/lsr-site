@@ -3,14 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createVenue as createVenueInDb, updateVenue as updateVenueInDb, deleteVenue as deleteVenueInDb } from "@/server/repos/venue.repo";
-import { getSessionUser } from "@/server/auth/session";
 import { createAuditLog } from "@/server/audit/log";
+import { requireOfficer } from "@/server/auth/guards";
 
 export async function createVenue(formData: FormData) {
-  const { user } = await getSessionUser();
-  if (!user) {
-    throw new Error("You must be logged in to create a venue.");
-  }
+  const user = await requireOfficer();
 
   const name = formData.get("name") as string;
   const addressLine1 = formData.get("addressLine1") as string;
@@ -50,10 +47,7 @@ export async function createVenue(formData: FormData) {
 }
 
 export async function updateVenue(id: string, formData: FormData) {
-  const { user } = await getSessionUser();
-  if (!user) {
-    throw new Error("You must be logged in to update a venue.");
-  }
+  const user = await requireOfficer();
 
   const name = formData.get("name") as string;
   const addressLine1 = formData.get("addressLine1") as string;
@@ -93,10 +87,7 @@ export async function updateVenue(id: string, formData: FormData) {
 }
 
 export async function deleteVenue(id: string) {
-  const { user } = await getSessionUser();
-  if (!user) {
-    throw new Error("You must be logged in to delete a venue.");
-  }
+  const user = await requireOfficer();
 
   await deleteVenueInDb(id);
 
