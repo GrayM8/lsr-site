@@ -1,76 +1,88 @@
-# Longhorn Sim Racing
+# Longhorn Sim Racing Platform
 
-This is the official website for the Longhorn Sim Racing club at UT Austin.
+The official web platform for [Longhorn Sim Racing](https://www.longhornsimracing.org) at UT Austin. Manages club events, racing competitions, member profiles, news, merchandise, and administration tools.
 
-Built with Next.js, TypeScript, Tailwind CSS, Prisma, and Supabase.
+## Repository structure
 
-## Getting Started
+```
+lsr-monorepo/
+├── apps/platform/       # Next.js web application
+├── docs/                # Engineering and admin documentation
+├── scripts/             # Shared utility scripts
+└── .github/             # CI workflows and repo config
+```
 
-### Prerequisites
+## Tech stack
 
-- Node.js (v20.x or later)
-- npm
-- A Supabase project for database and authentication.
+- **Monorepo**: pnpm workspaces + Turborepo
+- **Framework**: Next.js 16 (App Router, React Server Components)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4 + shadcn/ui
+- **Database**: PostgreSQL via Supabase
+- **ORM**: Prisma
+- **Auth**: Supabase Auth
+- **Deployment**: Vercel
 
-### Setup
+## Quick start
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/your-repo/lsr-site.git
-    cd lsr-site
-    ```
+```bash
+# Install pnpm if you don't have it
+npm install -g pnpm
 
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
+# Install dependencies
+pnpm install
 
-3.  **Set up environment variables:**
-    Create `.env.local` and `.env` files by copying the examples and add your Supabase credentials. You can get these from your Supabase project dashboard. Also fill in keys for the other providers.
+# Set up environment variables
+cp apps/platform/.env.example apps/platform/.env.local
+# Fill in Supabase credentials (ask team lead)
 
-    ```bash
-    cp .env.example .env.local
-    ```
+# Generate Prisma client
+pnpm --filter @lsr/platform db:generate
 
-    Now, open `.env.local` and fill in the values:
+# Start the dev server
+pnpm dev
+```
 
-    ```env
-    # Get these from your Supabase project's "API" settings
-    NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
-    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-public-anon-key
+The app will be running at **http://localhost:3000**.
 
-    # Get this from your Supabase project's "Database" settings
-    # Use the "Connection string" URI and make sure to use the Session Replay port (6543)
-    DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.your-project-id.supabase.co:6543/postgres"
-    ```
+## Scripts
 
-4.  **Run database migrations:**
-    This will sync your database schema with the Prisma schema defined in the project.
-    ```bash
-    npm run db:migrate
-    ```
+From the repo root:
 
-5.  **Run the development server:**
-    ```bash
-    npm run dev
-    ```
-    The site will be available at [http://localhost:3000](http://localhost:3000).
+| Command | Description |
+|---|---|
+| `pnpm dev` | Start the development server |
+| `pnpm build` | Production build |
+| `pnpm lint` | Run ESLint |
 
-## Key Scripts
+From `apps/platform/`:
 
--   `npm run dev`: Starts the development server.
--   `npm run build`: Creates a production build of the site.
--   `npm run lint`: Lints the codebase for errors.
--   `npm run db:migrate`: Applies database migrations.
--   `npm run db:reset`: Resets and re-seeds the database (for development only).
--   `npm run set-role <userId> <role>`: Assigns a role (`admin`, `officer`) to a user.
+| Command | Description |
+|---|---|
+| `pnpm dev` | Start the development server |
+| `pnpm build` | Production build (runs Prisma generate first) |
+| `pnpm lint` | Run ESLint |
+| `pnpm typecheck` | TypeScript type checking |
+| `pnpm db:generate` | Regenerate Prisma client |
+| `pnpm db:migrate` | Create and apply a database migration |
+| `pnpm db:reset` | Reset and re-seed the database |
+| `pnpm set-role <userId> <role>` | Assign a role to a user |
 
-## Tech Stack
+## Documentation
 
--   **Framework**: [Next.js](https://nextjs.org/) (App Router)
--   **Language**: [TypeScript](https://www.typescriptlang.org/)
--   **Styling**: [Tailwind CSS](https://tailwindcss.com/) with [shadcn/ui](https://ui.shadcn.com/)
--   **Database**: [Supabase](https://supabase.com/) (PostgreSQL)
--   **ORM**: [Prisma](https://www.prisma.io/)
--   **Authentication**: [Supabase Auth](https://supabase.com/auth)
--   **Deployment**: [Vercel](https://vercel.com/)
+| Document | Description |
+|---|---|
+| [docs/onboarding.md](docs/onboarding.md) | New engineer onboarding guide |
+| [docs/architecture.md](docs/architecture.md) | Platform architecture overview |
+| [docs/local-dev.md](docs/local-dev.md) | Local development setup |
+| [docs/deployment.md](docs/deployment.md) | CI/CD and deployment process |
+| [docs/admin-guide.md](docs/admin-guide.md) | Admin feature usage guide |
+| [docs/admin-quick-reference.md](docs/admin-quick-reference.md) | Quick admin task lookup |
+
+## Contributing
+
+1. Create a branch from `main`.
+2. Make your changes.
+3. Open a pull request -- CI will run lint, type checking, and a build automatically.
+4. Get approval from the Digital Platforms lead (required via CODEOWNERS).
+5. Merge.
